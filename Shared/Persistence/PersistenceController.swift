@@ -110,6 +110,8 @@ struct PersistenceController {
         receipt.note = "Thank you for shopping!"
         receipt.notesPageTwo = ""
         receipt.isArchived = false
+        receipt.issuedByName = "Umer Butt"
+        receipt.issuedByEmail = "wr.covid.4@gmail.com"
 
         let item = CDReceiptItem(context: context)
         item.id = UUID()

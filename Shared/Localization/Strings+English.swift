@@ -190,6 +190,14 @@ extension L10n {
         .openOnIPhoneToSync: "Open Cash Memer on your iPhone to sync receipts",
         .syncedJustNow: "Synced just now",
 
+        .issuedBy: "Issued By",
+        .accountEmail: "Account Email",
+        .customerCopy: "Customer Copy",
+        .fullRecord: "Full Record",
+        .pageOneOfTwo: "Page 1 of 2",
+        .pageTwoOfTwo: "Page 2 of 2",
+        .noteTwoPrivateHint: "Note 1 prints on both pages. Note 2, the customer's phone and email, the saved location and the issuing account print on page 2 only.",
+
         .cloudBackupAndSync: "Cloud Backup & Sync",
         .connected: "Connected",
         .notConnected: "Not Connected",

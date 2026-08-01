@@ -38,6 +38,8 @@ enum BackupArchive {
         var notesPageTwo: String
         var signaturePNG: Data?
         var isArchived: Bool
+        var issuedByName: String?
+        var issuedByEmail: String?
         var items: [ItemPayload]
     }
 
@@ -110,6 +112,8 @@ enum BackupArchive {
             notesPageTwo: receipt.notesPageTwo,
             signaturePNG: receipt.signaturePNG,
             isArchived: receipt.isArchived,
+            issuedByName: receipt.issuedByName,
+            issuedByEmail: receipt.issuedByEmail,
             items: receipt.orderedItems.map {
                 ItemPayload(
                     id: $0.id,
@@ -182,6 +186,8 @@ enum BackupArchive {
             object.notesPageTwo = receipt.notesPageTwo
             object.signaturePNG = receipt.signaturePNG
             object.isArchived = receipt.isArchived
+            object.issuedByName = receipt.issuedByName ?? ""
+            object.issuedByEmail = receipt.issuedByEmail ?? ""
 
             for item in receipt.items {
                 let line = CDReceiptItem(context: context)

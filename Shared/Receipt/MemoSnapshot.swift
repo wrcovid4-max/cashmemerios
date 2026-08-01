@@ -1,8 +1,14 @@
 import Foundation
 
+enum MemoDefaults {
+    /// Pre-filled into Note 1 on every new receipt. Editable — clear it and the
+    /// memo prints no note at all.
+    static let noteOne = "Thank You for shopping !!!"
+}
+
 /// An immutable value describing everything printed on a memo.
 ///
-/// Both the persisted `Receipt` and the in-progress New Receipt form project into
+/// Both the persisted `CDReceipt` and the in-progress New Receipt form project into
 /// this type, which is what lets the iPad live preview render an unsaved form with
 /// exactly the same code that exports the final PDF.
 struct MemoSnapshot: Equatable {
@@ -23,6 +29,9 @@ struct MemoSnapshot: Equatable {
     var totals: ReceiptTotals
     var note: String
     var notesPageTwo: String
+    /// Google account the memo was issued from. Page 2 only.
+    var issuedByName: String
+    var issuedByEmail: String
     var signaturePNG: Data?
 
     struct Line: Equatable, Identifiable {
@@ -43,6 +52,14 @@ struct MemoSnapshot: Equatable {
     }
 
     var hasCashDetails: Bool { totals.cashGiven > 0 }
+
+    var trimmedNote: String { note.trimmingCharacters(in: .whitespacesAndNewlines) }
+    var trimmedNoteTwo: String { notesPageTwo.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+    /// Contact details withheld from the customer copy.
+    var hasCustomerContact: Bool { !customerPhone.isEmpty || !customerEmail.isEmpty }
+    var hasLocation: Bool { !address.isEmpty || coordinateText != nil }
+    var hasIssuer: Bool { !issuedByName.isEmpty || !issuedByEmail.isEmpty }
 
     /// Payload encoded into the memo's QR code.
     var qrPayload: String {
@@ -96,6 +113,8 @@ extension MemoSnapshot {
             totals: receipt.totals,
             note: receipt.note,
             notesPageTwo: receipt.notesPageTwo,
+            issuedByName: receipt.issuedByName,
+            issuedByEmail: receipt.issuedByEmail,
             signaturePNG: receipt.signaturePNG
         )
     }

@@ -74,6 +74,10 @@ enum L10n {
         // Watch
         case openOnIPhoneToSync, syncedJustNow
 
+        // Two-page memo
+        case issuedBy, accountEmail, customerCopy, fullRecord
+        case pageOneOfTwo, pageTwoOfTwo, noteTwoPrivateHint
+
         // Misc
         case cloudBackupAndSync, connected, notConnected, done, save, retry, ok
     }

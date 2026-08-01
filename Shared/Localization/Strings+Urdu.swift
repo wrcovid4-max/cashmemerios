@@ -190,6 +190,14 @@ extension L10n {
         .openOnIPhoneToSync: "رسیدیں سنک کرنے کے لیے اپنے آئی فون پر کیش میمر کھولیں",
         .syncedJustNow: "ابھی سنک ہوا",
 
+        .issuedBy: "جاری کنندہ",
+        .accountEmail: "اکاؤنٹ ای میل",
+        .customerCopy: "کسٹمر کاپی",
+        .fullRecord: "مکمل ریکارڈ",
+        .pageOneOfTwo: "صفحہ ۱ از ۲",
+        .pageTwoOfTwo: "صفحہ ۲ از ۲",
+        .noteTwoPrivateHint: "نوٹ ۱ دونوں صفحات پر چھپتا ہے۔ نوٹ ۲، کسٹمر کا فون اور ای میل، محفوظ مقام اور جاری کنندہ اکاؤنٹ صرف صفحہ ۲ پر چھپتے ہیں۔",
+
         .cloudBackupAndSync: "کلاؤڈ بیک اپ اور سنک",
         .connected: "منسلک",
         .notConnected: "منسلک نہیں",

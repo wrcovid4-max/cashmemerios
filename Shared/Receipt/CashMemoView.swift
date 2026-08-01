@@ -3,22 +3,54 @@ import SwiftUI
 import UIKit
 #endif
 
-/// The printed memo. Rendered on screen for the iPad live preview and rasterised
-/// unchanged by `MemoExporter`, so what the user previews is what they share.
+/// One page of the printed memo. Rendered on screen for the iPad live preview and
+/// rasterised unchanged by `MemoExporter`, so what the user previews is what they share.
+///
+/// Every receipt is two pages:
+///
+/// - **Page 1 — customer copy.** Everything except the private block: customer
+///   phone, customer email, the saved location/GPS, Note 2 and the issuing account.
+///   The customer's *name* is still printed.
+/// - **Page 2 — full record.** Everything, including all of the above.
 struct CashMemoView: View {
     enum Style {
         /// Condensed card shown in the New Receipt preview pane.
         case preview
-        /// The full memo: cash/change, note, saved location, signature and QR code.
+        /// Full-size sheet used for PDF export and the detail viewer.
         case full
+    }
+
+    enum Page: Int, CaseIterable, Identifiable {
+        case one = 1, two = 2
+
+        var id: Int { rawValue }
+
+        /// Only page 2 carries the details the customer should not receive.
+        var showsPrivateDetails: Bool { self == .two }
+
+        var labelKey: L10n.Key {
+            switch self {
+            case .one: return .pageOneOfTwo
+            case .two: return .pageTwoOfTwo
+            }
+        }
+
+        var roleKey: L10n.Key {
+            switch self {
+            case .one: return .customerCopy
+            case .two: return .fullRecord
+            }
+        }
     }
 
     let memo: MemoSnapshot
     var style: Style = .full
+    var page: Page = .one
 
     @Environment(\.appLanguage) private var language
 
     private var showsUnitPriceColumn: Bool { style == .preview }
+    private var isPrivate: Bool { page.showsPrivateDetails }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,22 +61,23 @@ struct CashMemoView: View {
             itemTable
             totalsBlock
 
-            if style == .full {
-                if memo.hasCashDetails { cashBlock }
-                if !trimmedNote.isEmpty { noteBlock }
-                if !memo.address.isEmpty || memo.coordinateText != nil { locationBlock }
-                if memo.signaturePNG != nil { signatureBlock }
-                qrBlock
+            if memo.hasCashDetails { cashBlock }
+            if !memo.trimmedNote.isEmpty { noteBlock }
+
+            // Everything below is withheld from the customer copy.
+            if isPrivate {
+                if !memo.trimmedNoteTwo.isEmpty { noteTwoBlock }
+                if memo.hasLocation { locationBlock }
+                if memo.hasIssuer { issuerBlock }
             }
 
-            Text(L10n.string(.thankYouForShopping, language: language))
-                .font(.system(size: style == .preview ? 9 : 12, weight: .semibold))
-                .foregroundStyle(Theme.memoInk)
-                .padding(.top, style == .preview ? 10 : 14)
+            if memo.signaturePNG != nil { signatureBlock }
+            qrBlock
+            footer
         }
         .padding(style == .preview ? 16 : 24)
         .background(Theme.memoPaper)
-        .foregroundStyle(Theme.memoInk)
+        .foregroundColor(Theme.memoInk)
     }
 
     // MARK: - Header
@@ -53,12 +86,17 @@ struct CashMemoView: View {
         VStack(spacing: 2) {
             Text(L10n.string(.cashMemo, language: language))
                 .font(.system(size: style == .preview ? 18 : 26, weight: .heavy))
-                .foregroundStyle(Theme.memoTitle)
+                .foregroundColor(Theme.memoTitle)
             if !memo.headerSubtitle.isEmpty {
                 Text(memo.headerSubtitle)
                     .font(.system(size: style == .preview ? 9 : 13, weight: .semibold))
-                    .foregroundStyle(Theme.memoInk.opacity(0.65))
+                    .foregroundColor(Theme.memoInk.opacity(0.65))
             }
+            Text(L10n.string(page.roleKey, language: language))
+                .font(.system(size: style == .preview ? 7 : 10, weight: .semibold))
+                .foregroundColor(Theme.memoInk.opacity(0.45))
+                .textCase(.uppercase)
+                .kerning(0.8)
         }
         .padding(.bottom, style == .preview ? 8 : 12)
     }
@@ -90,12 +128,29 @@ struct CashMemoView: View {
                 trailing: (L10n.string(.method, language: language), L10n.string(memo.paymentMethod.key, language: language)),
                 style: style
             )
-            if style == .full, !memo.customerName.isEmpty {
+            // The customer's name appears on both pages; their phone and email do not.
+            if !memo.customerName.isEmpty {
                 MemoPairRow(
                     leading: (L10n.string(.customer, language: language), memo.customerName),
                     trailing: nil,
                     style: style
                 )
+            }
+            if isPrivate, memo.hasCustomerContact {
+                if !memo.customerPhone.isEmpty {
+                    MemoPairRow(
+                        leading: (L10n.string(.phone, language: language), memo.customerPhone),
+                        trailing: nil,
+                        style: style
+                    )
+                }
+                if !memo.customerEmail.isEmpty {
+                    MemoPairRow(
+                        leading: (L10n.string(.email, language: language), memo.customerEmail),
+                        trailing: nil,
+                        style: style
+                    )
+                }
             }
         }
         .padding(.vertical, style == .preview ? 6 : 10)
@@ -170,8 +225,7 @@ struct CashMemoView: View {
                 )
             }
 
-            MemoRule()
-                .padding(.vertical, 2)
+            MemoRule().padding(.vertical, 2)
 
             MemoAmountRow(
                 label: L10n.string(.grandTotal, language: language) + ":",
@@ -181,7 +235,7 @@ struct CashMemoView: View {
                 emphasised: true
             )
 
-            if style == .full { MemoRule().padding(.top, 2) }
+            MemoRule().padding(.top, 2)
         }
         .padding(.vertical, 6)
     }
@@ -205,35 +259,22 @@ struct CashMemoView: View {
         .padding(.bottom, 6)
     }
 
-    // MARK: - Note, location, signature, QR
-
-    private var trimmedNote: String {
-        memo.note.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
+    // MARK: - Notes, location, issuer
 
     private var noteBlock: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(L10n.string(.note, language: language) + ":")
-                .font(.system(size: fontSize, weight: .bold))
-            Text(trimmedNote)
-                .font(.system(size: fontSize, weight: .semibold))
-                .padding(.leading, 12)
-            if !memo.notesPageTwo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                Text(memo.notesPageTwo)
-                    .font(.system(size: fontSize - 1))
-                    .foregroundStyle(Theme.memoInk.opacity(0.7))
-                    .padding(.leading, 12)
-            }
-            MemoDivider().padding(.top, 8)
+        labelledBlock(L10n.string(.note, language: language)) {
+            Text(memo.trimmedNote)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.bottom, 6)
+    }
+
+    private var noteTwoBlock: some View {
+        labelledBlock(L10n.string(.notesPageTwo, language: language)) {
+            Text(memo.trimmedNoteTwo)
+        }
     }
 
     private var locationBlock: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(L10n.string(.savedLocation, language: language) + ":")
-                .font(.system(size: fontSize, weight: .bold))
+        labelledBlock(L10n.string(.savedLocation, language: language)) {
             VStack(alignment: .leading, spacing: 2) {
                 if !memo.address.isEmpty {
                     Text(memo.address)
@@ -242,13 +283,40 @@ struct CashMemoView: View {
                     Text("\(L10n.string(.gps, language: language)): \(coordinateText)")
                 }
             }
-            .font(.system(size: fontSize, weight: .semibold))
-            .padding(.leading, 12)
+        }
+    }
+
+    private var issuerBlock: some View {
+        labelledBlock(L10n.string(.issuedBy, language: language)) {
+            VStack(alignment: .leading, spacing: 2) {
+                if !memo.issuedByName.isEmpty {
+                    Text(memo.issuedByName)
+                }
+                if !memo.issuedByEmail.isEmpty {
+                    Text("\(L10n.string(.accountEmail, language: language)): \(memo.issuedByEmail)")
+                }
+            }
+        }
+    }
+
+    /// `Label:` on its own line with an indented value and a closing rule.
+    private func labelledBlock<Content: View>(
+        _ label: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label + ":")
+                .font(.system(size: fontSize, weight: .bold))
+            content()
+                .font(.system(size: fontSize, weight: .semibold))
+                .padding(.leading, 12)
             MemoDivider().padding(.top, 8)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.bottom, 6)
     }
+
+    // MARK: - Signature, QR, footer
 
     private var signatureBlock: some View {
         VStack(spacing: 6) {
@@ -257,7 +325,7 @@ struct CashMemoView: View {
                     .font(.system(size: fontSize, weight: .bold))
                 Spacer(minLength: 12)
                 signatureImage
-                    .frame(width: 150, height: 60)
+                    .frame(width: style == .preview ? 100 : 150, height: style == .preview ? 40 : 60)
                     .background(Color.white)
                     .overlay(Rectangle().stroke(Theme.memoInk.opacity(0.15), lineWidth: 0.5))
             }
@@ -283,15 +351,30 @@ struct CashMemoView: View {
                 qr
                     .interpolation(.none)
                     .resizable()
-                    .frame(width: 110, height: 110)
+                    .frame(
+                        width: style == .preview ? 66 : 110,
+                        height: style == .preview ? 66 : 110
+                    )
                     .padding(8)
                     .background(Color.white)
             }
             Text(L10n.string(.scanQRForDetails, language: language))
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(Theme.memoInk.opacity(0.6))
+                .font(.system(size: style == .preview ? 7 : 10, weight: .medium))
+                .foregroundColor(Theme.memoInk.opacity(0.6))
         }
         .padding(.top, 8)
+    }
+
+    private var footer: some View {
+        VStack(spacing: 3) {
+            Text(L10n.string(.thankYouForShopping, language: language))
+                .font(.system(size: style == .preview ? 9 : 12, weight: .semibold))
+                .foregroundColor(Theme.memoInk)
+            Text(L10n.string(page.labelKey, language: language))
+                .font(.system(size: style == .preview ? 7 : 9))
+                .foregroundColor(Theme.memoInk.opacity(0.45))
+        }
+        .padding(.top, style == .preview ? 10 : 14)
     }
 
     // MARK: - Metrics
@@ -309,7 +392,7 @@ private struct MemoRule: View {
             Rectangle().frame(height: 1.2)
             Rectangle().frame(height: 1.2)
         }
-        .foregroundStyle(Theme.memoInk)
+        .foregroundColor(Theme.memoInk)
     }
 }
 
@@ -318,7 +401,7 @@ private struct MemoDivider: View {
     var body: some View {
         Rectangle()
             .frame(height: 1)
-            .foregroundStyle(Theme.memoInk.opacity(0.85))
+            .foregroundColor(Theme.memoInk.opacity(0.85))
     }
 }
 
@@ -334,7 +417,7 @@ private struct MemoPairRow: View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             labelValue(leading)
             Spacer(minLength: 8)
-            if let trailing { labelValue(trailing) }
+            if let trailing = trailing { labelValue(trailing) }
         }
     }
 
@@ -342,7 +425,7 @@ private struct MemoPairRow: View {
         HStack(spacing: 4) {
             Text(pair.0 + ":")
                 .font(.system(size: fontSize, weight: style == .preview ? .regular : .bold))
-                .foregroundStyle(Theme.memoInk.opacity(style == .preview ? 0.6 : 1))
+                .foregroundColor(Theme.memoInk.opacity(style == .preview ? 0.6 : 1))
             Text(pair.1)
                 .font(.system(size: fontSize, weight: .bold))
         }

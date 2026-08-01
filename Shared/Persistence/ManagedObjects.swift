@@ -29,6 +29,9 @@ public final class CDReceipt: NSManagedObject {
     @NSManaged public var notesPageTwo: String
     @NSManaged public var signaturePNG: Data?
     @NSManaged public var isArchived: Bool
+    /// Google account that issued the memo — printed on page 2 only.
+    @NSManaged public var issuedByName: String
+    @NSManaged public var issuedByEmail: String
     @NSManaged public var items: NSSet?
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<CDReceipt> {

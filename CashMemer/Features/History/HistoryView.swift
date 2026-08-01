@@ -105,6 +105,8 @@ struct HistoryView: View {
         copy.notesPageTwo = receipt.notesPageTwo
         copy.signaturePNG = receipt.signaturePNG
         copy.isArchived = false
+        copy.issuedByName = receipt.issuedByName
+        copy.issuedByEmail = receipt.issuedByEmail
 
         for item in receipt.orderedItems {
             let line = CDReceiptItem(context: context)

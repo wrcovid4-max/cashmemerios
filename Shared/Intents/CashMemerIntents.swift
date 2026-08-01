@@ -55,10 +55,12 @@ struct CreateReceiptIntent: AppIntent {
         receipt.discountValue = 0
         receipt.taxPercent = 0
         receipt.cashGiven = 0
-        receipt.note = ""
+        receipt.note = MemoDefaults.noteOne
         receipt.notesPageTwo = ""
         receipt.signaturePNG = settings.defaultSignaturePNG
         receipt.isArchived = false
+        receipt.issuedByName = settings.googleAccountName ?? ""
+        receipt.issuedByEmail = settings.googleAccountEmail ?? ""
 
         let item = CDReceiptItem(context: context)
         item.id = UUID()

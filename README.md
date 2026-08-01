@@ -83,6 +83,42 @@ Saved memos render to a real PDF and display in `PDFView`, so pinch-zoom, text
 selection, Markup and the standard share sheet all behave as they do in Files. The same
 `CashMemoView` produces the on-screen preview and the exported file.
 
+---
+
+## Every memo is two pages
+
+`CashMemoView.Page` decides what each page carries; `MemoExporter` renders both into
+one PDF with independent page heights, since page 2 always runs longer.
+
+| | Page 1 — Customer Copy | Page 2 — Full Record |
+|---|:---:|:---:|
+| Receipt no, date, time, category, method | ✅ | ✅ |
+| **Customer name** | ✅ | ✅ |
+| Items, totals, discount, tax, cash, change | ✅ | ✅ |
+| Note 1 | ✅ | ✅ |
+| Signature, QR code | ✅ | ✅ |
+| Customer phone | — | ✅ |
+| Customer email | — | ✅ |
+| Saved Location + GPS | — | ✅ |
+| **Note 2** | — | ✅ |
+| **Issued By** (Google account + email) | — | ✅ |
+
+**Note 1** is pre-filled with `MemoDefaults.noteOne` — *"Thank You for shopping !!!"* —
+on every new receipt, including ones Siri creates. Edit it or clear it; an empty Note 1
+simply prints nothing.
+
+**Note 2** starts empty by design. It is the private note and never reaches the
+customer copy.
+
+**Issued By** is captured from the signed-in Google account **at the moment the receipt
+is generated** and stored on the receipt (`issuedByName` / `issuedByEmail`), so signing
+out later does not strip the issuer off historic memos.
+
+> One caveat: the app has a single address field — `address`, captured from GPS and
+> printed as *Saved Location*. That is what page 1 withholds. There is no separate
+> customer-address field; add one if the customer's own address should be distinct
+> from the transaction location.
+
 **Watch app** (`CashMemerWatch/`)
 History and Dashboard only — creating a memo needs a keyboard and a signature. The phone
 pushes a trimmed `WatchPayload` via `updateApplicationContext`, cached to disk so History

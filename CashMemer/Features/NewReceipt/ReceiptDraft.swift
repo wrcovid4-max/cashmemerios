@@ -33,8 +33,12 @@ final class ReceiptDraft: ObservableObject {
     @Published var taxPercentText = ""
     @Published var cashGivenText = ""
 
-    @Published var note = ""
+    /// Pre-filled with `MemoDefaults.noteOne`; edit or clear it freely.
+    @Published var note = MemoDefaults.noteOne
+    /// Private note printed on page 2 only. Deliberately left empty.
     @Published var notesPageTwo = ""
+    @Published var issuedByName = ""
+    @Published var issuedByEmail = ""
     @Published var signaturePNG: Data?
     @Published var saveSignatureAsDefault = true
 
@@ -87,6 +91,8 @@ final class ReceiptDraft: ObservableObject {
             totals: totals,
             note: note,
             notesPageTwo: notesPageTwo,
+            issuedByName: issuedByName,
+            issuedByEmail: issuedByEmail,
             signaturePNG: signaturePNG
         )
     }
@@ -161,9 +167,16 @@ final class ReceiptDraft: ObservableObject {
         discountValueText = ""
         taxPercentText = ""
         cashGivenText = ""
-        note = ""
+        note = MemoDefaults.noteOne
         notesPageTwo = ""
         signaturePNG = defaultSignature
+    }
+
+    /// Stamps the signed-in Google account onto the draft so page 2 records who
+    /// issued the memo even if the account is signed out later.
+    func adoptIssuer(from settings: AppSettings) {
+        issuedByName = settings.googleAccountName ?? ""
+        issuedByEmail = settings.googleAccountEmail ?? ""
     }
 
     /// Materialises the draft into Core Data and returns the saved receipt.
@@ -193,6 +206,8 @@ final class ReceiptDraft: ObservableObject {
         receipt.notesPageTwo = notesPageTwo
         receipt.signaturePNG = signaturePNG
         receipt.isArchived = false
+        receipt.issuedByName = issuedByName
+        receipt.issuedByEmail = issuedByEmail
 
         for (index, line) in lines.enumerated() {
             let item = CDReceiptItem(context: context)

@@ -112,11 +112,15 @@ struct NewReceiptView: View {
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
             ScrollView {
-                CashMemoView(memo: draft.snapshot, style: .preview)
-                    .frame(maxWidth: 460)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
-                    .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
-                    .padding(Theme.Spacing.l)
+                VStack(spacing: Theme.Spacing.l) {
+                    ForEach(CashMemoView.Page.allCases) { page in
+                        CashMemoView(memo: draft.snapshot, style: .preview, page: page)
+                            .frame(maxWidth: 460)
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+                            .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
+                    }
+                }
+                .padding(Theme.Spacing.l)
             }
         }
         .frame(maxWidth: .infinity)
@@ -126,12 +130,14 @@ struct NewReceiptView: View {
     private var inlinePreview: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.s) {
             Text(L10n.string(.livePreview, language: language)).sectionCaption()
-            CashMemoView(memo: draft.snapshot, style: .preview)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
-                        .stroke(Theme.separator, lineWidth: 1)
-                )
+            ForEach(CashMemoView.Page.allCases) { page in
+                CashMemoView(memo: draft.snapshot, style: .preview, page: page)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+                            .stroke(Theme.separator, lineWidth: 1)
+                    )
+            }
         }
     }
 
@@ -300,9 +306,15 @@ struct NewReceiptView: View {
     }
 
     private var notesSection: some View {
-        FormSection(titleKey: .notes) {
-            FormFieldRow(placeholderKey: .note, text: $draft.note)
-            FormFieldRow(placeholderKey: .notesPageTwo, text: $draft.notesPageTwo, showsDivider: false)
+        VStack(alignment: .leading, spacing: Theme.Spacing.s) {
+            FormSection(titleKey: .notes) {
+                FormFieldRow(placeholderKey: .note, text: $draft.note)
+                FormFieldRow(placeholderKey: .notesPageTwo, text: $draft.notesPageTwo, showsDivider: false)
+            }
+            Text(L10n.string(.noteTwoPrivateHint, language: language))
+                .font(.caption2)
+                .foregroundColor(Theme.textSecondary)
+                .padding(.horizontal, Theme.Spacing.xs)
         }
     }
 
@@ -333,6 +345,7 @@ struct NewReceiptView: View {
             draft.currency = settings.defaultCurrency
             draft.signaturePNG = settings.defaultSignaturePNG
         }
+        draft.adoptIssuer(from: settings)
     }
 
     private func captureLocation() {
