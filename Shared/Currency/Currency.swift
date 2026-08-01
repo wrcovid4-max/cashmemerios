@@ -50,10 +50,18 @@ enum CurrencyFormatter {
     static func compact(_ amount: Decimal, currency: Currency) -> String {
         let value = NSDecimalNumber(decimal: amount).doubleValue
         let magnitude = abs(value)
-        let (scaled, suffix): (Double, String) = switch magnitude {
-        case 1_000_000...: (value / 1_000_000, "M")
-        case 1_000...: (value / 1_000, "K")
-        default: (value, "")
+        let scaled: Double
+        let suffix: String
+        switch magnitude {
+        case 1_000_000...:
+            scaled = value / 1_000_000
+            suffix = "M"
+        case 1_000...:
+            scaled = value / 1_000
+            suffix = "K"
+        default:
+            scaled = value
+            suffix = ""
         }
         let digits = suffix.isEmpty ? 0 : 1
         let number = String(format: "%.\(digits)f", scaled)

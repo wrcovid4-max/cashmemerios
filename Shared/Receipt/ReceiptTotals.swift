@@ -1,6 +1,6 @@
 import Foundation
 
-/// Pure arithmetic for a memo, kept out of the SwiftData model so the live preview
+/// Pure arithmetic for a memo, kept out of the Core Data entity so the live preview
 /// can total an in-progress form that has not been persisted yet.
 struct ReceiptTotals: Equatable {
     let subtotal: Decimal
@@ -19,10 +19,11 @@ struct ReceiptTotals: Equatable {
     ) {
         let subtotal = items.reduce(Decimal.zero) { $0 + $1.unitPrice * Decimal($1.quantity) }
 
-        let discount: Decimal = switch discountType {
-        case .none: 0
-        case .percentage: (subtotal * discountValue / 100).rounded(2)
-        case .fixed: discountValue
+        let discount: Decimal
+        switch discountType {
+        case .none: discount = 0
+        case .percentage: discount = (subtotal * discountValue / 100).rounded(2)
+        case .fixed: discount = discountValue
         }
         // A discount is never allowed to push the memo negative.
         let cappedDiscount = min(max(discount, 0), subtotal)

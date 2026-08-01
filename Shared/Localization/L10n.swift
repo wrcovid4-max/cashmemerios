@@ -80,8 +80,8 @@ enum L10n {
 
     static func string(_ key: Key, language: AppLanguage) -> String {
         switch language {
-        case .english: english[key] ?? key.rawValue
-        case .urdu: urdu[key] ?? english[key] ?? key.rawValue
+        case .english: return english[key] ?? key.rawValue
+        case .urdu: return urdu[key] ?? english[key] ?? key.rawValue
         }
     }
 }

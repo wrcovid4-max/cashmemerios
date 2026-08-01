@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Cash Memer</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<true/>
+	</dict>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<!-- Live Activities for the scanner -->
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+
+	<!-- Deep links from Spotlight results, widgets and Siri shortcuts -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.cashmemer.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>cashmemer</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- Right-to-left support for the Urdu interface -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ur</string>
+	</array>
+
+	<!-- Paste your key here (or inject it at build time) to enable AI scanning -->
+	<key>GEMINI_API_KEY</key>
+	<string></string>
+
+	<key>NSCameraUsageDescription</key>
+	<string>Cash Memer uses the camera to scan paper receipts and barcodes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Cash Memer imports receipt photos from your library so it can read them.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Cash Memer saves the shop location on a receipt so you can find it later.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Face ID unlocks Cash Memer and keeps your receipts private.</string>
+</dict>
+</plist>

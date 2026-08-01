@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// Colour, spacing and type ramp for Cash Memer.
 ///
@@ -68,12 +71,13 @@ enum Theme {
 extension Color {
     /// Hex initialiser that resolves per appearance.
     init(light: UInt32, dark: UInt32) {
-        #if canImport(UIKit)
+        #if canImport(UIKit) && !os(watchOS)
         self.init(uiColor: UIColor { traits in
             UIColor(hex: traits.userInterfaceStyle == .dark ? dark : light)
         })
         #else
-        self.init(hex: light)
+        // watchOS is always dark, and AppKit-free targets resolve statically.
+        self.init(hex: dark)
         #endif
     }
 
@@ -88,7 +92,7 @@ extension Color {
     }
 }
 
-#if canImport(UIKit)
+#if canImport(UIKit) && !os(watchOS)
 extension UIColor {
     convenience init(hex: UInt32) {
         self.init(

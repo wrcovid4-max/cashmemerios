@@ -75,7 +75,7 @@ struct MemoSnapshot: Equatable {
 }
 
 extension MemoSnapshot {
-    init(receipt: Receipt) {
+    init(receipt: CDReceipt) {
         self.init(
             id: receipt.id,
             number: receipt.number,
@@ -90,9 +90,9 @@ extension MemoSnapshot {
             category: receipt.category,
             paymentMethod: receipt.paymentMethod,
             currency: receipt.currency,
-            lines: receipt.items
-                .sorted { $0.sortIndex < $1.sortIndex }
-                .map { Line(id: $0.id, name: $0.name, quantity: $0.quantity, unitPrice: $0.unitPrice) },
+            lines: receipt.orderedItems.map {
+                Line(id: $0.id, name: $0.name, quantity: Int($0.quantity), unitPrice: $0.unitPrice as Decimal)
+            },
             totals: receipt.totals,
             note: receipt.note,
             notesPageTwo: receipt.notesPageTwo,

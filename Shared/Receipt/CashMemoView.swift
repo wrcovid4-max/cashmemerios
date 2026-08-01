@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// The printed memo. Rendered on screen for the iPad live preview and rasterised
 /// unchanged by `MemoExporter`, so what the user previews is what they share.

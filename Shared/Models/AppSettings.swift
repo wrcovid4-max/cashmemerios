@@ -1,40 +1,47 @@
+import Combine
 import Foundation
-import Observation
 
-/// App-wide preferences, backed by `UserDefaults` and observed by the UI.
+/// App-wide preferences, backed by the App Group `UserDefaults` so the widget
+/// extension and Live Activity read the same language and currency as the app.
 ///
-/// The language and theme live here rather than in SwiftData because the watch
-/// app and the lock screen need them before the model container is ready.
-@Observable
-final class AppSettings {
+/// `ObservableObject` rather than `@Observable` — Xcode 14.2 predates Observation.
+final class AppSettings: ObservableObject {
+    /// Shared container so the app, widget extension and watch read one set of
+    /// preferences. Declared here rather than on the Core Data stack because the
+    /// watch target does not link Core Data.
+    static let appGroupID = "group.com.cashmemer.shared"
+
     private let defaults: UserDefaults
 
-    var language: AppLanguage { didSet { store(language.rawValue, .language) } }
-    var theme: AppTheme { didSet { store(theme.rawValue, .theme) } }
-    var defaultCurrencyCode: String { didSet { store(defaultCurrencyCode, .currency) } }
-    var appLockEnabled: Bool { didSet { store(appLockEnabled, .appLock) } }
-    var biometricsEnabled: Bool { didSet { store(biometricsEnabled, .biometrics) } }
-    var defaultSignaturePNG: Data? { didSet { store(defaultSignaturePNG, .signature) } }
-    var googleAccountEmail: String? { didSet { store(googleAccountEmail, .googleEmail) } }
-    var googleAccountName: String? { didSet { store(googleAccountName, .googleName) } }
-    var customCurrencies: [Currency] { didSet { storeJSON(customCurrencies, .customCurrencies) } }
-    var lastScanDate: Date? { didSet { store(lastScanDate, .lastScanDate) } }
-    var scansToday: Int { didSet { store(scansToday, .scansToday) } }
+    @Published var language: AppLanguage { didSet { store(language.rawValue, .language) } }
+    @Published var theme: AppTheme { didSet { store(theme.rawValue, .theme) } }
+    @Published var defaultCurrencyCode: String { didSet { store(defaultCurrencyCode, .currency) } }
+    @Published var appLockEnabled: Bool { didSet { store(appLockEnabled, .appLock) } }
+    @Published var biometricsEnabled: Bool { didSet { store(biometricsEnabled, .biometrics) } }
+    @Published var defaultSignaturePNG: Data? { didSet { store(defaultSignaturePNG, .signature) } }
+    @Published var googleAccountEmail: String? { didSet { store(googleAccountEmail, .googleEmail) } }
+    @Published var googleAccountName: String? { didSet { store(googleAccountName, .googleName) } }
+    @Published var customCurrencies: [Currency] { didSet { storeJSON(customCurrencies, .customCurrencies) } }
+    @Published var lastScanDate: Date? { didSet { store(lastScanDate, .lastScanDate) } }
+    @Published var scansToday: Int { didSet { store(scansToday, .scansToday) } }
 
-    init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
-        let rawLanguage = defaults.string(forKey: Keys.language.rawValue)
-        self.language = rawLanguage.flatMap(AppLanguage.init(rawValue:)) ?? .english
-        self.theme = defaults.string(forKey: Keys.theme.rawValue).flatMap(AppTheme.init(rawValue:)) ?? .system
-        self.defaultCurrencyCode = defaults.string(forKey: Keys.currency.rawValue) ?? Currency.pkr.code
-        self.appLockEnabled = defaults.bool(forKey: Keys.appLock.rawValue)
-        self.biometricsEnabled = defaults.bool(forKey: Keys.biometrics.rawValue)
-        self.defaultSignaturePNG = defaults.data(forKey: Keys.signature.rawValue)
-        self.googleAccountEmail = defaults.string(forKey: Keys.googleEmail.rawValue)
-        self.googleAccountName = defaults.string(forKey: Keys.googleName.rawValue)
-        self.customCurrencies = Self.loadJSON([Currency].self, key: .customCurrencies, defaults: defaults) ?? []
-        self.lastScanDate = defaults.object(forKey: Keys.lastScanDate.rawValue) as? Date
-        self.scansToday = defaults.integer(forKey: Keys.scansToday.rawValue)
+    init(defaults: UserDefaults? = nil) {
+        let store = defaults
+            ?? UserDefaults(suiteName: AppSettings.appGroupID)
+            ?? .standard
+        self.defaults = store
+
+        language = AppLanguage(rawValue: store.string(forKey: Keys.language.rawValue) ?? "") ?? .english
+        theme = AppTheme(rawValue: store.string(forKey: Keys.theme.rawValue) ?? "") ?? .system
+        defaultCurrencyCode = store.string(forKey: Keys.currency.rawValue) ?? Currency.pkr.code
+        appLockEnabled = store.bool(forKey: Keys.appLock.rawValue)
+        biometricsEnabled = store.bool(forKey: Keys.biometrics.rawValue)
+        defaultSignaturePNG = store.data(forKey: Keys.signature.rawValue)
+        googleAccountEmail = store.string(forKey: Keys.googleEmail.rawValue)
+        googleAccountName = store.string(forKey: Keys.googleName.rawValue)
+        customCurrencies = Self.loadJSON([Currency].self, key: .customCurrencies, defaults: store) ?? []
+        lastScanDate = store.object(forKey: Keys.lastScanDate.rawValue) as? Date
+        scansToday = store.integer(forKey: Keys.scansToday.rawValue)
 
         // A counter labelled "Scans Today" must not carry over from yesterday.
         if let last = lastScanDate, !Calendar.current.isDateInToday(last) {
@@ -54,7 +61,7 @@ final class AppSettings {
         availableCurrencies.first { $0.code == defaultCurrencyCode } ?? .pkr
     }
 
-    func recordScan(now: Date = .now) {
+    func recordScan(now: Date = Date()) {
         if let last = lastScanDate, Calendar.current.isDateInToday(last) {
             scansToday += 1
         } else {

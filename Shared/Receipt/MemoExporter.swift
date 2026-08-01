@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 import UniformTypeIdentifiers
 
 /// Rasterises `CashMemoView` into shareable files.
@@ -65,7 +68,7 @@ enum MemoExporter {
 
         var errorDescription: String? {
             switch self {
-            case .renderFailed: "The memo could not be rendered for export."
+            case .renderFailed: return "The memo could not be rendered for export."
             }
         }
     }
