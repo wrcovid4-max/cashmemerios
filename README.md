@@ -28,9 +28,10 @@ Then set your team in **Signing & Capabilities** for all three targets and build
    on-device Vision OCR, which recovers the store name and total but not line items.
 3. **WeatherKit** *(optional)* — the sidebar weather tile and the watch header need
    the WeatherKit capability on a paid account. Unprovisioned, the tile shows `—`.
-4. **App icon** — drop your icon into the asset catalogs. Note: the icon you sent
-   includes the Apple Pay and Wallet marks; App Review rejects third-party icons
-   that use Apple's trademarks, so that artwork will need reworking before submission.
+4. **App icon** — already installed. Your artwork was cropped out of its black
+   letterbox, edge-extended into the baked-in rounded corners and flattened to
+   opaque RGB, then exported as a 1024pt single-size iOS icon plus the full
+   watchOS ladder. It also appears on the App Lock screen as `AppLogo`.
 
 ---
 

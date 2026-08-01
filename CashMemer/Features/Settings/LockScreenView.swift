@@ -18,9 +18,20 @@ struct LockScreenView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: Theme.Spacing.l) {
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 46))
-                    .foregroundColor(Theme.brand)
+                Image("AppLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 84, height: 84)
+                    .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+                    .shadow(color: .black.opacity(0.18), radius: 12, y: 4)
+                    .overlay(alignment: .bottomTrailing) {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(7)
+                            .background(Theme.brand, in: Circle())
+                            .offset(x: 6, y: 6)
+                    }
 
                 Text(L10n.string(.appName, language: language))
                     .font(.title2.weight(.bold))
