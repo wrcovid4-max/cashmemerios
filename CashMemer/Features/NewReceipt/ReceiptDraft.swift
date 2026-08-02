@@ -8,7 +8,9 @@ import Foundation
 /// in-progress form that has never been written to the store. Every field is
 /// `@Published` because the iPad preview pane redraws on each keystroke.
 final class ReceiptDraft: ObservableObject {
-    @Published var number = CDReceipt.generateNumber()
+    /// Assigned from the store when the form appears, so it is the next number
+    /// in the book rather than a random one.
+    @Published var number = "1"
     @Published var createdAt = Date()
 
     @Published var title = ""
@@ -21,6 +23,7 @@ final class ReceiptDraft: ObservableObject {
     @Published var customerName = ""
     @Published var customerPhone = ""
     @Published var customerEmail = ""
+    @Published var customerAddress = ""
 
     @Published var currency: Currency = .pkr
     @Published var category: ReceiptCategory = .shopping
@@ -82,6 +85,7 @@ final class ReceiptDraft: ObservableObject {
             customerName: customerName,
             customerPhone: customerPhone,
             customerEmail: customerEmail,
+            customerAddress: customerAddress,
             category: category,
             paymentMethod: paymentMethod,
             currency: currency,
@@ -89,6 +93,7 @@ final class ReceiptDraft: ObservableObject {
                 MemoSnapshot.Line(id: $0.id, name: $0.name, quantity: $0.quantity, unitPrice: $0.unitPrice)
             },
             totals: totals,
+            taxPercent: taxPercent,
             note: note,
             notesPageTwo: notesPageTwo,
             issuedByName: issuedByName,
@@ -121,6 +126,7 @@ final class ReceiptDraft: ObservableObject {
         customerName = member.name
         customerPhone = member.phone
         customerEmail = member.email
+        // A member has no address field, so whatever was typed here is left alone.
     }
 
     /// Merges an OCR result into the form, leaving anything the user already typed alone.
@@ -147,8 +153,8 @@ final class ReceiptDraft: ObservableObject {
         }
     }
 
-    func reset(defaultCurrency: Currency, defaultSignature: Data?) {
-        number = CDReceipt.generateNumber()
+    func reset(defaultCurrency: Currency, defaultSignature: Data?, nextNumber: String) {
+        number = nextNumber
         createdAt = Date()
         title = ""
         storeName = ""
@@ -159,6 +165,7 @@ final class ReceiptDraft: ObservableObject {
         customerName = ""
         customerPhone = ""
         customerEmail = ""
+        customerAddress = ""
         currency = defaultCurrency
         category = .shopping
         paymentMethod = .cash
@@ -195,6 +202,7 @@ final class ReceiptDraft: ObservableObject {
         receipt.customerName = customerName
         receipt.customerPhone = customerPhone
         receipt.customerEmail = customerEmail
+        receipt.customerAddress = customerAddress
         receipt.currencyCode = currency.code
         receipt.categoryRaw = category.rawValue
         receipt.paymentMethodRaw = paymentMethod.rawValue

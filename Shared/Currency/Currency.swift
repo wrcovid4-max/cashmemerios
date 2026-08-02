@@ -46,6 +46,11 @@ enum CurrencyFormatter {
         return "\(currency.symbol) \(number)"
     }
 
+    /// `Rs12.00` — no space, as printed on the memo's per-unit sub-line.
+    static func tight(_ amount: Decimal, currency: Currency) -> String {
+        string(amount, currency: currency).replacingOccurrences(of: " ", with: "")
+    }
+
     /// Compact form for stat tiles, where space is tight: `Rs 12.4K`.
     static func compact(_ amount: Decimal, currency: Currency) -> String {
         let value = NSDecimalNumber(decimal: amount).doubleValue

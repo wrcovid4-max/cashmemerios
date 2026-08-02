@@ -27,6 +27,7 @@ enum BackupArchive {
         var customerName: String
         var customerPhone: String
         var customerEmail: String
+        var customerAddress: String?
         var currencyCode: String
         var category: String
         var paymentMethod: String
@@ -100,6 +101,7 @@ enum BackupArchive {
             customerName: receipt.customerName,
             customerPhone: receipt.customerPhone,
             customerEmail: receipt.customerEmail,
+            customerAddress: receipt.customerAddress,
             currencyCode: receipt.currencyCode,
             category: receipt.categoryRaw,
             paymentMethod: receipt.paymentMethodRaw,
@@ -175,6 +177,7 @@ enum BackupArchive {
             object.customerName = receipt.customerName
             object.customerPhone = receipt.customerPhone
             object.customerEmail = receipt.customerEmail
+            object.customerAddress = receipt.customerAddress ?? ""
             object.currencyCode = receipt.currencyCode
             object.categoryRaw = receipt.category
             object.paymentMethodRaw = receipt.paymentMethod

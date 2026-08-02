@@ -83,7 +83,7 @@ struct HistoryView: View {
     private func duplicate(_ receipt: CDReceipt) {
         let copy = CDReceipt(context: context)
         copy.id = UUID()
-        copy.number = CDReceipt.generateNumber()
+        copy.number = CDReceipt.nextNumber(in: context)
         copy.createdAt = Date()
         copy.title = receipt.title
         copy.storeName = receipt.storeName
@@ -94,6 +94,7 @@ struct HistoryView: View {
         copy.customerName = receipt.customerName
         copy.customerPhone = receipt.customerPhone
         copy.customerEmail = receipt.customerEmail
+        copy.customerAddress = receipt.customerAddress
         copy.currencyCode = receipt.currencyCode
         copy.categoryRaw = receipt.categoryRaw
         copy.paymentMethodRaw = receipt.paymentMethodRaw

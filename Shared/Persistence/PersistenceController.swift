@@ -89,7 +89,7 @@ struct PersistenceController {
 
         let receipt = CDReceipt(context: context)
         receipt.id = UUID()
-        receipt.number = "84AC83A"
+        receipt.number = "41"
         receipt.createdAt = Date()
         receipt.title = "Chapters"
         receipt.storeName = "Chapters"
@@ -98,8 +98,9 @@ struct PersistenceController {
         receipt.longitude = NSNumber(value: 74.390228)
         receipt.memberID = member.id
         receipt.customerName = "Umer Butt"
-        receipt.customerPhone = ""
-        receipt.customerEmail = ""
+        receipt.customerPhone = "0304 4545431"
+        receipt.customerEmail = "wr.covid.4@gmail.com"
+        receipt.customerAddress = "265/1, Sector L, Phase 1, Street 160, DHA Lahore"
         receipt.currencyCode = Currency.pkr.code
         receipt.categoryRaw = ReceiptCategory.shopping.rawValue
         receipt.paymentMethodRaw = PaymentMethod.cash.rawValue

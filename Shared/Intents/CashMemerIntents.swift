@@ -40,7 +40,7 @@ struct CreateReceiptIntent: AppIntent {
 
         let receipt = CDReceipt(context: context)
         receipt.id = UUID()
-        receipt.number = CDReceipt.generateNumber()
+        receipt.number = CDReceipt.nextNumber(in: context)
         receipt.createdAt = Date()
         receipt.title = store
         receipt.storeName = store
@@ -48,6 +48,7 @@ struct CreateReceiptIntent: AppIntent {
         receipt.customerName = ""
         receipt.customerPhone = ""
         receipt.customerEmail = ""
+        receipt.customerAddress = ""
         receipt.currencyCode = settings.defaultCurrencyCode
         receipt.categoryRaw = category.rawValue
         receipt.paymentMethodRaw = paymentMethod.rawValue

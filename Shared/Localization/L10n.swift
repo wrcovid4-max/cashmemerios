@@ -75,8 +75,9 @@ enum L10n {
         case openOnIPhoneToSync, syncedJustNow
 
         // Two-page memo
-        case issuedBy, accountEmail, customerCopy, fullRecord
-        case pageOneOfTwo, pageTwoOfTwo, noteTwoPrivateHint
+        case issuedBy, accountEmail
+        case pageTwo, placeStore, customerDetails, customerAddress
+        case issuerAccount, notePageTwoLabel, each, noteTwoPrivateHint
 
         // Misc
         case cloudBackupAndSync, connected, notConnected, done, save, retry, ok

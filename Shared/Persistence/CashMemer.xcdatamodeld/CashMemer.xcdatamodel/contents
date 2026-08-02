@@ -20,6 +20,7 @@
         <attribute name="categoryRaw" attributeType="String" defaultValueString="shopping"/>
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="currencyCode" attributeType="String" defaultValueString="PKR"/>
+        <attribute name="customerAddress" attributeType="String" defaultValueString=""/>
         <attribute name="customerEmail" attributeType="String" defaultValueString=""/>
         <attribute name="customerName" attributeType="String" defaultValueString=""/>
         <attribute name="customerPhone" attributeType="String" defaultValueString=""/>

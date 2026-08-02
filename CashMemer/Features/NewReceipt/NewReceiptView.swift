@@ -248,7 +248,11 @@ struct NewReceiptView: View {
             FormFieldRow(
                 placeholderKey: .customerEmail,
                 text: $draft.customerEmail,
-                keyboard: .emailAddress,
+                keyboard: .emailAddress
+            )
+            FormFieldRow(
+                placeholderKey: .customerAddress,
+                text: $draft.customerAddress,
                 showsDivider: false
             )
         }
@@ -323,8 +327,10 @@ struct NewReceiptView: View {
             SubtleDestructiveButton(titleKey: .clear, systemImage: "line.3.horizontal") {
                 draft.reset(
                     defaultCurrency: settings.defaultCurrency,
-                    defaultSignature: settings.defaultSignaturePNG
+                    defaultSignature: settings.defaultSignaturePNG,
+                    nextNumber: CDReceipt.nextNumber(in: context)
                 )
+                draft.adoptIssuer(from: settings)
             }
             .frame(maxWidth: .infinity)
 
@@ -346,6 +352,9 @@ struct NewReceiptView: View {
             draft.signaturePNG = settings.defaultSignaturePNG
         }
         draft.adoptIssuer(from: settings)
+        if draft.lines.isEmpty {
+            draft.number = CDReceipt.nextNumber(in: context)
+        }
     }
 
     private func captureLocation() {
@@ -383,8 +392,10 @@ struct NewReceiptView: View {
             }
             draft.reset(
                 defaultCurrency: settings.defaultCurrency,
-                defaultSignature: settings.defaultSignaturePNG
+                defaultSignature: settings.defaultSignaturePNG,
+                nextNumber: CDReceipt.nextNumber(in: context)
             )
+            draft.adoptIssuer(from: settings)
             generated = receipt
             isShowingGenerated = true
         } catch {

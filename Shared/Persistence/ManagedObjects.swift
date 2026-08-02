@@ -18,6 +18,9 @@ public final class CDReceipt: NSManagedObject {
     @NSManaged public var customerName: String
     @NSManaged public var customerPhone: String
     @NSManaged public var customerEmail: String
+    /// The customer's own address — printed on page 2 only, separate from
+    /// `address`, which is the GPS-captured transaction location.
+    @NSManaged public var customerAddress: String
     @NSManaged public var currencyCode: String
     @NSManaged public var categoryRaw: String
     @NSManaged public var paymentMethodRaw: String
@@ -81,9 +84,17 @@ extension CDReceipt: Identifiable {
         )
     }
 
-    /// Seven uppercase hex characters, matching the `84AC83A` format on the memo.
-    static func generateNumber() -> String {
-        String((0..<7).map { _ in "0123456789ABCDEF".randomElement()! })
+    /// `#41` — the form the memo and the exported filename both use.
+    var displayNumber: String { "#\(number)" }
+
+    /// Receipts are numbered sequentially like a paper book, so the next number is
+    /// one past the highest already issued.
+    static func nextNumber(in context: NSManagedObjectContext) -> String {
+        let request = CDReceipt.fetchRequest()
+        request.propertiesToFetch = ["number"]
+        let existing = (try? context.fetch(request)) ?? []
+        let highest = existing.compactMap { Int($0.number) }.max() ?? 0
+        return String(highest + 1)
     }
 }
 

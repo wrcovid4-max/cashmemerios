@@ -10,9 +10,8 @@ import UniformTypeIdentifiers
 /// full record. Pages are sized independently, because page 2 always runs longer.
 @MainActor
 enum MemoExporter {
-    /// Width of the exported sheet in points — roughly a wide thermal receipt,
-    /// which keeps the memo legible without wasting paper on A4.
-    static let pageWidth: CGFloat = 420
+    /// Width of the exported sheet in points, matching the reference memo exactly.
+    static let pageWidth: CGFloat = 600
 
     static func pdfData(for memo: MemoSnapshot, language: AppLanguage) -> Data? {
         let data = NSMutableData()
@@ -62,11 +61,32 @@ enum MemoExporter {
             throw ExportError.renderFailed
         }
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("CashMemo-\(memo.number)")
+            .appendingPathComponent(fileName(for: memo))
             .appendingPathExtension(for: .pdf)
         try data.write(to: url, options: .atomic)
         return url
     }
+
+    /// `Receipt #41 - Mart (Example) - 20260801_22_32_29 - Cash Memer`
+    ///
+    /// The timestamp is the moment of export, not the receipt's own time, which is
+    /// what the reference exports do — sharing the same memo twice gives two files.
+    static func fileName(for memo: MemoSnapshot, exportedAt: Date = Date()) -> String {
+        let store = memo.headerSubtitle.isEmpty ? "Receipt" : memo.headerSubtitle
+        let stamp = stampFormatter.string(from: exportedAt)
+        let raw = "Receipt \(memo.displayNumber) - \(store) - \(stamp) - Cash Memer"
+        // "/" and ":" are the only characters a file name cannot carry.
+        return raw
+            .replacingOccurrences(of: "/", with: "-")
+            .replacingOccurrences(of: ":", with: "-")
+    }
+
+    private static let stampFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyyMMdd_HH_mm_ss"
+        return formatter
+    }()
 
     private static func content(
         _ memo: MemoSnapshot,
