@@ -89,37 +89,43 @@ selection, Markup and the standard share sheet all behave as they do in Files. T
 
 ## Every memo is two pages
 
-`CashMemoView.Page` decides what each page carries; `MemoExporter` renders both into
-one PDF with independent page heights, since page 2 always runs longer.
+Rebuilt to match the reference Cash Memer PDF exactly: a 600pt cream sheet
+(`#FAF9F6`) on a warm grey margin (`#DCDCD2`), navy `CASH MEMO` title (`#102C57`),
+black body, and the double/single rule rhythm between blocks. `MemoExporter`
+renders both pages into one PDF with independent page heights.
 
-| | Page 1 — Customer Copy | Page 2 — Full Record |
+| | Page 1 | Page 2 — `CASH MEMO (Page 2)` |
 |---|:---:|:---:|
-| Receipt no, date, time, category, method | ✅ | ✅ |
-| **Customer name** | ✅ | ✅ |
-| Items, totals, discount, tax, cash, change | ✅ | ✅ |
-| Note 1 | ✅ | ✅ |
-| Signature, QR code | ✅ | ✅ |
-| Customer phone | — | ✅ |
-| Customer email | — | ✅ |
-| Saved Location + GPS | — | ✅ |
-| **Note 2** | — | ✅ |
-| **Issued By** (Google account + email) | — | ✅ |
+| Receipt No `#41`, date, time, Place/Store, category, method | ✅ | ✅ |
+| Customer — **name only**, one line | ✅ | — |
+| **Customer Details** — name, phone, email, **address** | — | ✅ |
+| Items, `@ Rs12.00 each`, subtotal, discount, `Tax (15.0%)`, grand total | ✅ | ✅ |
+| Cash Given, Change Amount | ✅ | ✅ |
+| `Note:` (Note 1) | ✅ | — |
+| `Saved Location:` + GPS | ✅ | — |
+| `Note (Page 2):` (Note 2) | — | ✅ |
+| `Issuer Account:` — Google name + email | — | ✅ |
+| Signature, QR, `Thank you for shopping with us!` | ✅ | ✅ |
+
+**Two address fields, deliberately.** `customerAddress` is the customer's own
+address and prints on page 2 only. `address` is the GPS-captured transaction
+location, printed as *Saved Location* on page 1. They are not the same thing.
+
+**Receipt numbers are sequential**, like a paper book — `CDReceipt.nextNumber(in:)`
+takes one past the highest already issued, and the memo prints it as `#41`.
 
 **Note 1** is pre-filled with `MemoDefaults.noteOne` — *"Thank You for shopping !!!"* —
-on every new receipt, including ones Siri creates. Edit it or clear it; an empty Note 1
-simply prints nothing.
+on every new receipt, including ones Siri creates. Edit or clear it freely.
+**Note 2** starts empty and only ever reaches page 2.
 
-**Note 2** starts empty by design. It is the private note and never reaches the
-customer copy.
+**Issued By** is captured from the signed-in Google account at generation time and
+stored on the receipt, so signing out later does not strip it off historic memos.
 
-**Issued By** is captured from the signed-in Google account **at the moment the receipt
-is generated** and stored on the receipt (`issuedByName` / `issuedByEmail`), so signing
-out later does not strip the issuer off historic memos.
+**Exported filename** matches the reference:
+`Receipt #41 - Mart (Example) - 20260801_22_32_29 - Cash Memer.pdf`
+The timestamp is the moment of export, not the receipt's own time.
 
-> One caveat: the app has a single address field — `address`, captured from GPS and
-> printed as *Saved Location*. That is what page 1 withholds. There is no separate
-> customer-address field; add one if the customer's own address should be distinct
-> from the transaction location.
+---
 
 **Watch app** (`CashMemerWatch/`)
 History and Dashboard only — creating a memo needs a keyboard and a signature. The phone
