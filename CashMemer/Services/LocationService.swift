@@ -45,17 +45,50 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     }
 
     /// Reverse-geocodes into the one-line address printed under "Saved Location".
+    ///
+    /// Apple's geocoder is tried first — it needs no key and no network round-trip
+    /// of our own — with Google Geocoding as the fallback, because `CLGeocoder`
+    /// rate-limits hard and returns nothing when it does.
     func address(for location: CLLocation) async -> String? {
-        guard let placemark = try? await geocoder.reverseGeocodeLocation(location).first else { return nil }
-        let components = [
-            placemark.subThoroughfare,
-            placemark.thoroughfare,
-            placemark.subLocality,
-            placemark.locality,
-            placemark.country
+        if let placemark = try? await geocoder.reverseGeocodeLocation(location).first {
+            let components = [
+                placemark.subThoroughfare,
+                placemark.thoroughfare,
+                placemark.subLocality,
+                placemark.locality,
+                placemark.country
+            ]
+            let address = components.compactMap { $0 }.joined(separator: ", ")
+            if !address.isEmpty { return address }
+        }
+        return await googleAddress(for: location)
+    }
+
+    private func googleAddress(for location: CLLocation) async -> String? {
+        guard let key = APIKeys.googleMaps else { return nil }
+
+        let coordinate = "\(location.coordinate.latitude),\(location.coordinate.longitude)"
+        var components = URLComponents(string: "https://maps.googleapis.com/maps/api/geocode/json")
+        components?.queryItems = [
+            URLQueryItem(name: "latlng", value: coordinate),
+            URLQueryItem(name: "key", value: key)
         ]
-        let address = components.compactMap { $0 }.joined(separator: ", ")
-        return address.isEmpty ? nil : address
+        guard let url = components?.url else { return nil }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let payload = try JSONDecoder().decode(GeocodeResponse.self, from: data)
+            guard payload.status == "OK" else { return nil }
+            return payload.results.first?.formatted_address
+        } catch {
+            return nil
+        }
+    }
+
+    private struct GeocodeResponse: Decodable {
+        struct Result: Decodable { let formatted_address: String }
+        let status: String
+        let results: [Result]
     }
 
     // MARK: - CLLocationManagerDelegate

@@ -34,10 +34,7 @@ protocol ReceiptScanning {
 /// Parses a receipt photo with Gemini, which handles the messy real-world layouts
 /// (skewed thermal paper, Urdu/English mixed text) that plain OCR gets wrong.
 struct GeminiReceiptScanner: ReceiptScanning {
-    /// Read from `GEMINI_API_KEY` in Info.plist so the key stays out of source control.
-    static var apiKey: String? {
-        Bundle.main.object(forInfoDictionaryKey: "GEMINI_API_KEY") as? String
-    }
+    static var apiKey: String? { APIKeys.gemini }
 
     var model = "gemini-2.0-flash"
     var session: URLSession = .shared

@@ -44,6 +44,15 @@
 				<string>cashmemer</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.cashmemer.app.googlesignin</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Replace with REVERSED_CLIENT_ID from GoogleService-Info.plist -->
+				<string>REPLACE_WITH_REVERSED_CLIENT_ID</string>
+			</array>
+		</dict>
 	</array>
 
 	<!-- Right-to-left support for the Urdu interface -->
@@ -53,9 +62,13 @@
 		<string>ur</string>
 	</array>
 
-	<!-- Paste your key here (or inject it at build time) to enable AI scanning -->
+	<!-- API keys. Restrict each one to bundle id com.cashmemer.app in its console. -->
 	<key>GEMINI_API_KEY</key>
-	<string></string>
+	<string>AIzaSyChaEasRdOBl9Yt6UywvCoLhZF-pqqFMaQ</string>
+	<key>EXCHANGE_RATE_API_KEY</key>
+	<string>1019e9c7b1b8116172747878</string>
+	<key>GOOGLE_MAPS_API_KEY</key>
+	<string>AIzaSyAf_tqLgCSTOO0htQzKSEJI_vfgABiOF0Q</string>
 
 	<key>NSCameraUsageDescription</key>
 	<string>Cash Memer uses the camera to scan paper receipts and barcodes.</string>

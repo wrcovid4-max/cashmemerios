@@ -23,9 +23,11 @@ Then set your team in **Signing & Capabilities** for all three targets and build
    on your developer account (or change the ID in `AppSettings.appGroupID` and the
    three `.entitlements` files). The Core Data store, preferences and the widget
    all live in it.
-2. **Gemini key** — paste your key into `GEMINI_API_KEY` in
-   `CashMemer/Resources/Info.plist`. Without it the scanner silently falls back to
-   on-device Vision OCR, which recovers the store name and total but not line items.
+2. **API keys** — already in `CashMemer/Resources/Info.plist`: `GEMINI_API_KEY`
+   (scanner), `EXCHANGE_RATE_API_KEY` (Rates screen, falls back to the keyless
+   endpoint), `GOOGLE_MAPS_API_KEY` (reverse-geocoding fallback when `CLGeocoder`
+   rate-limits). Read through `APIKeys`. Keep this repo **private**, and restrict
+   each key to bundle id `com.cashmemer.app` in its console.
 3. **WeatherKit** *(optional)* — the sidebar weather tile and the watch header need
    the WeatherKit capability on a paid account. Unprovisioned, the tile shows `—`.
 4. **App icon** — already installed. Your artwork was cropped out of its black
@@ -155,10 +157,26 @@ CashMemerWidgets/  Widget + Live Activity extension
 CashMemerWatch/    watchOS app (History + Dashboard)
 ```
 
+## Google Sign-In
+
+Bundle identifier: **`com.cashmemer.app`**
+
+1. Firebase console → add an **iOS** app with that bundle id.
+2. Download **`GoogleService-Info.plist`** and drop it into `CashMemer/Resources/`.
+3. Copy `REVERSED_CLIENT_ID` out of that file and paste it over
+   `REPLACE_WITH_REVERSED_CLIENT_ID` in `Info.plist`.
+4. `xcodegen generate` again.
+
+`GoogleAuthService` reads the client id from the plist, so until step 2 the button
+reports that the file is missing instead of failing silently. The signed-in account
+is what stamps `Issuer Account` onto page 2 of each memo.
+
+The SDK comes in over SPM (`GoogleSignIn-iOS`, pinned to 7.0.0 — the last release
+verified against Xcode 14). If resolution complains, raise it in `project.yml`.
+
 ## Not yet wired
 
-- **Google Sign-In** — the button and account UI are in place; drop in the GoogleSignIn
-  SDK and populate `settings.googleAccountEmail` / `Name`. Local backup export
-  (`BackupArchive`) already produces the JSON that upload would send.
 - **Restore from backup** — `BackupArchive.restore(from:into:)` is implemented and
   idempotent; it needs a file-importer button in Settings.
+- **Cloud upload** — the Drive call itself. `BackupArchive.export` already produces
+  the JSON it would send, and sign-in now provides the account.

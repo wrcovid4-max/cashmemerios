@@ -40,10 +40,32 @@ actor ExchangeRateService {
 
     @discardableResult
     func refresh(base: String) async throws -> Snapshot {
-        guard let url = URL(string: "https://open.er-api.com/v6/latest/\(base)") else {
-            throw RateError.badResponse
+        // The keyed v6 endpoint has the higher quota; the keyless one is the
+        // fallback so the app still works if the key is missing or exhausted.
+        var endpoints: [URL] = []
+        if let key = APIKeys.exchangeRate,
+           let keyed = URL(string: "https://v6.exchangerate-api.com/v6/\(key)/latest/\(base)") {
+            endpoints.append(keyed)
+        }
+        if let open = URL(string: "https://open.er-api.com/v6/latest/\(base)") {
+            endpoints.append(open)
         }
 
+        var lastError: Error = RateError.badResponse
+        for url in endpoints {
+            do {
+                let snapshot = try await fetch(url, base: base)
+                cached = snapshot
+                writeCache(snapshot)
+                return snapshot
+            } catch {
+                lastError = error
+            }
+        }
+        throw lastError
+    }
+
+    private func fetch(_ url: URL, base: String) async throws -> Snapshot {
         let (data, response) = try await session.data(from: url)
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             throw RateError.badResponse
@@ -52,14 +74,16 @@ actor ExchangeRateService {
         let payload = try JSONDecoder().decode(APIResponse.self, from: data)
         guard payload.result == "success" else { throw RateError.badResponse }
 
-        let snapshot = Snapshot(
-            base: payload.base_code,
-            rates: payload.rates.mapValues { Decimal($0) },
+        // The keyed endpoint returns `conversion_rates`; the keyless one `rates`.
+        guard let rates = payload.conversion_rates ?? payload.rates, !rates.isEmpty else {
+            throw RateError.badResponse
+        }
+
+        return Snapshot(
+            base: payload.base_code ?? base,
+            rates: rates.mapValues { Decimal($0) },
             updatedAt: Date()
         )
-        cached = snapshot
-        writeCache(snapshot)
-        return snapshot
     }
 
     // MARK: - Cache
@@ -76,8 +100,9 @@ actor ExchangeRateService {
 
     private struct APIResponse: Decodable {
         let result: String
-        let base_code: String
-        let rates: [String: Double]
+        let base_code: String?
+        let rates: [String: Double]?
+        let conversion_rates: [String: Double]?
     }
 
     enum RateError: LocalizedError {

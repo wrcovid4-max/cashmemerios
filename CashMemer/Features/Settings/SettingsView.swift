@@ -205,12 +205,11 @@ struct SettingsView: View {
                     Text(settings.googleAccountEmail ?? "")
                 }
                 Button(L10n.string(.signOut, language: language), role: .destructive) {
-                    settings.googleAccountEmail = nil
-                    settings.googleAccountName = nil
+                    GoogleAuthService.shared.signOut(from: settings)
                 }
             } else {
-                // Wire GoogleSignIn here; the rest of the backup path is already local-first.
                 Button {
+                    GoogleAuthService.shared.signIn(into: settings)
                 } label: {
                     HStack(spacing: Theme.Spacing.m) {
                         Image(systemName: "g.circle.fill")

@@ -24,8 +24,15 @@ struct CashMemerApp: App {
                 .appLanguage(settings.language)
                 .preferredColorScheme(settings.theme.colorScheme)
                 .tint(Theme.brand)
-                .task { await quickStats.start(settings: settings) }
-                .onOpenURL { navigation.handle(url: $0) }
+                .task {
+                    GoogleAuthService.shared.restorePreviousSignIn(into: settings)
+                    await quickStats.start(settings: settings)
+                }
+                .onOpenURL { url in
+                    // Google's callback comes back on its own scheme.
+                    if GoogleAuthService.shared.handle(url: url) { return }
+                    navigation.handle(url: url)
+                }
                 .onContinueUserActivity(CSSearchableItemActionType) { navigation.handle(userActivity: $0) }
                 .onContinueUserActivity(SpotlightIndex.activityType) { navigation.handle(userActivity: $0) }
                 // Any save — from the UI, an App Intent or a restore — refreshes

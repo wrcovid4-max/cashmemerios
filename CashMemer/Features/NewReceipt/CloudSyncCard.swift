@@ -119,7 +119,6 @@ struct CloudSyncCard: View {
     }
 
     private func signOut() {
-        settings.googleAccountEmail = nil
-        settings.googleAccountName = nil
+        GoogleAuthService.shared.signOut(from: settings)
     }
 }
