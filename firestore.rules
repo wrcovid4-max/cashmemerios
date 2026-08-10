@@ -1,0 +1,31 @@
+rules_version = '2';
+
+// Cash Memer — every receipt belongs to exactly one signed-in account.
+//
+// Paste into Firebase console → Firestore Database → Rules → Publish.
+// Without these, the default rules either deny everything (sync silently fails)
+// or, in test mode, let anyone on the internet read your receipts.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // A user reaches only their own document tree. The uid comes from Firebase
+    // Auth, so the iOS and Android apps signed into the same Google account
+    // share one tree — which is what makes them one dataset.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /receipts/{receiptId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /members/{memberId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Anything not matched above is denied.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

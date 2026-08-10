@@ -202,6 +202,8 @@ extension L10n {
         .noteTwoPrivateHint: "نوٹ ۱ دونوں صفحات پر چھپتا ہے۔ نوٹ ۲، کسٹمر کا فون اور ای میل، محفوظ مقام اور جاری کنندہ اکاؤنٹ صرف صفحہ ۲ پر چھپتے ہیں۔",
 
         .cloudBackupAndSync: "کلاؤڈ بیک اپ اور سنک",
+        .syncing: "سنک ہو رہا ہے…",
+        .syncFailed: "سنک ناکام",
         .connected: "منسلک",
         .notConnected: "منسلک نہیں",
         .done: "مکمل",

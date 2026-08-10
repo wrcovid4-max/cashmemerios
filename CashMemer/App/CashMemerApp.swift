@@ -1,5 +1,6 @@
 import CoreData
 import CoreSpotlight
+import FirebaseCore
 import SwiftUI
 import WidgetKit
 
@@ -13,6 +14,11 @@ struct CashMemerApp: App {
 
     private let persistence = PersistenceController.shared
 
+    init() {
+        // Must run before any Firebase API is touched.
+        FirebaseApp.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()
@@ -25,6 +31,7 @@ struct CashMemerApp: App {
                 .preferredColorScheme(settings.theme.colorScheme)
                 .tint(Theme.brand)
                 .task {
+                    // Restoring the session starts Firestore sync on success.
                     GoogleAuthService.shared.restorePreviousSignIn(into: settings)
                     await quickStats.start(settings: settings)
                 }

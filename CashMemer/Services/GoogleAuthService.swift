@@ -1,10 +1,14 @@
 import Combine
+import FirebaseAuth
 import Foundation
 import GoogleSignIn
 import UIKit
 
-/// Google Sign-In, used to stamp the issuing account onto each memo and to
-/// identify the account backups belong to.
+/// Google Sign-In, bridged into Firebase Auth.
+///
+/// The Google credential is exchanged for a Firebase one so Firestore sees the
+/// same uid the Android app signs in as — that shared uid is what makes the two
+/// apps one dataset. It also stamps the issuing account onto each memo.
 ///
 /// The client ID is read from `GoogleService-Info.plist`; if that file has not been
 /// added to the target yet, every entry point fails with a readable message rather
@@ -28,6 +32,7 @@ final class GoogleAuthService: ObservableObject {
         GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] user, _ in
             guard let user = user else { return }
             self?.apply(user, to: settings)
+            self?.linkToFirebase(user)
         }
     }
 
@@ -60,13 +65,34 @@ final class GoogleAuthService: ObservableObject {
             guard let user = result?.user else { return }
             self.lastError = nil
             self.apply(user, to: settings)
+            self.linkToFirebase(user)
         }
     }
 
     func signOut(from settings: AppSettings) {
         GIDSignIn.sharedInstance.signOut()
+        try? Auth.auth().signOut()
+        FirestoreSyncService.shared.stop()
         settings.googleAccountEmail = nil
         settings.googleAccountName = nil
+    }
+
+    /// Signs into Firebase with the Google credential, then starts syncing.
+    private func linkToFirebase(_ user: GIDGoogleUser) {
+        guard let idToken = user.idToken?.tokenString else { return }
+        let credential = GoogleAuthProvider.credential(
+            withIDToken: idToken,
+            accessToken: user.accessToken.tokenString
+        )
+
+        Auth.auth().signIn(with: credential) { [weak self] _, error in
+            if let error = error {
+                self?.lastError = error.localizedDescription
+                return
+            }
+            let context = PersistenceController.shared.container.viewContext
+            FirestoreSyncService.shared.start(context: context)
+        }
     }
 
     /// Routes the callback URL Google opens the app with.

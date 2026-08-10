@@ -35,6 +35,8 @@ public final class CDReceipt: NSManagedObject {
     /// Google account that issued the memo — printed on page 2 only.
     @NSManaged public var issuedByName: String
     @NSManaged public var issuedByEmail: String
+    /// Last local edit, compared against the remote copy to settle conflicts.
+    @NSManaged public var updatedAt: Date?
     @NSManaged public var items: NSSet?
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<CDReceipt> {
@@ -124,6 +126,7 @@ public final class CDMember: NSManagedObject {
     @NSManaged public var email: String
     @NSManaged public var notes: String
     @NSManaged public var createdAt: Date
+    @NSManaged public var updatedAt: Date?
     @NSManaged public var avatarPNG: Data?
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<CDMember> {

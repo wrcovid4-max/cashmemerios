@@ -8,6 +8,7 @@
         <attribute name="name" attributeType="String" defaultValueString=""/>
         <attribute name="notes" attributeType="String" defaultValueString=""/>
         <attribute name="phone" attributeType="String" defaultValueString=""/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="id"/>
@@ -41,6 +42,7 @@
         <attribute name="storeName" attributeType="String" defaultValueString=""/>
         <attribute name="taxPercent" attributeType="Decimal" defaultValueString="0"/>
         <attribute name="title" attributeType="String" defaultValueString=""/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="items" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDReceiptItem" inverseName="receipt" inverseEntity="CDReceiptItem"/>
         <uniquenessConstraints>
             <uniquenessConstraint>

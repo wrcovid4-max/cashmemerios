@@ -202,6 +202,8 @@ extension L10n {
         .noteTwoPrivateHint: "Note 1 prints on both pages. Note 2, the customer's phone and email, the saved location and the issuing account print on page 2 only.",
 
         .cloudBackupAndSync: "Cloud Backup & Sync",
+        .syncing: "Syncing…",
+        .syncFailed: "Sync Failed",
         .connected: "Connected",
         .notConnected: "Not Connected",
         .done: "Done",

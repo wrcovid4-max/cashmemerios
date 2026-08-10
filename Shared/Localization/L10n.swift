@@ -80,7 +80,7 @@ enum L10n {
         case issuerAccount, notePageTwoLabel, each, noteTwoPrivateHint
 
         // Misc
-        case cloudBackupAndSync, connected, notConnected, done, save, retry, ok
+        case cloudBackupAndSync, connected, notConnected, syncing, syncFailed, done, save, retry, ok
     }
 
     static func string(_ key: Key, language: AppLanguage) -> String {

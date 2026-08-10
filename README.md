@@ -169,16 +169,45 @@ Configured and ready. Bundle identifier **`com.cashmemer.app`**, Firebase projec
 **`cash-memer`**. `GoogleService-Info.plist` is in `CashMemer/Resources/` and its
 `REVERSED_CLIENT_ID` is already wired as a URL scheme in `Info.plist`.
 
-**The Firebase SDK is deliberately not used.** Signing in only needs an OAuth client
-id, which `GoogleAuthService` reads straight out of `GoogleService-Info.plist`. The
-only dependency is `GoogleSignIn-iOS` over SPM, pinned to 7.0.0 — the last release
-verified against Xcode 14. Pulling in `firebase-ios-sdk` would add a large
-dependency tree, and its current releases require Xcode 15.
+`GoogleAuthService` signs in with Google, then exchanges that credential for a
+Firebase Auth one. The resulting uid is the same one the Android app signs in as,
+which is what makes the two apps one dataset rather than two. The signed-in account
+also stamps `Issuer Account` onto page 2 of each memo.
 
-The one remaining console step is **Authentication → Sign-in method → Google →
-Enable**, if the Android app has not already turned it on.
+**Console steps:** Authentication → Sign-in method → **Google → Enable**, and
+Firestore Database → Rules → paste [`firestore.rules`](firestore.rules) → Publish.
+Without the rules, sync fails silently or your receipts are world-readable.
 
-The signed-in account is what stamps `Issuer Account` onto page 2 of each memo.
+## Backup and sync
+
+`FirestoreSyncService` mirrors Core Data into `users/{uid}/receipts` and
+`users/{uid}/members`, automatically and in both directions:
+
+- **Local → remote** — a `NSManagedObjectContextDidSave` observer pushes every
+  inserted, updated and deleted receipt. Line items have no document of their own;
+  they ride inside the receipt, so a memo is always written atomically.
+- **Remote → local** — snapshot listeners apply changes as they arrive, so a
+  receipt scanned on Android shows up on the iPhone without a refresh.
+- **Conflicts** are last-write-wins on `updatedAt`. If the local copy is newer than
+  an inbound change, it wins and is pushed back instead. That is the right trade for
+  one person's receipt book — simultaneous edits from two devices are rare, and a
+  merge prompt nobody reads would be worse.
+- **Loops** are prevented by an `isApplyingRemote` flag, so writing a remote change
+  into Core Data does not echo straight back out.
+
+The upload button in the Cloud Backup & Sync card forces a full re-push; the card's
+pill shows live status (syncing / last synced time / error).
+
+`BackupArchive` still produces a local JSON export, independent of all this — worth
+keeping as the offline escape hatch.
+
+### Firebase and Xcode 14.2
+
+`firebase-ios-sdk` is pinned to **10.29.0**. Firebase 11.x requires Xcode 15.2, so
+do not let SPM drift upward until you move off Xcode 14.2. Only `FirebaseAuth` and
+`FirebaseFirestore` are linked — no Analytics, no Crashlytics.
+
+The first package resolve pulls gRPC, abseil and leveldb, so expect one slow build.
 
 ## Not yet wired
 

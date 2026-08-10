@@ -23,6 +23,11 @@ packages:
   GoogleSignIn:
     url: https://github.com/google/GoogleSignIn-iOS
     exactVersion: 7.0.0
+  # Firebase 10.29 is the last line that still builds under Xcode 14; 11.x
+  # requires Xcode 15.2. Raise this only after moving off Xcode 14.2.
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    exactVersion: 10.29.0
 
 fileGroups:
   - README.md
@@ -62,6 +67,10 @@ targets:
         weak: true
       - package: GoogleSignIn
         product: GoogleSignIn
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
       - target: CashMemerWidgets
       - target: CashMemerWatch
 
