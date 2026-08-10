@@ -352,6 +352,46 @@ installers and already-trashed files. Your code is in GitHub regardless.
 
 ---
 
+## Testing CarPlay
+
+Run any **iPhone simulator**, then in the Simulator menu bar:
+**I/O → External Displays → CarPlay**. A second window opens with the dashboard;
+Cash Memer appears on it with three pages — History, Rates and Dashboard.
+
+All three are read-only. CarPlay templates exist to keep eyes on the road, and
+creating a memo needs a keyboard and a signature anyway.
+
+### Why it runs in the simulator but not in a car
+
+CarPlay needs `com.apple.developer.carplay-driving-task`, and Apple grants CarPlay
+entitlements **by application only**, to a short list of app categories. A device
+build carrying that key fails signing:
+
+```
+Provisioning profile "iOS Team Provisioning Profile" doesn't include the
+com.apple.developer.carplay-driving-task entitlement
+```
+
+No profile a free personal team can create ever will include it.
+
+The simulator does not validate entitlements against a provisioning profile, so
+the entitlement lives in a **simulator-only** file and `project.yml` picks it per
+SDK:
+
+```yaml
+CODE_SIGN_ENTITLEMENTS: CashMemer/Resources/CashMemer.entitlements
+CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]: CashMemer/Resources/CashMemer-Simulator.entitlements
+```
+
+Device builds keep using the empty file and go on signing normally. Nothing about
+CarPlay affects running on your iPhone or iPad.
+
+To move it to a real head unit, apply at
+<https://developer.apple.com/contact/carplay/> and, if granted, add the same key
+to `CashMemer.entitlements`.
+
+---
+
 ## Keeping your work
 
 **Nothing is backed up anywhere except GitHub.** After any change:
