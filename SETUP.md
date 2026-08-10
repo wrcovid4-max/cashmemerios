@@ -155,6 +155,16 @@ The last line matters. **The code is not on `main`.**
 ## 5. Generate and open the project
 
 ```bash
+./bootstrap.sh
+```
+
+That is the whole of steps 3 and 5 in one command: it checks Xcode is ready,
+downloads XcodeGen if it is missing (no Homebrew needed — see step 3 for why that
+matters on macOS 12), generates the project and opens it.
+
+Doing it by hand instead:
+
+```bash
 xcodegen generate
 ```
 ```bash
