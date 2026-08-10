@@ -270,7 +270,64 @@ Copy the errors and hand them over to be fixed.
 | `package product 'nanopb' requires minimum platform version 12.0` | Firebase is too new for Xcode 14.2's SwiftPM. Lower `exactVersion` in `project.yml` — 10.9.0, then 10.7.0. Then **File → Packages → Reset Package Caches** |
 | Package resolution fails on GoogleSignIn | Try `7.1.0` in `project.yml` |
 | `No such module 'FirebaseAuth'` | Packages have not finished resolving. **File → Packages → Resolve Package Versions** |
+| `Cannot find 'X' in scope`, but X is right there in the sidebar | A new file arrived without regenerating. `./pull.sh`, or `xcodegen generate` |
+| `accessing build database ...: database or disk is full` | The Mac is out of disk, not a code error. See below |
 | Signing errors | A target was missed in step 6 |
+
+### When the disk fills up
+
+`database or disk is full`, usually followed by `Command SwiftCompile failed with
+a nonzero exit code`. Xcode could not write its build database. Nothing is wrong
+with the code, and the compile error is only fallout.
+
+Check first:
+
+```bash
+df -h /
+```
+```bash
+du -sh ~/Library/Developer/Xcode/DerivedData ~/Library/Developer/CoreSimulator ~/.Trash ~/Downloads 2>/dev/null
+```
+
+Then reclaim, in order of how much it gives back:
+
+```bash
+rm -rf ~/Library/Developer/Xcode/DerivedData
+```
+
+Build cache only — Xcode rebuilds it. With Firebase's SPM checkouts this is
+routinely 5–15 GB. Deleting it is also the repair, not just the cleanup: a
+`build.db` written while the disk was full is usually truncated, and no amount of
+free space fixes it in place.
+
+```bash
+ls -lh ~/Downloads
+```
+
+Two things hide there. The Xcode **`.xip`** installer (7–10 GB) is useless once
+expanded. And if `Xcode.app` is still in Downloads *and* in `/Applications`, one
+is a 23 GB duplicate — confirm `ls -d /Applications/Xcode.app` prints a path
+before removing the other.
+
+```bash
+rm -rf ~/Downloads/Xcode*.xip
+```
+```bash
+rm -rf ~/.Trash/*
+```
+```bash
+xcrun simctl delete unavailable
+```
+
+Emptying the Trash matters: deleting in Finder reclaims nothing until you do.
+
+Aim for **15 GB free** before rebuilding — Xcode 14.2 needs real scratch space
+for this project, and a nearly-full disk just fails a little later. The build
+after clearing DerivedData recompiles Firebase from scratch and is slow; that is
+not a hang.
+
+`rm -rf` is irreversible and does not use the Trash. Everything above is caches,
+installers and already-trashed files. Your code is in GitHub regardless.
 
 ---
 
