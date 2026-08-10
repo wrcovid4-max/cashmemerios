@@ -57,7 +57,18 @@ struct NewReceiptView: View {
         }
         .sheet(isPresented: $isPresentingBarcode) {
             BarcodeScannerSheet { code in
-                draft.addLine(name: code, quantity: 1, unitPrice: 0)
+                // Look the code up in the catalogue first. Adding a line named
+                // "012345678905" priced at zero — which is what this did before
+                // — is not a receipt line anybody wants.
+                if let product = CDProduct.first(barcode: code, in: context) {
+                    draft.addLine(
+                        name: product.name.isEmpty ? code : product.name,
+                        quantity: 1,
+                        unitPrice: product.price.decimalValue
+                    )
+                } else {
+                    draft.addLine(name: code, quantity: 1, unitPrice: 0)
+                }
             }
         }
         .photosPicker(isPresented: $isPresentingGallery, selection: $photoSelection, matching: .images)

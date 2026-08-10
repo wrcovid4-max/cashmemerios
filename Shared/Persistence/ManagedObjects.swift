@@ -154,3 +154,69 @@ extension CDMember: Identifiable {
 
     static let csvHeader = "Name,Phone,Email,Notes"
 }
+
+// MARK: - Products
+
+/// The shop's catalogue, shared by the barcode Products page and the Price List.
+///
+/// One entity, two screens. A product either carries a barcode — scanned at the
+/// till and looked up instantly — or it does not, and is priced by hand. Keeping
+/// both in one table means a barcode can be added to an existing hand-entered
+/// product later without retyping it, and the receipt form searches one place.
+@objc(CDProduct)
+public final class CDProduct: NSManagedObject {
+    @NSManaged public var id: UUID
+    @NSManaged public var name: String
+    /// `nil` for hand-priced products; that is what separates the two pages.
+    @NSManaged public var barcode: String?
+    @NSManaged public var category: String
+    @NSManaged public var unit: String
+    @NSManaged public var price: NSDecimalNumber
+    @NSManaged public var stock: Int32
+    @NSManaged public var lowStockThreshold: Int32
+    @NSManaged public var isArchived: Bool
+    @NSManaged public var notes: String
+    @NSManaged public var createdAt: Date
+    @NSManaged public var updatedAt: Date?
+
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<CDProduct> {
+        NSFetchRequest<CDProduct>(entityName: "CDProduct")
+    }
+
+    var hasBarcode: Bool { !(barcode ?? "").isEmpty }
+
+    var isLowStock: Bool { lowStockThreshold > 0 && stock <= lowStockThreshold }
+
+    /// Newly created products need every non-optional attribute set before the
+    /// first save; `createdAt` and `id` have no model default.
+    static func make(in context: NSManagedObjectContext) -> CDProduct {
+        let product = CDProduct(context: context)
+        product.id = UUID()
+        product.createdAt = Date()
+        product.updatedAt = Date()
+        product.unit = "piece"
+        return product
+    }
+
+    /// Everything, newest first — the Products page filters in memory so the
+    /// search field and the All/Active/Archived chips stay instant.
+    static func allRequest() -> NSFetchRequest<CDProduct> {
+        let request = fetchRequest()
+        request.sortDescriptors = [
+            NSSortDescriptor(key: "isArchived", ascending: true),
+            NSSortDescriptor(key: "name", ascending: true, selector: #selector(NSString.localizedCaseInsensitiveCompare(_:)))
+        ]
+        return request
+    }
+
+    /// Barcode lookup at the till. Exact match, archived included — scanning a
+    /// product you archived should still tell you what it is.
+    static func first(barcode: String, in context: NSManagedObjectContext) -> CDProduct? {
+        let trimmed = barcode.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let request = fetchRequest()
+        request.predicate = NSPredicate(format: "barcode ==[c] %@", trimmed)
+        request.fetchLimit = 1
+        return try? context.fetch(request).first
+    }
+}

@@ -86,6 +86,11 @@ enum L10n {
         case totalWithoutDiscount, totalWithoutTax, searchCurrencies, iranianToman
         case currencyCodeExample, currencySymbol, removePasscode, clearSignature
         case receiptsOnThisDevice
+
+        // Products / Price List
+        case products, priceList, addNewProduct, editProduct, searchProducts
+        case barcode, barcodeInUse, stock, lowStock, sellValue, unit
+        case filterAll, filterActive, noProductsYet, noProductsHint
     }
 
     static func string(_ key: Key, language: AppLanguage) -> String {

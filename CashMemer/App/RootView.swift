@@ -128,6 +128,8 @@ struct RootView: View {
         case .newReceipt: NewReceiptView()
         case .history: HistoryView()
         case .members: MembersDirectoryView()
+        case .products: ProductsView(scope: .products)
+        case .priceList: ProductsView(scope: .priceList)
         case .dashboard: DashboardView()
         case .scan: ScanView()
         case .rates: RatesView()

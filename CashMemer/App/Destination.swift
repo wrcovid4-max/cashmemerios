@@ -1,10 +1,12 @@
 import SwiftUI
 
-/// The seven top-level destinations: the iPad sidebar rows and the iPhone tab bar.
-/// Members sits third, promoted out of Settings — it is a place you go, not a
-/// preference you set.
+/// Every screen the app can show, as sidebar rows on iPad and tab-bar entries on
+/// iPhone. Members sits third, promoted out of Settings — it is a place you go,
+/// not a preference you set. Products and Price List live behind More: they are
+/// reference material, consulted while writing a memo rather than destinations in
+/// their own right.
 enum Destination: String, CaseIterable, Identifiable, Hashable {
-    case newReceipt, history, members, dashboard, scan, rates, settings, more
+    case newReceipt, history, members, products, priceList, dashboard, scan, rates, settings, more
 
     var id: String { rawValue }
 
@@ -13,6 +15,8 @@ enum Destination: String, CaseIterable, Identifiable, Hashable {
         case .newReceipt: return .newReceipt
         case .history: return .history
         case .members: return .membersDirectory
+        case .products: return .products
+        case .priceList: return .priceList
         case .dashboard: return .dashboard
         case .scan: return .scan
         case .rates: return .rates
@@ -27,6 +31,8 @@ enum Destination: String, CaseIterable, Identifiable, Hashable {
         case .newReceipt: return "plus.circle.fill"
         case .history: return "list.bullet.rectangle.portrait.fill"
         case .members: return "person.2.fill"
+        case .products: return "shippingbox.fill"
+        case .priceList: return "list.bullet.rectangle.fill"
         case .dashboard: return "chart.bar.fill"
         case .scan: return "viewfinder"
         case .rates: return "dollarsign.circle.fill"
@@ -58,6 +64,6 @@ enum Destination: String, CaseIterable, Identifiable, Hashable {
     /// Reached one tap deeper, through More. Scan earns its place here rather
     /// than on the bar because New Receipt already opens the scanner directly.
     static var moreDestinations: [Destination] {
-        [.scan, .rates, .settings]
+        [.products, .priceList, .scan, .rates, .settings]
     }
 }
