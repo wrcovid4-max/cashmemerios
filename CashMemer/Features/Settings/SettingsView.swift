@@ -135,8 +135,7 @@ struct SettingsView: View {
                 Button(role: .destructive) {
                     lock.removePasscode()
                 } label: {
-                    Text(L10n.string(.removeSignature, language: language)
-                        .replacingOccurrences(of: "Signature", with: "Passcode"))
+                    Text(L10n.string(.removePasscode, language: language))
                 }
             }
         } header: {
@@ -163,10 +162,10 @@ struct SettingsView: View {
 
     private var customCurrencySection: some View {
         Section(L10n.string(.customCurrency, language: language)) {
-            TextField("Code (e.g. AUD)", text: $customCode)
+            TextField(L10n.string(.currencyCodeExample, language: language), text: $customCode)
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
-            TextField("Symbol", text: $customSymbol)
+            TextField(L10n.string(.currencySymbol, language: language), text: $customSymbol)
             TextField(L10n.string(.name, language: language), text: $customName)
 
             Button(L10n.string(.addThisCurrency, language: language), action: addCustomCurrency)

@@ -30,6 +30,12 @@ struct SidebarView: View {
         }
         .padding(.top, Theme.Spacing.s)
         .background(Theme.background)
+        // The sidebar draws its own "Cash Memer" wordmark, so it sets no
+        // navigationTitle — but NavigationSplitView still reserves a navigation
+        // bar for the column, leaving an empty band above the brand. Hiding it
+        // reclaims that space. The sidebar toggle is unaffected: it lives in the
+        // detail column's toolbar, not this one.
+        .toolbar(.hidden, for: .navigationBar)
     }
 
     private var destinationList: some View {
