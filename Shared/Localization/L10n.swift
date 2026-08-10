@@ -91,6 +91,9 @@ enum L10n {
         case products, priceList, addNewProduct, editProduct, searchProducts
         case barcode, barcodeInUse, stock, lowStock, sellValue, unit
         case filterAll, filterActive, noProductsYet, noProductsHint
+
+        // Markup
+        case markupTools, pageLabel, addNote
     }
 
     static func string(_ key: Key, language: AppLanguage) -> String {

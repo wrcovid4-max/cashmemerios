@@ -41,6 +41,10 @@ public final class CDReceipt: NSManagedObject {
     /// Android app. Kept so edits go back to *that* document in the shape Android
     /// expects, rather than landing beside it as a second, iOS-shaped copy.
     @NSManaged public var remoteDocID: String?
+    /// Markup drawn over the generated memo, as JSON. Coordinates rather than a
+    /// flattened PDF, so the marks survive the memo being re-rendered after an
+    /// edit — see MemoMarkup.
+    @NSManaged public var markupJSON: String?
     @NSManaged public var items: NSSet?
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<CDReceipt> {
