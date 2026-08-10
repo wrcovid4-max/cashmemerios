@@ -38,6 +38,7 @@
         <attribute name="notesPageTwo" attributeType="String" defaultValueString=""/>
         <attribute name="number" attributeType="String" defaultValueString=""/>
         <attribute name="paymentMethodRaw" attributeType="String" defaultValueString="cash"/>
+        <attribute name="remoteDocID" optional="YES" attributeType="String"/>
         <attribute name="signaturePNG" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <attribute name="storeName" attributeType="String" defaultValueString=""/>
         <attribute name="taxPercent" attributeType="Decimal" defaultValueString="0"/>

@@ -38,9 +38,31 @@ struct PersistenceController {
         description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
 
+        // Both default to true; stated outright because the whole model-versioning
+        // arrangement depends on them.
+        description.shouldMigrateStoreAutomatically = true
+        description.shouldInferMappingModelAutomatically = true
+
+        var loadError: NSError?
         container.loadPersistentStores { _, error in
-            if let error = error as NSError? {
-                assertionFailure("Unable to open the Cash Memer store: \(error), \(error.userInfo)")
+            loadError = error as NSError?
+        }
+
+        // A store that will not open used to hit `assertionFailure`, which traps
+        // in Debug — turning a recoverable problem into a crash on every launch,
+        // with no way out but deleting the app. Rebuild instead. Receipts live in
+        // Firestore and come back on the next sync, so a rebuilt store costs far
+        // less than an app that cannot start.
+        if let loadError = loadError, !inMemory, let storeURL = description.url {
+            NSLog("Cash Memer: rebuilding the local store, it could not be opened — \(loadError)")
+            Self.removeStoreFiles(at: storeURL)
+
+            var retryError: NSError?
+            container.loadPersistentStores { _, error in
+                retryError = error as NSError?
+            }
+            if let retryError = retryError {
+                assertionFailure("Unable to open the Cash Memer store: \(retryError), \(retryError.userInfo)")
             }
         }
 
@@ -58,6 +80,19 @@ struct PersistenceController {
 
     /// Retained so indexing keeps running for the process lifetime.
     private var spotlightIndexer: ReceiptSpotlightDelegate?
+
+    /// SQLite keeps its write-ahead log and shared memory beside the database.
+    /// Removing only the `.sqlite` leaves those two behind, and the store fails to
+    /// open again for a different reason.
+    private static func removeStoreFiles(at url: URL) {
+        let manager = FileManager.default
+        for suffix in ["", "-wal", "-shm"] {
+            let path = url.path + suffix
+            if manager.fileExists(atPath: path) {
+                try? manager.removeItem(atPath: path)
+            }
+        }
+    }
 
     func save() {
         let context = container.viewContext
