@@ -70,6 +70,10 @@ final class FirestoreSyncService: ObservableObject {
 
         // Anything created before sign-in still needs to reach the cloud.
         Task { await pushAll(context: context) }
+
+        // Diagnostic: reports which collections under users/{uid} actually hold
+        // documents, since the client SDK cannot list subcollections.
+        Task { await SyncDiagnostics.probe(uid: uid, database: database) }
     }
 
     func stop() {
