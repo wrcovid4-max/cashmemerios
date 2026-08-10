@@ -218,7 +218,8 @@ enum PaymentMethodAppEnum: String, AppEnum {
 /// is required in every phrase, so each one reads naturally with "Cash Memer".
 @available(iOS 16.0, *)
 struct CashMemerShortcuts: AppShortcutsProvider {
-    static var shortcutTileColor: ShortcutTileColor = .green
+    // `shortcutTileColor` is left at its default. It only tints the tile in the
+    // Shortcuts app, and the case names differ across iOS versions.
 
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
