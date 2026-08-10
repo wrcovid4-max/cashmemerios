@@ -7,33 +7,23 @@ Professional receipt organiser. A native rebuild of the Android app, targeting
 
 ## Building
 
-The project is generated from `project.yml` so there is no `.xcodeproj` in git.
+**Starting from a clean Mac? Follow [SETUP.md](SETUP.md)** — Xcode through to first
+run, assuming nothing is installed.
+
+The short version, once Xcode and XcodeGen are in place:
 
 ```bash
-brew install xcodegen     # once
+git checkout claude/untitled-session-kzaqp5
 xcodegen generate
 open CashMemer.xcodeproj
 ```
 
-Then set your team in **Signing & Capabilities** for all three targets and build.
+There is no `.xcodeproj` in git; it is generated from `project.yml`. Re-run
+`xcodegen generate` after every pull.
 
-### Before the first run
-
-1. **App Group** — all three targets share `group.com.cashmemer.shared`. Register it
-   on your developer account (or change the ID in `AppSettings.appGroupID` and the
-   three `.entitlements` files). The Core Data store, preferences and the widget
-   all live in it.
-2. **API keys** — already in `CashMemer/Resources/Info.plist`: `GEMINI_API_KEY`
-   (scanner), `EXCHANGE_RATE_API_KEY` (Rates screen, falls back to the keyless
-   endpoint), `GOOGLE_MAPS_API_KEY` (reverse-geocoding fallback when `CLGeocoder`
-   rate-limits). Read through `APIKeys`. Keep this repo **private**, and restrict
-   each key to bundle id `com.cashmemer.app` in its console.
-3. **WeatherKit** *(optional)* — the sidebar weather tile and the watch header need
-   the WeatherKit capability on a paid account. Unprovisioned, the tile shows `—`.
-4. **App icon** — already installed. Your artwork was cropped out of its black
-   letterbox, edge-extended into the baked-in rounded corners and flattened to
-   opaque RGB, then exported as a 1024pt single-size iOS icon plus the full
-   watchOS ladder. It also appears on the App Lock screen as `AppLogo`.
+Keys, `GoogleService-Info.plist`, the app icon and Firebase config are all
+committed — see the table in SETUP.md. Keep this repo **private**: the keys are in
+`Info.plist`.
 
 ---
 
