@@ -35,9 +35,19 @@ final class FirestoreSyncService: ObservableObject {
     private static let receiptsCollection = "cashMemos"
     private static let membersCollection = "members"
 
+    /// The products collection is *discovered* rather than named. Guessing
+    /// `receipts` cost days on the memo side, and the client SDK cannot list
+    /// subcollections, so instead each of these is read once and the first
+    /// holding product-shaped documents wins.
+    private static let productCollectionCandidates = [
+        "products", "product", "priceList", "priceLists", "prices",
+        "inventory", "stock", "catalog", "catalogue", "items", "barcodes"
+    ]
+
     private let database = Firestore.firestore()
     private var receiptListener: ListenerRegistration?
     private var memberListener: ListenerRegistration?
+    private var productListener: ListenerRegistration?
     private var saveObserver: NSObjectProtocol?
     private var context: NSManagedObjectContext?
 
@@ -73,6 +83,7 @@ final class FirestoreSyncService: ObservableObject {
 
         listenForReceipts(uid: uid, context: context)
         listenForMembers(uid: uid, context: context)
+        Task { await discoverProducts(uid: uid, context: context) }
         observeLocalSaves(context: context)
 
         // Anything created before sign-in still needs to reach the cloud.
@@ -91,8 +102,10 @@ final class FirestoreSyncService: ObservableObject {
     private func stopListening() {
         receiptListener?.remove()
         memberListener?.remove()
+        productListener?.remove()
         receiptListener = nil
         memberListener = nil
+        productListener = nil
         if let saveObserver = saveObserver {
             NotificationCenter.default.removeObserver(saveObserver)
             self.saveObserver = nil
@@ -239,6 +252,75 @@ final class FirestoreSyncService: ObservableObject {
             ReceiptDocument.apply(document, to: member)
         }
 
+        saveQuietly(context)
+    }
+
+    // MARK: - Products
+
+    /// Finds which collection holds the catalogue, then listens to it.
+    private func discoverProducts(uid: String, context: NSManagedObjectContext) async {
+        for name in Self.productCollectionCandidates {
+            guard
+                let snapshot = try? await database.collection("users").document(uid)
+                    .collection(name).limit(to: 1).getDocuments(),
+                let first = snapshot.documents.first,
+                AndroidProductDocument.matches(first.data())
+            else { continue }
+
+            NSLog("CashMemer sync: products found in users/<uid>/%@", name)
+            listenForProducts(uid: uid, collection: name, context: context)
+            return
+        }
+        NSLog("CashMemer sync: no product collection found under users/<uid>")
+    }
+
+    private func listenForProducts(uid: String, collection: String, context: NSManagedObjectContext) {
+        productListener?.remove()
+        productListener = database.collection("users").document(uid).collection(collection)
+            .addSnapshotListener { [weak self] snapshot, error in
+                Task { @MainActor in
+                    guard let self = self, error == nil, let snapshot = snapshot else { return }
+                    self.applyProductChanges(snapshot.documentChanges, context: context)
+                }
+            }
+    }
+
+    private func applyProductChanges(_ changes: [DocumentChange], context: NSManagedObjectContext) {
+        guard !changes.isEmpty else { return }
+
+        applyingRemote.isSet = true
+        defer { applyingRemote.isSet = false }
+
+        var applied = 0
+        for change in changes {
+            let document = change.document.data()
+            guard AndroidProductDocument.matches(document) else { continue }
+            let id = AndroidProductDocument.localID(document, documentID: change.document.documentID)
+
+            let request = CDProduct.fetchRequest()
+            request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+            request.fetchLimit = 1
+            let existing = try? context.fetch(request).first
+
+            if change.type == .removed {
+                if let existing = existing { context.delete(existing) }
+                continue
+            }
+
+            let product: CDProduct
+            if let existing = existing {
+                product = existing
+            } else {
+                // `make` sets id and createdAt; both are non-optional with no
+                // model default, and reading them unset traps.
+                product = CDProduct.make(in: context)
+                product.id = id
+            }
+            AndroidProductDocument.apply(document, to: product)
+            applied += 1
+        }
+
+        NSLog("CashMemer sync: %d product change(s) in, %d applied", changes.count, applied)
         saveQuietly(context)
     }
 
