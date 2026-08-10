@@ -247,7 +247,7 @@ Copy the errors and hand them over to be fixed.
 | Error | Fix |
 |---|---|
 | `Multiple commands produce Info.plist` | `xcodegen generate` again |
-| Package resolution fails on Firebase | Lower `exactVersion` in `project.yml` — try `10.24.0`, then `10.15.0` |
+| `package product 'nanopb' requires minimum platform version 12.0` | Firebase is too new for Xcode 14.2's SwiftPM. Lower `exactVersion` in `project.yml` — 10.9.0, then 10.7.0. Then **File → Packages → Reset Package Caches** |
 | Package resolution fails on GoogleSignIn | Try `7.1.0` in `project.yml` |
 | `No such module 'FirebaseAuth'` | Packages have not finished resolving. **File → Packages → Resolve Package Versions** |
 | Signing errors | A target was missed in step 6 |

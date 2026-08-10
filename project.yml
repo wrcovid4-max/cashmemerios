@@ -30,11 +30,15 @@ packages:
   GoogleSignIn:
     url: https://github.com/google/GoogleSignIn-iOS
     exactVersion: 7.0.0
-  # Firebase 10.29 is the last line that still builds under Xcode 14; 11.x
-  # requires Xcode 15.2. Raise this only after moving off Xcode 14.2.
+  # Pinned low on purpose. Later Firebase 10.x releases pull nanopb 2.30910,
+  # which declares iOS 12 while Firebase itself still declares iOS 11 — an
+  # inconsistency Xcode 14.2's SwiftPM rejects outright ("package product
+  # 'nanopb' requires minimum platform version 12.0 ... but this target supports
+  # 11.0"). 10.9.0 predates that bump. Nothing here uses a newer API, and 11.x
+  # needs Xcode 15.2 anyway.
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk
-    exactVersion: 10.29.0
+    exactVersion: 10.9.0
 
 fileGroups:
   - README.md
