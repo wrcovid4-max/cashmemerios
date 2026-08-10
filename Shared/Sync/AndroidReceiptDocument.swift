@@ -102,7 +102,8 @@ enum AndroidReceiptDocument {
         receipt.notesPageTwo = string(document["notePage2"])
         receipt.issuedByName = string(document["accountName"])
         receipt.issuedByEmail = string(document["accountEmail"])
-        receipt.isArchived = false
+        receipt.isArchived = document["isArchived"] as? Bool ?? false
+        receipt.memberID = (document["memberID"] as? String).flatMap(UUID.init(uuidString:))
 
         // `signaturePath` points at a file inside the Android sandbox and is of no
         // use here; only the inline base64 copy can be read.
@@ -178,6 +179,13 @@ enum AndroidReceiptDocument {
                 ] as [String: Any]
             }
         ]
+
+        // iOS-only fields. Android ignores keys it does not know, and carrying
+        // them means a memo written here survives the round trip with its
+        // identity and archive state intact instead of being rebuilt as new.
+        document["uuid"] = receipt.id.uuidString
+        document["isArchived"] = receipt.isArchived
+        if let memberID = receipt.memberID { document["memberID"] = memberID.uuidString }
 
         if let latitude = receipt.latitude?.doubleValue { document["latitude"] = latitude }
         if let longitude = receipt.longitude?.doubleValue { document["longitude"] = longitude }

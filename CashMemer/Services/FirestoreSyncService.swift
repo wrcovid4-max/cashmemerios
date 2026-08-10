@@ -28,6 +28,13 @@ final class FirestoreSyncService: ObservableObject {
 
     @Published private(set) var status: Status = .signedOut
 
+    /// The Android app's collection name, confirmed from the console breadcrumb:
+    /// `users/{uid}/cashMemos`. This was `receipts` — a name invented when the
+    /// sync was written — so the listener attached to an empty collection and
+    /// reported success while every existing memo sat untouched next to it.
+    private static let receiptsCollection = "cashMemos"
+    private static let membersCollection = "members"
+
     private let database = Firestore.firestore()
     private var receiptListener: ListenerRegistration?
     private var memberListener: ListenerRegistration?
@@ -95,7 +102,7 @@ final class FirestoreSyncService: ObservableObject {
     // MARK: - Remote → local
 
     private func listenForReceipts(uid: String, context: NSManagedObjectContext) {
-        receiptListener = database.collection("users").document(uid).collection("receipts")
+        receiptListener = database.collection("users").document(uid).collection(Self.receiptsCollection)
             .addSnapshotListener { [weak self] snapshot, error in
                 // Firestore calls back on the main queue, but that is a runtime
                 // promise the compiler cannot see, so hop explicitly.
@@ -140,7 +147,10 @@ final class FirestoreSyncService: ObservableObject {
             let isAndroid = AndroidReceiptDocument.matches(document)
             if isAndroid { androidCount += 1 }
             let id: UUID
-            if isAndroid {
+            if let ours = (document["uuid"] as? String).flatMap(UUID.init(uuidString:)) {
+                // Written by this app into Android's collection — keep its identity.
+                id = ours
+            } else if isAndroid {
                 id = AndroidReceiptDocument.localID(forDocument: documentID)
             } else if let parsed = (document["id"] as? String).flatMap(UUID.init(uuidString:)) {
                 id = parsed
@@ -191,7 +201,7 @@ final class FirestoreSyncService: ObservableObject {
     }
 
     private func listenForMembers(uid: String, context: NSManagedObjectContext) {
-        memberListener = database.collection("users").document(uid).collection("members")
+        memberListener = database.collection("users").document(uid).collection(Self.membersCollection)
             .addSnapshotListener { [weak self] snapshot, error in
                 Task { @MainActor in
                     guard let self = self, error == nil, let snapshot = snapshot else { return }
@@ -289,9 +299,9 @@ final class FirestoreSyncService: ObservableObject {
 
         for object in deleted {
             if let receipt = object as? CDReceipt {
-                await delete(documentID: receipt.remoteDocID ?? receipt.id.uuidString, from: "receipts")
+                await delete(documentID: receipt.remoteDocID ?? receipt.id.uuidString, from: Self.receiptsCollection)
             } else if let member = object as? CDMember {
-                await delete(documentID: member.id.uuidString, from: "members")
+                await delete(documentID: member.id.uuidString, from: Self.membersCollection)
             }
         }
     }
@@ -305,22 +315,17 @@ final class FirestoreSyncService: ObservableObject {
             receipt.updatedAt = Date()
         }
 
-        // A receipt that arrived from Android goes back to its own document, in
-        // Android's shape. Writing an iOS-shaped copy under a fresh UUID would
-        // leave the phone's original untouched and the memo duplicated.
-        let payload: [String: Any]
-        let id: String
-        if let remoteDocID = receipt.remoteDocID, !remoteDocID.isEmpty {
-            payload = AndroidReceiptDocument.dictionary(from: receipt)
-            id = remoteDocID
-        } else {
-            payload = ReceiptDocument.dictionary(from: receipt)
-            id = receipt.id.uuidString
-        }
+        // One collection, one shape. Everything is written the way Android reads
+        // it, plus a few iOS-only fields Android ignores, so a memo created here
+        // shows up on the phone rather than sitting in a format it cannot parse.
+        let payload = AndroidReceiptDocument.dictionary(from: receipt)
+        // Android-derived memos go back to their own document; iOS-created ones
+        // use their UUID, which is stable without having to be stored.
+        let id = (receipt.remoteDocID?.isEmpty == false) ? receipt.remoteDocID! : receipt.id.uuidString
 
         do {
             try await database.collection("users").document(uid)
-                .collection("receipts").document(id).setData(payload, merge: false)
+                .collection(Self.receiptsCollection).document(id).setData(payload, merge: false)
             status = .synced(Date())
             return true
         } catch {
@@ -340,7 +345,7 @@ final class FirestoreSyncService: ObservableObject {
 
         do {
             try await database.collection("users").document(uid)
-                .collection("members").document(member.id.uuidString).setData(payload, merge: false)
+                .collection(Self.membersCollection).document(member.id.uuidString).setData(payload, merge: false)
             return true
         } catch {
             status = .failed(error.localizedDescription)
