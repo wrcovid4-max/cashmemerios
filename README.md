@@ -121,10 +121,12 @@ The timestamp is the moment of export, not the receipt's own time.
 ---
 
 **Watch app** (`CashMemerWatch/`)
-History and Dashboard only — creating a memo needs a keyboard and a signature. The phone
-pushes a trimmed `WatchPayload` via `updateApplicationContext`, cached to disk so History
-still has content out of range. The watch target deliberately does not link Core Data,
-PDFKit or the scanner.
+Three swipeable pages — History, Dashboard and Rates — all read-only, because creating a
+memo needs a keyboard and a signature. The phone pushes a trimmed `WatchPayload` via
+`updateApplicationContext`, cached to disk so every page still has content out of range;
+the FX quotes ride along in that payload rather than being fetched, so the watch holds no
+API key and makes no request of its own. The watch target deliberately does not link Core
+Data, PDFKit or the scanner.
 
 **Widgets** — `TodaySummaryWidget` covers Home Screen (small/medium) and Lock Screen
 (rectangular/inline/circular) families.
@@ -157,7 +159,7 @@ Shared/            Models, Core Data stack, localization, theme, memo renderer,
                    App Intents, Spotlight, Live Activity attributes, watch payload
 CashMemer/         iOS/iPadOS app — App, Features/, Services/, Resources/
 CashMemerWidgets/  Widget + Live Activity extension
-CashMemerWatch/    watchOS app (History + Dashboard)
+CashMemerWatch/    watchOS app (History + Dashboard + Rates)
 ```
 
 ## Google Sign-In
