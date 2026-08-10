@@ -356,7 +356,6 @@ struct NewReceiptView: View {
         }
     }
 
-    @MainActor
     private func captureLocation() {
         isLocating = true
         // Single exit rather than a `defer`: a `defer` that mutates main-actor

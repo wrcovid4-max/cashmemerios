@@ -96,7 +96,6 @@ struct LockScreenView: View {
         }
     }
 
-    @MainActor
     private func authenticate() {
         Task { @MainActor in
             error = nil

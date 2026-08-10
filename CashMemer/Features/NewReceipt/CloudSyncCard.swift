@@ -256,12 +256,10 @@ struct CloudSyncCard: View {
     // MARK: - Behaviour
 
     /// Sync is automatic; this forces a full re-push for peace of mind.
-    @MainActor
     private func syncNow() {
         Task { @MainActor in await sync.pushAll(context: context) }
     }
 
-    @MainActor
     private func backUpNow() {
         guard !isBackingUp else { return }
         isBackingUp = true

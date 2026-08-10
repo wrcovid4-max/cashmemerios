@@ -19,8 +19,11 @@ struct ReceiptDetailView: View {
     var body: some View {
         Group {
             if let document = document {
+                // Deliberately *not* ignoring the bottom safe area. Doing so drew
+                // the last of the memo — signature, QR, footer — underneath the
+                // tab bar, where it collided with the tab labels and could not be
+                // scrolled clear.
                 PDFViewer(document: document)
-                    .ignoresSafeArea(edges: .bottom)
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
