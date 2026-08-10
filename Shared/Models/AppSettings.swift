@@ -94,6 +94,17 @@ final class AppSettings: ObservableObject {
         case customCurrencies = "settings.customCurrencies"
         case lastScanDate = "settings.lastScanDate"
         case scansToday = "settings.scansToday"
+        case settingsStamp = "settings.syncStamp"
+    }
+
+    /// When the synced preferences last changed, local or remote.
+    ///
+    /// Deliberately not `@Published`: writing it must not itself register as a
+    /// settings change, or saving the stamp would trigger another push, which
+    /// would write a new stamp, and so on.
+    var settingsStamp: Date? {
+        get { defaults.object(forKey: Keys.settingsStamp.rawValue) as? Date }
+        set { defaults.set(newValue, forKey: Keys.settingsStamp.rawValue) }
     }
 
     private func store(_ value: Any?, _ key: Keys) {

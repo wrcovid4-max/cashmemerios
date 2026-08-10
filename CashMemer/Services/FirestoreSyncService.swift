@@ -53,6 +53,12 @@ final class FirestoreSyncService: ObservableObject {
     /// that has none yet.
     private var productCollection = "products"
     private var saveObserver: NSObjectProtocol?
+    private var settingsListener: ListenerRegistration?
+    private var settingsObserver: AnyCancellable?
+    private weak var settings: AppSettings?
+    /// Guards the same echo loop the receipts have: applying remote preferences
+    /// changes AppSettings, which would immediately push them back out.
+    private var isApplyingSettings = false
     private var context: NSManagedObjectContext?
 
     /// Set while remote documents are being written into Core Data, so the save
@@ -74,8 +80,9 @@ final class FirestoreSyncService: ObservableObject {
 
     // MARK: - Lifecycle
 
-    func start(context: NSManagedObjectContext) {
+    func start(context: NSManagedObjectContext, settings: AppSettings? = nil) {
         self.context = context
+        if let settings = settings { self.settings = settings }
 
         guard let uid = uid else {
             status = .signedOut
@@ -89,6 +96,10 @@ final class FirestoreSyncService: ObservableObject {
         listenForMembers(uid: uid, context: context)
         Task { await discoverProducts(uid: uid, context: context) }
         observeLocalSaves(context: context)
+        if let settings = self.settings {
+            listenForSettings(uid: uid, settings: settings)
+            observeLocalSettings(uid: uid, settings: settings)
+        }
 
         // Anything created before sign-in still needs to reach the cloud.
         Task { await pushAll(context: context) }
@@ -107,6 +118,10 @@ final class FirestoreSyncService: ObservableObject {
         receiptListener?.remove()
         memberListener?.remove()
         productListener?.remove()
+        settingsListener?.remove()
+        settingsListener = nil
+        settingsObserver?.cancel()
+        settingsObserver = nil
         receiptListener = nil
         memberListener = nil
         productListener = nil
@@ -257,6 +272,57 @@ final class FirestoreSyncService: ObservableObject {
         }
 
         saveQuietly(context)
+    }
+
+    // MARK: - Settings
+
+    /// Preferences live on the user document, merged, because Android keeps its
+    /// own fields there. Last-write-wins on `settingsUpdatedAt`, same as receipts.
+    private func listenForSettings(uid: String, settings: AppSettings) {
+        settingsListener = database.collection("users").document(uid)
+            .addSnapshotListener { [weak self] snapshot, error in
+                Task { @MainActor in
+                    guard
+                        let self = self, error == nil,
+                        let document = snapshot?.data(),
+                        let remote = SettingsDocument.stamp(document)
+                    else { return }
+
+                    let local = settings.settingsStamp ?? .distantPast
+                    guard remote > local else { return }
+
+                    self.isApplyingSettings = true
+                    SettingsDocument.apply(document, to: settings)
+                    settings.settingsStamp = remote
+                    // Cleared a turn later: the assignments above land on
+                    // objectWillChange, which fires before this frame ends.
+                    Task { @MainActor in self.isApplyingSettings = false }
+                    NSLog("CashMemer sync: applied remote settings")
+                }
+            }
+    }
+
+    /// Debounced: changing a picker fires objectWillChange for every keystroke,
+    /// and a write per keystroke is neither needed nor free.
+    private func observeLocalSettings(uid: String, settings: AppSettings) {
+        settingsObserver = settings.objectWillChange
+            .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self = self, !self.isApplyingSettings else { return }
+                Task { @MainActor in await self.pushSettings(uid: uid, settings: settings) }
+            }
+    }
+
+    private func pushSettings(uid: String, settings: AppSettings) async {
+        let stamp = Date()
+        let payload = SettingsDocument.dictionary(from: settings, stamp: stamp)
+        do {
+            // merge, so Android's account fields and draft survive.
+            try await database.collection("users").document(uid).setData(payload, merge: true)
+            settings.settingsStamp = stamp
+        } catch {
+            NSLog("CashMemer sync: settings push failed — %@", error.localizedDescription)
+        }
     }
 
     // MARK: - Products

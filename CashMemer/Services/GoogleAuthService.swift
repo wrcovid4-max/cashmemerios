@@ -32,7 +32,7 @@ final class GoogleAuthService: ObservableObject {
         GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] user, _ in
             guard let user = user else { return }
             self?.apply(user, to: settings)
-            self?.linkToFirebase(user)
+            self?.linkToFirebase(user, settings: settings)
         }
     }
 
@@ -65,7 +65,7 @@ final class GoogleAuthService: ObservableObject {
             guard let user = result?.user else { return }
             self.lastError = nil
             self.apply(user, to: settings)
-            self.linkToFirebase(user)
+            self.linkToFirebase(user, settings: settings)
         }
     }
 
@@ -78,7 +78,7 @@ final class GoogleAuthService: ObservableObject {
     }
 
     /// Signs into Firebase with the Google credential, then starts syncing.
-    private func linkToFirebase(_ user: GIDGoogleUser) {
+    private func linkToFirebase(_ user: GIDGoogleUser, settings: AppSettings) {
         guard let idToken = user.idToken?.tokenString else { return }
         let credential = GoogleAuthProvider.credential(
             withIDToken: idToken,
@@ -91,7 +91,9 @@ final class GoogleAuthService: ObservableObject {
                 return
             }
             let context = PersistenceController.shared.container.viewContext
-            FirestoreSyncService.shared.start(context: context)
+            // Settings ride along so preferences sync too — they used to live
+            // only in UserDefaults and died with the device.
+            FirestoreSyncService.shared.start(context: context, settings: settings)
         }
     }
 
