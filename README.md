@@ -165,20 +165,20 @@ CashMemerWatch/    watchOS app (History + Dashboard)
 
 ## Google Sign-In
 
-Bundle identifier: **`com.cashmemer.app`**
+Configured and ready. Bundle identifier **`com.cashmemer.app`**, Firebase project
+**`cash-memer`**. `GoogleService-Info.plist` is in `CashMemer/Resources/` and its
+`REVERSED_CLIENT_ID` is already wired as a URL scheme in `Info.plist`.
 
-1. Firebase console → add an **iOS** app with that bundle id.
-2. Download **`GoogleService-Info.plist`** and drop it into `CashMemer/Resources/`.
-3. Copy `REVERSED_CLIENT_ID` out of that file and paste it over
-   `REPLACE_WITH_REVERSED_CLIENT_ID` in `Info.plist`.
-4. `xcodegen generate` again.
+**The Firebase SDK is deliberately not used.** Signing in only needs an OAuth client
+id, which `GoogleAuthService` reads straight out of `GoogleService-Info.plist`. The
+only dependency is `GoogleSignIn-iOS` over SPM, pinned to 7.0.0 — the last release
+verified against Xcode 14. Pulling in `firebase-ios-sdk` would add a large
+dependency tree, and its current releases require Xcode 15.
 
-`GoogleAuthService` reads the client id from the plist, so until step 2 the button
-reports that the file is missing instead of failing silently. The signed-in account
-is what stamps `Issuer Account` onto page 2 of each memo.
+The one remaining console step is **Authentication → Sign-in method → Google →
+Enable**, if the Android app has not already turned it on.
 
-The SDK comes in over SPM (`GoogleSignIn-iOS`, pinned to 7.0.0 — the last release
-verified against Xcode 14). If resolution complains, raise it in `project.yml`.
+The signed-in account is what stamps `Issuer Account` onto page 2 of each memo.
 
 ## Not yet wired
 

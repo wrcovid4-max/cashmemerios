@@ -49,8 +49,8 @@
 			<string>com.cashmemer.app.googlesignin</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<!-- Replace with REVERSED_CLIENT_ID from GoogleService-Info.plist -->
-				<string>REPLACE_WITH_REVERSED_CLIENT_ID</string>
+				<!-- REVERSED_CLIENT_ID from GoogleService-Info.plist -->
+				<string>com.googleusercontent.apps.159444468545-7odacfdr8japhmvhlrcqmen9skpp62j6</string>
 			</array>
 		</dict>
 	</array>

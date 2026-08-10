@@ -36,6 +36,8 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - path: CashMemer
+        excludes:
+          - "Resources/Info.plist"
       - path: Shared
     settings:
       base:
@@ -70,6 +72,8 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - path: CashMemerWidgets
+        excludes:
+          - "Info.plist"
       # The extension needs the store, the theme and the activity attributes,
       # but not the app's view layer.
       - path: Shared/Models
@@ -101,6 +105,8 @@ targets:
     deploymentTarget: "9.0"
     sources:
       - path: CashMemerWatch
+        excludes:
+          - "Info.plist"
       # Deliberately narrow: the watch shows History and Dashboard from a synced
       # payload, so it never links Core Data, PDFKit or the scanner.
       - path: Shared/Models/Enums.swift
