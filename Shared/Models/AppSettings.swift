@@ -19,6 +19,10 @@ final class AppSettings: ObservableObject {
     @Published var appLockEnabled: Bool { didSet { store(appLockEnabled, .appLock) } }
     @Published var biometricsEnabled: Bool { didSet { store(biometricsEnabled, .biometrics) } }
     @Published var defaultSignaturePNG: Data? { didSet { store(defaultSignaturePNG, .signature) } }
+    /// The signature currently drawn on the in-progress receipt, kept apart from
+    /// `defaultSignaturePNG` so it survives leaving the tab or quitting the app
+    /// without being promoted to the default for every future memo.
+    @Published var draftSignaturePNG: Data? { didSet { store(draftSignaturePNG, .draftSignature) } }
     @Published var googleAccountEmail: String? { didSet { store(googleAccountEmail, .googleEmail) } }
     @Published var googleAccountName: String? { didSet { store(googleAccountName, .googleName) } }
     @Published var customCurrencies: [Currency] { didSet { storeJSON(customCurrencies, .customCurrencies) } }
@@ -37,6 +41,7 @@ final class AppSettings: ObservableObject {
         appLockEnabled = store.bool(forKey: Keys.appLock.rawValue)
         biometricsEnabled = store.bool(forKey: Keys.biometrics.rawValue)
         defaultSignaturePNG = store.data(forKey: Keys.signature.rawValue)
+        draftSignaturePNG = store.data(forKey: Keys.draftSignature.rawValue)
         googleAccountEmail = store.string(forKey: Keys.googleEmail.rawValue)
         googleAccountName = store.string(forKey: Keys.googleName.rawValue)
         customCurrencies = Self.loadJSON([Currency].self, key: .customCurrencies, defaults: store) ?? []
@@ -83,6 +88,7 @@ final class AppSettings: ObservableObject {
         case appLock = "settings.appLock"
         case biometrics = "settings.biometrics"
         case signature = "settings.defaultSignature"
+        case draftSignature = "settings.draftSignature"
         case googleEmail = "settings.googleEmail"
         case googleName = "settings.googleName"
         case customCurrencies = "settings.customCurrencies"

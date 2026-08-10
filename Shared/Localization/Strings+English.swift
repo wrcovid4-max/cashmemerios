@@ -218,6 +218,7 @@ extension L10n {
         .currencyCodeExample: "Code (e.g. AUD)",
         .currencySymbol: "Symbol",
         .removePasscode: "Remove Passcode",
+        .clearSignature: "Clear Signature",
         .syncing: "Syncing…",
         .syncFailed: "Sync Failed",
         .connected: "Connected",

@@ -5,7 +5,7 @@ import UIKit
 /// Signature capture backed by PencilKit.
 ///
 /// PKCanvasView gives Apple Pencil pressure, tilt and palm rejection for free, and
-/// `drawingPolicy = .anyInput` keeps finger signing working on iPhone.
+/// `drawingPolicy = .anyInput` keeps finger — and simulator mouse — signing working.
 struct SignaturePadView: View {
     @Binding var signaturePNG: Data?
     @Binding var saveAsDefault: Bool
@@ -13,23 +13,30 @@ struct SignaturePadView: View {
     @EnvironmentObject private var settings: AppSettings
     @Environment(\.appLanguage) private var language
 
-    @State private var drawing = PKDrawing()
+    /// Bumped to tell the canvas to wipe itself. The canvas otherwise owns its own
+    /// drawing outright — see SignatureCanvas for why it is not a two-way binding.
+    @State private var clearToken = 0
+    @State private var hasInk = false
     @State private var isPencilOnly = false
 
-    private var hasSignature: Bool { signaturePNG != nil || !drawing.strokes.isEmpty }
+    private var hasSignature: Bool { signaturePNG != nil || hasInk }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.m) {
             header
 
-            SignatureCanvas(drawing: $drawing, isPencilOnly: isPencilOnly, onChange: rasterise)
-                .frame(height: 170)
-                .background(Color.white, in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
-                        .stroke(Theme.separator, lineWidth: 1)
-                )
-                .overlay(alignment: .bottomLeading) { placeholder }
+            SignatureCanvas(
+                clearToken: clearToken,
+                isPencilOnly: isPencilOnly,
+                onChange: rasterise
+            )
+            .frame(height: 170)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
+                    .stroke(Theme.separator, lineWidth: 1)
+            )
+            .overlay(alignment: .bottomLeading) { placeholder }
 
             Toggle(isOn: $saveAsDefault) {
                 Text(L10n.string(.saveAsDefaultSignature, language: language))
@@ -47,27 +54,32 @@ struct SignaturePadView: View {
                 .tint(Theme.brand)
             }
 
-            if hasSignature {
-                Button(action: clear) {
-                    HStack(spacing: Theme.Spacing.s) {
-                        Image(systemName: "trash")
-                        Text(L10n.string(.clearAndRedraw, language: language))
-                            .font(.subheadline.weight(.semibold))
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 11)
-                    .foregroundColor(Theme.destructive)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
-                            .stroke(Theme.destructive.opacity(0.4), lineWidth: 1)
-                    )
+            // Always shown, not only once something has been drawn. The form's own
+            // Clear button deliberately leaves the signature alone, so this is the
+            // only way to remove one and it needs to be findable before you start.
+            Button(action: clear) {
+                HStack(spacing: Theme.Spacing.s) {
+                    Image(systemName: "trash")
+                    Text(L10n.string(.clearSignature, language: language))
+                        .font(.subheadline.weight(.semibold))
                 }
-                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 11)
+                .foregroundColor(hasSignature ? Theme.destructive : Theme.textTertiary)
+                .overlay(
+                    RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
+                        .stroke(
+                            (hasSignature ? Theme.destructive : Theme.textTertiary).opacity(0.4),
+                            lineWidth: 1
+                        )
+                )
             }
+            .buttonStyle(.plain)
+            .disabled(!hasSignature)
         }
         .padding(Theme.Spacing.l)
         .background(Theme.cardAlt, in: RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
-        .onAppear(perform: loadDefaultIfNeeded)
+        .onAppear(perform: restoreIfNeeded)
     }
 
     private var header: some View {
@@ -97,13 +109,13 @@ struct SignaturePadView: View {
     /// Shows a previously saved signature until the user starts drawing over it.
     @ViewBuilder
     private var placeholder: some View {
-        if drawing.strokes.isEmpty, let data = signaturePNG, let image = UIImage(data: data) {
+        if !hasInk, let data = signaturePNG, let image = UIImage(data: data) {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
                 .padding(10)
                 .allowsHitTesting(false)
-        } else if drawing.strokes.isEmpty {
+        } else if !hasInk {
             Text(L10n.string(.signHere, language: language))
                 .font(.caption)
                 .foregroundColor(Theme.textTertiary)
@@ -112,17 +124,24 @@ struct SignaturePadView: View {
         }
     }
 
-    private func loadDefaultIfNeeded() {
-        if signaturePNG == nil { signaturePNG = settings.defaultSignaturePNG }
+    /// Restores the signature that was on screen before the view went away — a tab
+    /// switch, or the app being quit. Falls back to the saved default.
+    private func restoreIfNeeded() {
+        guard signaturePNG == nil else { return }
+        signaturePNG = settings.draftSignaturePNG ?? settings.defaultSignaturePNG
     }
 
     private func clear() {
-        drawing = PKDrawing()
+        clearToken += 1
+        hasInk = false
         signaturePNG = nil
+        settings.draftSignaturePNG = nil
     }
 
-    private func rasterise() {
-        guard !drawing.strokes.isEmpty else { return }
+    private func rasterise(_ drawing: PKDrawing) {
+        hasInk = !drawing.strokes.isEmpty
+        guard hasInk else { return }
+
         // Crop to the ink so the memo does not print a mostly-empty box.
         let bounds = drawing.bounds.insetBy(dx: -8, dy: -8)
         guard bounds.width > 0, bounds.height > 0 else { return }
@@ -131,50 +150,65 @@ struct SignaturePadView: View {
         guard let data = image.pngData() else { return }
 
         signaturePNG = data
+        settings.draftSignaturePNG = data
         if saveAsDefault { settings.defaultSignaturePNG = data }
     }
 }
 
 /// `PKCanvasView` bridged into SwiftUI, reporting each finished stroke.
+///
+/// The drawing is deliberately **not** a two-way binding. It was, and it made the
+/// pad impossible to sign on: the coordinator captured the wrapper struct once at
+/// `makeCoordinator()` and kept writing through that stale copy, so the new stroke
+/// never reached SwiftUI's state. The next `updateUIView` then saw a canvas whose
+/// drawing differed from the (still empty) state and "corrected" the canvas by
+/// wiping it. Every stroke was erased a frame after it was drawn.
+///
+/// So the canvas owns its drawing. SwiftUI is told about changes through `onChange`
+/// and can only ever wipe it, by bumping `clearToken`.
 private struct SignatureCanvas: UIViewRepresentable {
-    @Binding var drawing: PKDrawing
+    let clearToken: Int
     let isPencilOnly: Bool
-    let onChange: () -> Void
+    let onChange: (PKDrawing) -> Void
 
     func makeUIView(context: Context) -> PKCanvasView {
         let canvas = PKCanvasView()
         canvas.delegate = context.coordinator
-        canvas.drawing = drawing
         canvas.backgroundColor = .clear
         canvas.isOpaque = false
         canvas.tool = PKInkingTool(.pen, color: .black, width: 4)
         canvas.drawingPolicy = isPencilOnly ? .pencilOnly : .anyInput
-        // The signature box is fixed size; scrolling it would fight the gesture.
+        // The signature box is a fixed size; scrolling it would fight the gesture.
         canvas.isScrollEnabled = false
+        context.coordinator.lastClearToken = clearToken
         return canvas
     }
 
     func updateUIView(_ canvas: PKCanvasView, context: Context) {
+        // Refreshed every update so the callback is never a stale capture.
+        context.coordinator.onChange = onChange
         canvas.drawingPolicy = isPencilOnly ? .pencilOnly : .anyInput
-        if canvas.drawing != drawing {
-            canvas.drawing = drawing
+
+        if context.coordinator.lastClearToken != clearToken {
+            context.coordinator.lastClearToken = clearToken
+            canvas.drawing = PKDrawing()
         }
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+        Coordinator(onChange: onChange)
     }
 
     final class Coordinator: NSObject, PKCanvasViewDelegate {
-        private let parent: SignatureCanvas
+        var onChange: (PKDrawing) -> Void
+        var lastClearToken = 0
 
-        init(_ parent: SignatureCanvas) {
-            self.parent = parent
+        init(onChange: @escaping (PKDrawing) -> Void) {
+            self.onChange = onChange
         }
 
         func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-            parent.drawing = canvasView.drawing
-            parent.onChange()
+            onChange(canvasView.drawing)
         }
     }
 }

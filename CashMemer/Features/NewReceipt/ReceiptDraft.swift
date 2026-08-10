@@ -153,14 +153,22 @@ final class ReceiptDraft: ObservableObject {
         }
     }
 
-    func reset(defaultCurrency: Currency, defaultSignature: Data?, nextNumber: String) {
+    /// Clears the form for the next memo.
+    ///
+    /// The captured location and the signature are deliberately left alone: both
+    /// are laborious to redo and almost always still correct for the next receipt
+    /// written in the same place by the same person. `clearAll` takes them too.
+    func reset(defaultCurrency: Currency, nextNumber: String, clearAll: Bool = false) {
         number = nextNumber
         createdAt = Date()
         title = ""
         storeName = ""
-        address = ""
-        latitude = nil
-        longitude = nil
+        if clearAll {
+            address = ""
+            latitude = nil
+            longitude = nil
+            signaturePNG = nil
+        }
         memberID = nil
         customerName = ""
         customerPhone = ""
@@ -176,7 +184,6 @@ final class ReceiptDraft: ObservableObject {
         cashGivenText = ""
         note = MemoDefaults.noteOne
         notesPageTwo = ""
-        signaturePNG = defaultSignature
     }
 
     /// Stamps the signed-in Google account onto the draft so page 2 records who

@@ -218,6 +218,7 @@ extension L10n {
         .currencyCodeExample: "کوڈ (مثلاً AUD)",
         .currencySymbol: "علامت",
         .removePasscode: "پاس کوڈ ہٹائیں",
+        .clearSignature: "دستخط صاف کریں",
         .syncing: "سنک ہو رہا ہے…",
         .syncFailed: "سنک ناکام",
         .connected: "منسلک",

@@ -84,7 +84,7 @@ enum L10n {
         case syncNow, backUpNow, backingUp, backupReady, backupFailed, backupNeedsNoAccount
         case scannerHint, signHere, applePencilOnly
         case totalWithoutDiscount, totalWithoutTax, searchCurrencies, iranianToman
-        case currencyCodeExample, currencySymbol, removePasscode
+        case currencyCodeExample, currencySymbol, removePasscode, clearSignature
     }
 
     static func string(_ key: Key, language: AppLanguage) -> String {

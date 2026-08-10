@@ -318,9 +318,10 @@ struct NewReceiptView: View {
     private var actionButtons: some View {
         HStack(spacing: Theme.Spacing.m) {
             SubtleDestructiveButton(titleKey: .clear, systemImage: "line.3.horizontal") {
+                // Keeps the GPS fix and the signature — clearing the signature
+                // is what the button inside the signature card is for.
                 draft.reset(
                     defaultCurrency: settings.defaultCurrency,
-                    defaultSignature: settings.defaultSignaturePNG,
                     nextNumber: CDReceipt.nextNumber(in: context)
                 )
                 draft.adoptIssuer(from: settings)
@@ -342,7 +343,12 @@ struct NewReceiptView: View {
     private func seedDraft() {
         if draft.lines.isEmpty && draft.storeName.isEmpty {
             draft.currency = settings.defaultCurrency
-            draft.signaturePNG = settings.defaultSignaturePNG
+        }
+        // Only ever fills a gap. This used to assign unconditionally, which wiped
+        // the signature every time the tab was revisited on an otherwise empty
+        // form — the draft one is restored first so a half-written memo keeps it.
+        if draft.signaturePNG == nil {
+            draft.signaturePNG = settings.draftSignaturePNG ?? settings.defaultSignaturePNG
         }
         draft.adoptIssuer(from: settings)
         if draft.lines.isEmpty {
@@ -389,7 +395,6 @@ struct NewReceiptView: View {
             }
             draft.reset(
                 defaultCurrency: settings.defaultCurrency,
-                defaultSignature: settings.defaultSignaturePNG,
                 nextNumber: CDReceipt.nextNumber(in: context)
             )
             draft.adoptIssuer(from: settings)

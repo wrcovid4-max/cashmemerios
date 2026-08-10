@@ -184,7 +184,7 @@ struct CloudSyncCard: View {
             // Green, cloud, needs an account.
             CloudActionButton(
                 title: L10n.string(.syncNow, language: language),
-                systemImage: "arrow.triangle.2.circlepath.icloud.fill",
+                systemImage: "arrow.triangle.2.circlepath",
                 tint: Theme.brandDeep,
                 fill: Theme.brandSoft,
                 isBusy: isSyncing,
