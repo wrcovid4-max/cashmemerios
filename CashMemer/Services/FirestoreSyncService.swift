@@ -48,6 +48,10 @@ final class FirestoreSyncService: ObservableObject {
     private var receiptListener: ListenerRegistration?
     private var memberListener: ListenerRegistration?
     private var productListener: ListenerRegistration?
+    /// Where products are written. Set by discovery; falls back to the first
+    /// candidate so a product created here still reaches the cloud on an account
+    /// that has none yet.
+    private var productCollection = "products"
     private var saveObserver: NSObjectProtocol?
     private var context: NSManagedObjectContext?
 
@@ -268,6 +272,7 @@ final class FirestoreSyncService: ObservableObject {
             else { continue }
 
             NSLog("CashMemer sync: products found in users/<uid>/%@", name)
+            productCollection = name
             listenForProducts(uid: uid, collection: name, context: context)
             return
         }
@@ -373,6 +378,8 @@ final class FirestoreSyncService: ObservableObject {
                 await push(receipt: receipt)
             } else if let member = object as? CDMember {
                 await push(member: member)
+            } else if let product = object as? CDProduct {
+                await push(product: product)
             } else if let item = object as? CDReceiptItem, let parent = item.receipt {
                 // Items have no document of their own; they ride with the receipt.
                 await push(receipt: parent)
@@ -384,6 +391,8 @@ final class FirestoreSyncService: ObservableObject {
                 await delete(documentID: receipt.remoteDocID ?? receipt.id.uuidString, from: Self.receiptsCollection)
             } else if let member = object as? CDMember {
                 await delete(documentID: member.id.uuidString, from: Self.membersCollection)
+            } else if let product = object as? CDProduct {
+                await delete(documentID: product.id.uuidString, from: productCollection)
             }
         }
     }
@@ -435,6 +444,24 @@ final class FirestoreSyncService: ObservableObject {
         }
     }
 
+    @discardableResult
+    func push(product: CDProduct) async -> Bool {
+        guard let uid = uid else { return false }
+        if product.updatedAt == nil || !applyingRemote.isSet {
+            product.updatedAt = Date()
+        }
+        let payload = AndroidProductDocument.dictionary(from: product)
+        do {
+            try await database.collection("users").document(uid)
+                .collection(productCollection).document(product.id.uuidString)
+                .setData(payload, merge: false)
+            return true
+        } catch {
+            status = .failed(error.localizedDescription)
+            return false
+        }
+    }
+
     private func delete(documentID: String, from collection: String) async {
         guard let uid = uid, !documentID.isEmpty else { return }
         try? await database.collection("users").document(uid)
@@ -458,6 +485,11 @@ final class FirestoreSyncService: ObservableObject {
         let members = (try? context.fetch(CDMember.allRequest())) ?? []
         for member in members {
             await push(member: member)
+        }
+
+        let products = (try? context.fetch(CDProduct.allRequest())) ?? []
+        for product in products {
+            await push(product: product)
         }
 
         status = .synced(Date())

@@ -104,6 +104,7 @@ enum AndroidReceiptDocument {
         receipt.issuedByEmail = string(document["accountEmail"])
         receipt.isArchived = document["isArchived"] as? Bool ?? false
         receipt.memberID = (document["memberID"] as? String).flatMap(UUID.init(uuidString:))
+        receipt.markupJSON = document["markupJSON"] as? String
 
         // `signaturePath` points at a file inside the Android sandbox and is of no
         // use here; only the inline base64 copy can be read.
@@ -185,6 +186,9 @@ enum AndroidReceiptDocument {
         // identity and archive state intact instead of being rebuilt as new.
         document["uuid"] = receipt.id.uuidString
         document["isArchived"] = receipt.isArchived
+        if let markup = receipt.markupJSON, !markup.isEmpty {
+            document["markupJSON"] = markup
+        }
         if let memberID = receipt.memberID { document["memberID"] = memberID.uuidString }
 
         if let latitude = receipt.latitude?.doubleValue { document["latitude"] = latitude }
