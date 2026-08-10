@@ -142,7 +142,7 @@ source ~/.zprofile
 ## 4. Get the code
 
 ```bash
-cd ~/Documents
+cd ~
 git clone https://github.com/wrcovid4-max/cashmemerios.git
 cd cashmemerios
 git checkout claude/untitled-session-kzaqp5

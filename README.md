@@ -136,7 +136,11 @@ PDFKit or the scanner.
 - **iPad** — `NavigationSplitView`: sidebar (destinations + Quick Overview + contact
   footer), and New Receipt runs three columns with a **live CASH MEMO preview** that
   redraws on every keystroke.
-- **iPhone** — six-tab bar; the memo preview sits inline at the foot of the form.
+- **iPhone** — five tabs (New Receipt, History, Members, Dashboard, More) with a
+  custom More screen holding Products, Price List, Scan, Rates and Settings. The
+  live preview is iPad-only. The More tab is deliberately ours: past five entries
+  iOS inserts its own, which wraps each screen in a second navigation controller
+  and localises its chrome from the system language rather than the in-app toggle.
 
 ## Bilingual EN ⇄ اردو
 
@@ -176,8 +180,14 @@ live, not a change to apply.
 
 ## Backup and sync
 
-`FirestoreSyncService` mirrors Core Data into `users/{uid}/receipts` and
+`FirestoreSyncService` mirrors Core Data into **`users/{uid}/cashMemos`** and
 `users/{uid}/members`, automatically and in both directions:
+
+> `cashMemos` is the Android app's collection, confirmed from the Firestore
+> console. It was `receipts` — a name invented here — and the listener therefore
+> attached to an empty collection and reported success while every existing memo
+> sat untouched beside it. If a collection ever looks empty when it should not,
+> check the name in the console before anything else.
 
 - **Local → remote** — a `NSManagedObjectContextDidSave` observer pushes every
   inserted, updated and deleted receipt. Line items have no document of their own;
@@ -216,6 +226,25 @@ Xcode 14.2. Only `FirebaseAuth` and `FirebaseFirestore` are linked — no
 Analytics, no Crashlytics.
 
 The first package resolve pulls gRPC, abseil and leveldb, so expect one slow build.
+
+## Products, markup and CarPlay
+
+**Products / Price List** (`CashMemer/Features/Products/`) — one `CDProduct`
+table behind two screens. Products is the barcode side: scan, search, stock,
+archive, duplicate. Price List is everything priced by hand. What separates them
+is whether `barcode` is nil. Scanning on the New Receipt form looks the code up
+and adds the product's name and price. Android's catalogue syncs inbound, and the
+collection is *discovered* rather than named — eleven candidates are read once
+each and the first holding product-shaped documents wins.
+
+**PDF markup** (`Shared/Receipt/MemoMarkup.swift`) — move, text, tick and cross
+over the generated memo, with a page switcher. Marks are stored as fractions of
+the page box, not as a flattened PDF, so they keep their place when the memo is
+re-rendered after an edit.
+
+**CarPlay** (`CashMemer/CarPlay/`) — History, Rates and Dashboard, read-only. Runs
+in the simulator only; the entitlement lives in a simulator-only file so device
+signing is untouched. See SETUP.md.
 
 ## Not yet wired
 
