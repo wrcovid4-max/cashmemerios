@@ -36,6 +36,36 @@ features that need a paid account.
 
 ---
 
+## 2b. If you have never used Terminal
+
+Steps 3, 4 and 5 are typed into **Terminal**, not Xcode.
+
+Open it with **⌘ + Space**, type `Terminal`, press Return. Paste a command with
+**⌘V** and press Return to run it. Do one line at a time and wait for the prompt
+(`yourname@Mac ~ %`) to come back before the next.
+
+Three things that look broken but are not:
+
+- **Homebrew asks for your Mac password, and typing shows nothing** — no dots, no
+  stars. That is deliberate. Type it and press Return.
+- **Homebrew takes 5–10 minutes** and prints a lot of output. It may pause and ask
+  you to press Return to continue.
+- **When it finishes it may print a "Next steps" block** with a couple of commands
+  to run. Run them, or `brew` will not be found afterwards.
+
+If this repository is **private**, `git clone` in step 4 will ask for a username
+and password, and GitHub no longer accepts passwords. Run this first:
+
+```bash
+brew install gh
+gh auth login
+```
+
+Choose **GitHub.com → HTTPS → Login with a web browser**. After that `git clone`
+works without prompting.
+
+---
+
 ## 3. Install Homebrew and XcodeGen
 
 There is no `.xcodeproj` in this repository on purpose — Xcode project files
