@@ -18,8 +18,11 @@ xcodegen generate
 open CashMemer.xcodeproj
 ```
 
-There is no `.xcodeproj` in git; it is generated from `project.yml`. Re-run
-`xcodegen generate` after every pull.
+There is no `.xcodeproj` in git; it is generated from `project.yml`.
+
+To pull later changes, leave Xcode open and run `./pull.sh`, then press ⌘B. It
+regenerates only when the file list or `project.yml` changed — which is when
+regeneration is actually required, and easy to forget.
 
 Keys, `GoogleService-Info.plist`, the app icon and Firebase config are all
 committed — see the table in SETUP.md. Keep this repo **private**: the keys are in

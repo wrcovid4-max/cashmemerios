@@ -169,9 +169,29 @@ Firebase. **The first resolve is slow**, several minutes, because Firebase pulls
 gRPC, abseil and leveldb. It is not stuck. Wait for the progress bar at the top to
 finish before doing anything else.
 
-> Re-run `xcodegen generate` after every `git pull`. It is also the fix if the
-> project ever looks wrong — deleting `CashMemer.xcodeproj` and regenerating
-> loses nothing.
+> Regenerating is also the fix if the project ever looks wrong — deleting
+> `CashMemer.xcodeproj` and running `xcodegen generate` loses nothing.
+
+### Pulling changes after that
+
+Leave Xcode open. From Terminal:
+
+```bash
+cd ~/cashmemerios && ./pull.sh
+```
+
+Then press **⌘B** in Xcode. Nothing else — no quitting, no reopening.
+
+`pull.sh` pulls and then decides whether the project needs regenerating, which
+is the one part that is easy to get wrong. Editing an existing Swift file needs
+no regeneration; Xcode reads it off disk. **Adding, deleting or renaming a file
+does**, and so does any change to `project.yml`, because XcodeGen writes the file
+list into the project when it generates. Skip it and you get
+`Cannot find 'X' in scope` for code sitting visibly in the sidebar. The script
+checks and tells you which case you are in.
+
+Plain `git pull` still works when only existing files changed — the script just
+means you do not have to know which time it is.
 
 ---
 
