@@ -362,16 +362,20 @@ struct NewReceiptView: View {
         }
     }
 
+    @MainActor
     private func captureLocation() {
         isLocating = true
-        Task {
-            defer { isLocating = false }
-            guard let location = await locationService.currentLocation() else { return }
-            draft.latitude = location.coordinate.latitude
-            draft.longitude = location.coordinate.longitude
-            if let address = await locationService.address(for: location) {
-                draft.address = address
+        // Single exit rather than a `defer`: a `defer` that mutates main-actor
+        // state from inside a task closure is what the compiler rejects here.
+        Task { @MainActor in
+            if let location = await locationService.currentLocation() {
+                draft.latitude = location.coordinate.latitude
+                draft.longitude = location.coordinate.longitude
+                if let address = await locationService.address(for: location) {
+                    draft.address = address
+                }
             }
+            isLocating = false
         }
     }
 

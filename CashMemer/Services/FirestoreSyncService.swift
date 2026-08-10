@@ -36,7 +36,16 @@ final class FirestoreSyncService: ObservableObject {
 
     /// Set while remote documents are being written into Core Data, so the save
     /// they trigger is not echoed straight back to Firestore.
-    private var isApplyingRemote = false
+    ///
+    /// A lock-guarded box rather than a plain `Bool`, for two reasons that are
+    /// really the same reason. Core Data posts `NSManagedObjectContextDidSave`
+    /// from inside `context.save()`, and the observer closure is non-isolated as
+    /// far as the compiler is concerned — a main-actor property could only be
+    /// read after hopping to the main actor, which is a run-loop turn too late.
+    /// By then the flag has been cleared and every inbound change echoes
+    /// straight back out to Firestore. Being `Sendable`, this reads correctly
+    /// from the observer without a hop.
+    private nonisolated let applyingRemote = RemoteApplyFlag()
 
     private init() {}
 
@@ -84,13 +93,17 @@ final class FirestoreSyncService: ObservableObject {
     private func listenForReceipts(uid: String, context: NSManagedObjectContext) {
         receiptListener = database.collection("users").document(uid).collection("receipts")
             .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return }
-                if let error = error {
-                    self.status = .failed(error.localizedDescription)
-                    return
+                // Firestore calls back on the main queue, but that is a runtime
+                // promise the compiler cannot see, so hop explicitly.
+                Task { @MainActor in
+                    guard let self = self else { return }
+                    if let error = error {
+                        self.status = .failed(error.localizedDescription)
+                        return
+                    }
+                    guard let snapshot = snapshot else { return }
+                    self.applyReceiptChanges(snapshot.documentChanges, context: context)
                 }
-                guard let snapshot = snapshot else { return }
-                self.applyReceiptChanges(snapshot.documentChanges, context: context)
             }
     }
 
@@ -100,9 +113,9 @@ final class FirestoreSyncService: ObservableObject {
             return
         }
 
-        isApplyingRemote = true
+        applyingRemote.isSet = true
         defer {
-            isApplyingRemote = false
+            applyingRemote.isSet = false
             status = .synced(Date())
         }
 
@@ -137,36 +150,43 @@ final class FirestoreSyncService: ObservableObject {
     private func listenForMembers(uid: String, context: NSManagedObjectContext) {
         memberListener = database.collection("users").document(uid).collection("members")
             .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self, error == nil, let snapshot = snapshot else { return }
-
-                self.isApplyingRemote = true
-                defer { self.isApplyingRemote = false }
-
-                for change in snapshot.documentChanges {
-                    let document = change.document.data()
-                    guard let id = (document["id"] as? String).flatMap(UUID.init(uuidString:)) else { continue }
-
-                    let request = CDMember.fetchRequest()
-                    request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
-                    request.fetchLimit = 1
-                    let existing = try? context.fetch(request).first
-
-                    if change.type == .removed {
-                        if let existing = existing { context.delete(existing) }
-                        continue
-                    }
-
-                    let remoteDate = ReceiptDocument.date(document["updatedAt"]) ?? .distantPast
-                    if let existing = existing, let localDate = existing.updatedAt, localDate > remoteDate {
-                        continue
-                    }
-                    let member = existing ?? CDMember(context: context)
-                    if existing == nil { member.id = id }
-                    ReceiptDocument.apply(document, to: member)
+                Task { @MainActor in
+                    guard let self = self, error == nil, let snapshot = snapshot else { return }
+                    self.applyMemberChanges(snapshot.documentChanges, context: context)
                 }
-
-                self.saveQuietly(context)
             }
+    }
+
+    private func applyMemberChanges(_ changes: [DocumentChange], context: NSManagedObjectContext) {
+        guard !changes.isEmpty else { return }
+
+        applyingRemote.isSet = true
+        defer { applyingRemote.isSet = false }
+
+        for change in changes {
+            let document = change.document.data()
+            guard let id = (document["id"] as? String).flatMap(UUID.init(uuidString:)) else { continue }
+
+            let request = CDMember.fetchRequest()
+            request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+            request.fetchLimit = 1
+            let existing = try? context.fetch(request).first
+
+            if change.type == .removed {
+                if let existing = existing { context.delete(existing) }
+                continue
+            }
+
+            let remoteDate = ReceiptDocument.date(document["updatedAt"]) ?? .distantPast
+            if let existing = existing, let localDate = existing.updatedAt, localDate > remoteDate {
+                continue
+            }
+            let member = existing ?? CDMember(context: context)
+            if existing == nil { member.id = id }
+            ReceiptDocument.apply(document, to: member)
+        }
+
+        saveQuietly(context)
     }
 
     private func saveQuietly(_ context: NSManagedObjectContext) {
@@ -181,13 +201,19 @@ final class FirestoreSyncService: ObservableObject {
     // MARK: - Local → remote
 
     private func observeLocalSaves(context: NSManagedObjectContext) {
+        // `queue: nil` is deliberate. It makes the block run synchronously on the
+        // thread that posted the save, which is the only point at which
+        // `applyingRemote` still reflects the save being observed. Handing this
+        // to `.main` queues the block for the next run-loop turn — by then the
+        // flag has been cleared, the guard below never fires, and every receipt
+        // arriving from Android is pushed straight back to Firestore.
         saveObserver = NotificationCenter.default.addObserver(
             forName: .NSManagedObjectContextDidSave,
             object: context,
-            queue: .main
+            queue: nil
         ) { [weak self] notification in
-            guard let self = self, !self.isApplyingRemote else { return }
-            Task { await self.pushChanges(from: notification) }
+            guard let self = self, !self.applyingRemote.isSet else { return }
+            Task { @MainActor in await self.pushChanges(from: notification) }
         }
     }
 
@@ -222,7 +248,7 @@ final class FirestoreSyncService: ObservableObject {
         guard let uid = uid else { return false }
 
         // Stamp the edit so the other device can tell which copy is newer.
-        if receipt.updatedAt == nil || !isApplyingRemote {
+        if receipt.updatedAt == nil || !applyingRemote.isSet {
             receipt.updatedAt = Date()
         }
         let payload = ReceiptDocument.dictionary(from: receipt)
@@ -243,7 +269,7 @@ final class FirestoreSyncService: ObservableObject {
     func push(member: CDMember) async -> Bool {
         guard let uid = uid else { return false }
 
-        if member.updatedAt == nil || !isApplyingRemote {
+        if member.updatedAt == nil || !applyingRemote.isSet {
             member.updatedAt = Date()
         }
         let payload = ReceiptDocument.dictionary(from: member)
@@ -280,5 +306,27 @@ final class FirestoreSyncService: ObservableObject {
         }
 
         status = .synced(Date())
+    }
+}
+
+/// A `Bool` readable and writable from any isolation context.
+///
+/// Exists so `FirestoreSyncService.applyingRemote` can be checked synchronously
+/// from the Core Data save notification, which arrives in a non-isolated closure.
+private final class RemoteApplyFlag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value = false
+
+    var isSet: Bool {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return value
+        }
+        set {
+            lock.lock()
+            value = newValue
+            lock.unlock()
+        }
     }
 }

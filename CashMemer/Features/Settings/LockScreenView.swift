@@ -96,8 +96,9 @@ struct LockScreenView: View {
         }
     }
 
+    @MainActor
     private func authenticate() {
-        Task {
+        Task { @MainActor in
             error = nil
             let ok = await lock.authenticate(reason: L10n.string(.appLockHint, language: language))
             // Fall back to the stored passcode rather than stranding the user.
