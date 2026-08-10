@@ -41,47 +41,52 @@ struct CashMemoView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
+            // Grouped to stay inside the ViewBuilder limit of 10 children.
+            Group {
+                header
 
-            doubleRule
-            metadata
-            doubleRule
+                doubleRule
+                metadata
+                doubleRule
 
-            itemTable
-            totals
+                itemTable
+                totals
 
-            doubleRule
-            cashBlock
-            doubleRule
-
-            if page.isPrivate {
-                // Page 2 swaps Note 1 and the location for the private blocks.
-                if !memo.trimmedNoteTwo.isEmpty {
-                    labelledBlock(L10n.string(.notePageTwoLabel, language: language)) {
-                        Text(memo.trimmedNoteTwo)
-                    }
-                    singleRule
-                }
-                if memo.hasIssuer {
-                    issuerBlock
-                }
-            } else {
-                if !memo.trimmedNote.isEmpty {
-                    labelledBlock(L10n.string(.note, language: language)) {
-                        Text(memo.trimmedNote)
-                    }
-                    singleRule
-                }
-                if memo.hasLocation {
-                    locationBlock
-                    singleRule
-                }
+                doubleRule
+                cashBlock
+                doubleRule
             }
 
-            signatureRow
-            doubleRule
-            qrBlock
-            footer
+            Group {
+                if page.isPrivate {
+                    // Page 2 swaps Note 1 and the location for the private blocks.
+                    if !memo.trimmedNoteTwo.isEmpty {
+                        labelledBlock(L10n.string(.notePageTwoLabel, language: language)) {
+                            Text(memo.trimmedNoteTwo)
+                        }
+                        singleRule
+                    }
+                    if memo.hasIssuer {
+                        issuerBlock
+                    }
+                } else {
+                    if !memo.trimmedNote.isEmpty {
+                        labelledBlock(L10n.string(.note, language: language)) {
+                            Text(memo.trimmedNote)
+                        }
+                        singleRule
+                    }
+                    if memo.hasLocation {
+                        locationBlock
+                        singleRule
+                    }
+                }
+
+                signatureRow
+                doubleRule
+                qrBlock
+                footer
+            }
         }
         .padding(.horizontal, 30 * s)
         .padding(.top, 22 * s)

@@ -186,75 +186,80 @@ struct NewReceiptView: View {
 
     private var detailsSection: some View {
         FormSection(titleKey: .receiptDetails) {
-            FormFieldRow(placeholderKey: .titleField, text: $draft.title)
-            FormFieldRow(placeholderKey: .placeStoreName, text: $draft.storeName)
-            FormFieldRow(
-                placeholderKey: .address,
-                text: $draft.address,
-                trailing: AnyView(locationButtons)
-            )
-            FormPickerRow(
-                titleKey: .currency,
-                selection: $draft.currency,
-                options: settings.availableCurrencies
-            ) { currency in
-                Text(currency.pickerLabel)
-            }
-            FormPickerRow(
-                titleKey: .category,
-                selection: $draft.category,
-                options: ReceiptCategory.allCases
-            ) { category in
-                Label(
-                    L10n.string(category.key, language: language),
-                    systemImage: category.systemImage
+            // Split into groups: a ViewBuilder takes at most 10 children.
+            Group {
+                FormFieldRow(placeholderKey: .titleField, text: $draft.title)
+                FormFieldRow(placeholderKey: .placeStoreName, text: $draft.storeName)
+                FormFieldRow(
+                    placeholderKey: .address,
+                    text: $draft.address,
+                    trailing: AnyView(locationButtons)
                 )
-            }
-            FormPickerRow(
-                titleKey: .paymentType,
-                selection: $draft.paymentMethod,
-                options: PaymentMethod.allCases
-            ) { method in
-                Label(
-                    L10n.string(method.key, language: language),
-                    systemImage: method.systemImage
-                )
-            }
-
-            Button {
-                isPresentingMembers = true
-            } label: {
-                HStack {
-                    Label(
-                        L10n.string(.selectMember, language: language),
-                        systemImage: "person.crop.circle.badge.questionmark"
-                    )
-                    .foregroundStyle(Theme.brand)
-                    Spacer()
-                    Image(systemName: "chevron.forward")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textTertiary)
+                FormPickerRow(
+                    titleKey: .currency,
+                    selection: $draft.currency,
+                    options: settings.availableCurrencies
+                ) { currency in
+                    Text(currency.pickerLabel)
                 }
-                .padding(.horizontal, Theme.Spacing.l)
-                .padding(.vertical, 13)
-                .contentShape(Rectangle())
+                FormPickerRow(
+                    titleKey: .category,
+                    selection: $draft.category,
+                    options: ReceiptCategory.allCases
+                ) { category in
+                    Label(
+                        L10n.string(category.key, language: language),
+                        systemImage: category.systemImage
+                    )
+                }
+                FormPickerRow(
+                    titleKey: .paymentType,
+                    selection: $draft.paymentMethod,
+                    options: PaymentMethod.allCases
+                ) { method in
+                    Label(
+                        L10n.string(method.key, language: language),
+                        systemImage: method.systemImage
+                    )
+                }
             }
-            .buttonStyle(.plain)
 
-            Divider().padding(.leading, Theme.Spacing.l)
+            Group {
+                Button {
+                    isPresentingMembers = true
+                } label: {
+                    HStack {
+                        Label(
+                            L10n.string(.selectMember, language: language),
+                            systemImage: "person.crop.circle.badge.questionmark"
+                        )
+                        .foregroundStyle(Theme.brand)
+                        Spacer()
+                        Image(systemName: "chevron.forward")
+                            .font(.caption)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                    .padding(.horizontal, Theme.Spacing.l)
+                    .padding(.vertical, 13)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
 
-            FormFieldRow(placeholderKey: .customerName, text: $draft.customerName)
-            FormFieldRow(placeholderKey: .customerPhone, text: $draft.customerPhone, keyboard: .phonePad)
-            FormFieldRow(
-                placeholderKey: .customerEmail,
-                text: $draft.customerEmail,
-                keyboard: .emailAddress
-            )
-            FormFieldRow(
-                placeholderKey: .customerAddress,
-                text: $draft.customerAddress,
-                showsDivider: false
-            )
+                Divider().padding(.leading, Theme.Spacing.l)
+
+                FormFieldRow(placeholderKey: .customerName, text: $draft.customerName)
+                FormFieldRow(placeholderKey: .customerPhone, text: $draft.customerPhone, keyboard: .phonePad)
+                FormFieldRow(
+                    placeholderKey: .customerEmail,
+                    text: $draft.customerEmail,
+                    keyboard: .emailAddress
+                )
+                FormFieldRow(
+                    placeholderKey: .customerAddress,
+                    text: $draft.customerAddress,
+                    showsDivider: false
+                )
+            }
         }
     }
 

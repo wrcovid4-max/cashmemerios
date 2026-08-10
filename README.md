@@ -196,9 +196,21 @@ keeping as the offline escape hatch.
 
 ### Firebase and Xcode 14.2
 
-`firebase-ios-sdk` is pinned to **10.29.0**. Firebase 11.x requires Xcode 15.2, so
-do not let SPM drift upward until you move off Xcode 14.2. Only `FirebaseAuth` and
-`FirebaseFirestore` are linked — no Analytics, no Crashlytics.
+`firebase-ios-sdk` is pinned to **10.9.0**, and the pin is load-bearing. Later
+10.x releases pull nanopb 2.30910, which declares iOS 12 as its minimum while
+Firebase itself still declares iOS 11 — an inconsistency Xcode 14.2's stricter
+SwiftPM rejects outright:
+
+```
+the package product 'nanopb' requires minimum platform version 12.0 for the
+iOS platform, but this target supports 11.0
+```
+
+Raising `IPHONEOS_DEPLOYMENT_TARGET` does **not** fix this; the mismatch is
+inside Firebase's own `Package.swift`. 10.9.0 predates the bump. Firebase 11.x
+needs Xcode 15.2 regardless, so do not let SPM drift upward until you move off
+Xcode 14.2. Only `FirebaseAuth` and `FirebaseFirestore` are linked — no
+Analytics, no Crashlytics.
 
 The first package resolve pulls gRPC, abseil and leveldb, so expect one slow build.
 

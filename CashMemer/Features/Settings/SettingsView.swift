@@ -21,17 +21,24 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            appearanceSection
-            securitySection
-            passcodeSection
-            signatureSection
-            membersSection
-            customCurrencySection
-            googleSection
-            backupSection
-            dataSection
-            informationSection
-            contactSection
+            // Grouped because a ViewBuilder accepts at most 10 children, and
+            // exceeding it fails to type-check with a misleading error about
+            // FormStyleConfiguration.
+            Group {
+                appearanceSection
+                securitySection
+                passcodeSection
+                signatureSection
+                membersSection
+            }
+            Group {
+                customCurrencySection
+                googleSection
+                backupSection
+                dataSection
+                informationSection
+                contactSection
+            }
         }
         .scrollContentBackground(.hidden)
         .background(Theme.background)
