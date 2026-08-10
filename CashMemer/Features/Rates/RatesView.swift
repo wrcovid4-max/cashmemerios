@@ -30,10 +30,6 @@ struct RatesCard: View {
 
     @State private var query = ""
 
-    /// The toman is not an ISO code and the API does not quote it, so it is
-    /// synthesised from the rial. Iran prices in tomans in practice.
-    private static let tomanCode = "TMN"
-
     /// The compact card on the Dashboard keeps the short curated list; the Rates
     /// tab lists everything the API actually returned.
     ///
@@ -45,12 +41,11 @@ struct RatesCard: View {
             .map(\.code)
             .filter { $0 != settings.defaultCurrencyCode }
 
-        guard !compact, let rates = stats.rates?.rates, !rates.isEmpty else {
+        guard !compact, let snapshot = stats.rates, !snapshot.rates.isEmpty else {
             return curated
         }
 
-        var all = Set(rates.keys)
-        if rates["IRR"] != nil { all.insert(Self.tomanCode) }
+        var all = Set(snapshot.ratesIncludingToman.keys)
         all.remove(settings.defaultCurrencyCode)
 
         let sorted = all.sorted()
@@ -182,17 +177,15 @@ struct RatesCard: View {
     }
 
     private func rate(for code: String) -> Decimal? {
-        guard let rates = stats.rates?.rates else { return nil }
-        guard code == Self.tomanCode else { return rates[code] }
-        // 1 toman = 10 rials, so a base buying N rials buys N/10 tomans.
-        guard let rial = rates["IRR"] else { return nil }
-        return rial / 10
+        stats.rates?.ratesIncludingToman[code]
     }
 
     /// Foundation already knows every ISO currency name in every language it
     /// ships, so there is no table to write or translate here.
     private func name(for code: String) -> String {
-        if code == Self.tomanCode { return L10n.string(.iranianToman, language: language) }
+        if code == ExchangeRateService.Snapshot.tomanCode {
+            return L10n.string(.iranianToman, language: language)
+        }
         return locale.localizedString(forCurrencyCode: code) ?? code
     }
 }

@@ -52,14 +52,25 @@ struct CashMemerApp: App {
                 ) { _ in
                     PhoneSessionService.shared.push(
                         context: persistence.container.viewContext,
-                        settings: settings
+                        settings: settings,
+                        rates: quickStats.rates
                     )
                     WidgetCenter.shared.reloadAllTimelines()
                 }
                 .onAppear {
                     PhoneSessionService.shared.push(
                         context: persistence.container.viewContext,
-                        settings: settings
+                        settings: settings,
+                        rates: quickStats.rates
+                    )
+                }
+                // A rates refresh has to reach the watch too; receipts alone
+                // would leave its Rates page on whatever it first received.
+                .onReceive(quickStats.$rates.dropFirst()) { rates in
+                    PhoneSessionService.shared.push(
+                        context: persistence.container.viewContext,
+                        settings: settings,
+                        rates: rates
                     )
                 }
         }

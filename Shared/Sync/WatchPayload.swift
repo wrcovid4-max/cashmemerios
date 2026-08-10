@@ -10,6 +10,22 @@ struct WatchPayload: Codable, Equatable {
     var currencySymbol: String
     var receipts: [Summary]
 
+    /// Optional on purpose. The watch caches the last payload to disk, and a
+    /// watch still holding one written before Rates existed would fail to decode
+    /// a non-optional field — taking its History down with it. Optional keys are
+    /// simply absent, so old caches keep working until the phone pushes again.
+    var baseCode: String?
+    var rates: [Rate]?
+
+    /// One quote. Names are not sent: Foundation already knows every ISO
+    /// currency name on the watch, so shipping them would waste the transfer.
+    struct Rate: Codable, Equatable, Identifiable {
+        var code: String
+        var value: Double
+
+        var id: String { code }
+    }
+
     struct Summary: Codable, Equatable, Identifiable {
         var id: UUID
         var number: String
@@ -42,4 +58,11 @@ struct WatchPayload: Codable, Equatable {
     func recent(limit: Int = 25) -> [Summary] {
         Array(receipts.sorted { $0.date > $1.date }.prefix(limit))
     }
+
+    /// Every quote the phone sent, alphabetically — the watch Rates page.
+    var sortedRates: [Rate] {
+        (rates ?? []).sorted { $0.code < $1.code }
+    }
+
+    var base: String { baseCode ?? "" }
 }

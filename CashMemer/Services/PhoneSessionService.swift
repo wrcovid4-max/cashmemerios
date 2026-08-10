@@ -18,12 +18,20 @@ final class PhoneSessionService: NSObject, ObservableObject {
         WCSession.default.activate()
     }
 
-    func push(context: NSManagedObjectContext, settings: AppSettings) {
+    func push(
+        context: NSManagedObjectContext,
+        settings: AppSettings,
+        rates: ExchangeRateService.Snapshot? = nil
+    ) {
         guard WCSession.isSupported(), WCSession.default.activationState == .activated else { return }
 
         let request = CDReceipt.activeRequest()
         request.fetchLimit = 60
         guard let receipts = try? context.fetch(request) else { return }
+
+        let quotes = (rates?.ratesIncludingToman ?? [:])
+            .map { WatchPayload.Rate(code: $0.key, value: NSDecimalNumber(decimal: $0.value).doubleValue) }
+            .sorted { $0.code < $1.code }
 
         let payload = WatchPayload(
             generatedAt: Date(),
@@ -38,11 +46,17 @@ final class PhoneSessionService: NSObject, ObservableObject {
                     categoryRaw: $0.categoryRaw,
                     paymentRaw: $0.paymentMethodRaw
                 )
-            }
+            },
+            baseCode: rates?.base ?? settings.defaultCurrencyCode,
+            rates: quotes
         )
 
         // Skip identical pushes; the radio cost is not worth a no-op update.
-        guard payload.receipts != lastPayload?.receipts else { return }
+        // Rates move without the receipts changing, so both have to be compared
+        // — checking receipts alone would pin the watch to its first quote set.
+        let unchanged = payload.receipts == lastPayload?.receipts
+            && payload.rates == lastPayload?.rates
+        guard !unchanged else { return }
         guard let data = try? JSONEncoder().encode(payload) else { return }
 
         try? WCSession.default.updateApplicationContext(["payload": data])

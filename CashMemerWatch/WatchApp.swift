@@ -16,13 +16,15 @@ struct CashMemerWatchApp: App {
     }
 }
 
-/// Two pages, swipeable via the page dots: History and Dashboard. Nothing else —
-/// creating a memo needs a keyboard and a signature, which belong on the phone.
+/// Three pages, swipeable via the page dots: History, Dashboard and Rates. All
+/// read-only — creating a memo needs a keyboard and a signature, which belong on
+/// the phone.
 struct WatchRootView: View {
     var body: some View {
         TabView {
             WatchHistoryView()
             WatchDashboardView()
+            WatchRatesView()
         }
         .tabViewStyle(.page)
     }

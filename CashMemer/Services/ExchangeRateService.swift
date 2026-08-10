@@ -16,6 +16,21 @@ actor ExchangeRateService {
             guard let rate = rates[code], rate > 0 else { return nil }
             return (1 / rate).rounded(2)
         }
+
+        /// Not an ISO code, so the API never quotes it and Foundation does not
+        /// name it — but it is the unit Iran actually prices in.
+        static let tomanCode = "TMN"
+
+        /// The published rates plus the toman, synthesised at 1 TMN = 10 IRR.
+        ///
+        /// Derived in one place so the phone's Rates screen and the payload sent
+        /// to the watch cannot drift apart.
+        var ratesIncludingToman: [String: Decimal] {
+            guard let rial = rates["IRR"] else { return rates }
+            var all = rates
+            all[Self.tomanCode] = rial / 10
+            return all
+        }
     }
 
     private var cached: Snapshot?
