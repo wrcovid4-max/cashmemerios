@@ -220,6 +220,7 @@ extension L10n {
         .currencySymbol: "علامت",
         .removePasscode: "پاس کوڈ ہٹائیں",
         .clearSignature: "دستخط صاف کریں",
+        .receiptsOnThisDevice: "رسیدیں اس ڈیوائس پر",
         .syncing: "سنک ہو رہا ہے…",
         .syncFailed: "سنک ناکام",
         .connected: "منسلک",

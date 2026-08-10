@@ -220,6 +220,7 @@ extension L10n {
         .currencySymbol: "Symbol",
         .removePasscode: "Remove Passcode",
         .clearSignature: "Clear Signature",
+        .receiptsOnThisDevice: "receipts on this device",
         .syncing: "Syncing…",
         .syncFailed: "Sync Failed",
         .connected: "Connected",

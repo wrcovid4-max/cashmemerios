@@ -85,6 +85,7 @@ enum L10n {
         case scannerHint, signHere, applePencilOnly
         case totalWithoutDiscount, totalWithoutTax, searchCurrencies, iranianToman
         case currencyCodeExample, currencySymbol, removePasscode, clearSignature
+        case receiptsOnThisDevice
     }
 
     static func string(_ key: Key, language: AppLanguage) -> String {

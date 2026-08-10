@@ -18,6 +18,11 @@ struct CloudSyncCard: View {
     @ObservedObject private var sync = FirestoreSyncService.shared
     @Environment(\.managedObjectContext) private var context
 
+    /// Shown under the header. Whether anything actually arrived is the first
+    /// question when sync misbehaves, and reading it off the screen beats
+    /// digging through the Xcode console.
+    @FetchRequest(fetchRequest: CDReceipt.activeRequest()) private var storedReceipts: FetchedResults<CDReceipt>
+
     @State private var isBackingUp = false
     @State private var backupURL: URL?
     @State private var backupError: String?
@@ -28,6 +33,10 @@ struct CloudSyncCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.m) {
             header
+
+            Text("\(storedReceipts.count) \(L10n.string(.receiptsOnThisDevice, language: language))")
+                .font(.caption2)
+                .foregroundStyle(Theme.textTertiary)
 
             if settings.isSignedIntoGoogle {
                 accountRow

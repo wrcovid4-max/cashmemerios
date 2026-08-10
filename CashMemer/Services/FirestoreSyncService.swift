@@ -114,9 +114,15 @@ final class FirestoreSyncService: ObservableObject {
         }
 
         applyingRemote.isSet = true
+        var androidCount = 0
+        var appliedCount = 0
         defer {
             applyingRemote.isSet = false
             status = .synced(Date())
+            NSLog(
+                "CashMemer sync: %d change(s) in, %d Android-shaped, %d applied, %d receipts stored",
+                changes.count, androidCount, appliedCount, Self.localReceiptCount(in: context)
+            )
         }
 
         for change in changes {
@@ -128,12 +134,17 @@ final class FirestoreSyncService: ObservableObject {
             // where it is. Android's `id` is the printed receipt number, not a
             // UUID, so its local id is derived from the Firestore document id.
             let isAndroid = AndroidReceiptDocument.matches(document)
+            if isAndroid { androidCount += 1 }
             let id: UUID
             if isAndroid {
                 id = AndroidReceiptDocument.localID(forDocument: documentID)
             } else if let parsed = (document["id"] as? String).flatMap(UUID.init(uuidString:)) {
                 id = parsed
             } else {
+                // Neither shape. Worth naming rather than dropping in silence —
+                // that silence is what hid the Android receipts in the first place.
+                NSLog("CashMemer sync: skipped %@, unrecognised shape, keys: %@",
+                      documentID, Array(document.keys).sorted().joined(separator: ","))
                 continue
             }
 
@@ -168,6 +179,7 @@ final class FirestoreSyncService: ObservableObject {
                 } else {
                     ReceiptDocument.apply(document, to: receipt, in: context)
                 }
+                appliedCount += 1
             }
         }
 
@@ -221,8 +233,18 @@ final class FirestoreSyncService: ObservableObject {
         do {
             try context.save()
         } catch {
+            // A throw here loses every change just applied, so it is worth more
+            // than a status pill: Core Data's validation errors name the offending
+            // attribute only in userInfo.
+            NSLog("CashMemer sync: save failed — %@", (error as NSError).userInfo.description)
+            context.rollback()
             status = .failed(error.localizedDescription)
         }
+    }
+
+    /// Purely for the diagnostic line; a count is cheap and a fetch of everything is not.
+    private static func localReceiptCount(in context: NSManagedObjectContext) -> Int {
+        (try? context.count(for: CDReceipt.fetchRequest())) ?? -1
     }
 
     // MARK: - Local → remote
@@ -333,8 +355,12 @@ final class FirestoreSyncService: ObservableObject {
         guard uid != nil else { return }
         status = .syncing
 
+        // Receipts that came from Android are skipped. Android owns those
+        // documents, and a bulk re-push would write this device's copy over the
+        // original — including a copy that imported badly. Real edits still reach
+        // them through the save observer.
         let receipts = (try? context.fetch(CDReceipt.fetchRequest())) ?? []
-        for receipt in receipts {
+        for receipt in receipts where (receipt.remoteDocID ?? "").isEmpty {
             await push(receipt: receipt)
         }
 
