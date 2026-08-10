@@ -188,6 +188,7 @@ extension L10n {
         .discountFixed: "مقررہ رقم",
 
         .openOnIPhoneToSync: "رسیدیں سنک کرنے کے لیے اپنے آئی فون پر کیش میمر کھولیں",
+        .openOnIPhoneToSyncRates: "شرحیں سنک کرنے کے لیے اپنے آئی فون پر کیش میمر کھولیں",
         .syncedJustNow: "ابھی سنک ہوا",
 
         .pageTwo: "صفحہ ۲",

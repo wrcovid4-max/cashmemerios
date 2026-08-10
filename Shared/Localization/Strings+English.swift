@@ -188,6 +188,7 @@ extension L10n {
         .discountFixed: "Fixed Amount",
 
         .openOnIPhoneToSync: "Open Cash Memer on your iPhone to sync receipts",
+        .openOnIPhoneToSyncRates: "Open Cash Memer on your iPhone to sync rates",
         .syncedJustNow: "Synced just now",
 
         .pageTwo: "Page 2",

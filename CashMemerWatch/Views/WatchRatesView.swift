@@ -73,7 +73,7 @@ struct WatchRatesView: View {
             Image(systemName: "iphone.and.arrow.forward")
                 .font(.title2)
                 .foregroundColor(.secondary)
-            Text(L10n.string(.openOnIPhoneToSync, language: language))
+            Text(L10n.string(.openOnIPhoneToSyncRates, language: language))
                 .font(.footnote)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)

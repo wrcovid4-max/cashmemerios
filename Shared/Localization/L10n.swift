@@ -72,7 +72,7 @@ enum L10n {
         case discountNone, discountPercentage, discountFixed
 
         // Watch
-        case openOnIPhoneToSync, syncedJustNow
+        case openOnIPhoneToSync, openOnIPhoneToSyncRates, syncedJustNow
 
         // Two-page memo
         case issuedBy, accountEmail
