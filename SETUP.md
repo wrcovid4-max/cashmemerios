@@ -270,6 +270,7 @@ Copy the errors and hand them over to be fixed.
 | `package product 'nanopb' requires minimum platform version 12.0` | Firebase is too new for Xcode 14.2's SwiftPM. Lower `exactVersion` in `project.yml` — 10.9.0, then 10.7.0. Then **File → Packages → Reset Package Caches** |
 | Package resolution fails on GoogleSignIn | Try `7.1.0` in `project.yml` |
 | `No such module 'FirebaseAuth'` | Packages have not finished resolving. **File → Packages → Resolve Package Versions** |
+| `Missing package product 'GoogleSignIn'` / `'FirebaseAuth'` / `'FirebaseFirestore'` | The package checkouts are gone — usually after clearing DerivedData. **File → Packages → Reset Package Caches**, then **Resolve Package Versions** |
 | `Cannot find 'X' in scope`, but X is right there in the sidebar | A new file arrived without regenerating. `./pull.sh`, or `xcodegen generate` |
 | `accessing build database ...: database or disk is full` | The Mac is out of disk, not a code error. See below |
 | Signing errors | A target was missed in step 6 |
@@ -325,6 +326,26 @@ Aim for **15 GB free** before rebuilding — Xcode 14.2 needs real scratch space
 for this project, and a nearly-full disk just fails a little later. The build
 after clearing DerivedData recompiles Firebase from scratch and is slow; that is
 not a hang.
+
+#### Expect this next
+
+```
+Missing package product 'GoogleSignIn'
+Missing package product 'FirebaseAuth'
+Missing package product 'FirebaseFirestore'
+```
+
+Not a new problem — the Swift package checkouts live *inside* DerivedData
+(`SourcePackages/`), so deleting it removed them too. The project still
+references the packages; the sources are gone until they are fetched again.
+
+**File → Packages → Reset Package Caches**, then **File → Packages → Resolve
+Package Versions**, and wait for the progress bar at the top to finish before
+building. Building while it is still running reproduces the same three errors
+and looks like the fix did not work.
+
+Package resolution needs a couple of GB itself, so make sure the space was
+actually freed first — running out mid-fetch fails exactly this way.
 
 `rm -rf` is irreversible and does not use the Trash. Everything above is caches,
 installers and already-trashed files. Your code is in GitHub regardless.
