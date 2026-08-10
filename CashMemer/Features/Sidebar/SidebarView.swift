@@ -50,7 +50,11 @@ struct SidebarView: View {
                 }
             }
         }
-        .padding(.horizontal, Theme.Spacing.m)
+        // Matches the wordmark above and the Quick Overview panel below, both of
+        // which use .l. At .m the rows were 4pt wider than everything else, so the
+        // selected row's green pill alone ran past the sidebar's content margin
+        // and looked like it was overflowing the column.
+        .padding(.horizontal, Theme.Spacing.l)
     }
 }
 

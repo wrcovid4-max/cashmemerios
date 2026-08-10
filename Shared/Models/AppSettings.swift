@@ -33,7 +33,7 @@ final class AppSettings: ObservableObject {
 
         language = AppLanguage(rawValue: store.string(forKey: Keys.language.rawValue) ?? "") ?? .english
         theme = AppTheme(rawValue: store.string(forKey: Keys.theme.rawValue) ?? "") ?? .system
-        defaultCurrencyCode = store.string(forKey: Keys.currency.rawValue) ?? Currency.pkr.code
+        defaultCurrencyCode = store.string(forKey: Keys.currency.rawValue) ?? Currency.usd.code
         appLockEnabled = store.bool(forKey: Keys.appLock.rawValue)
         biometricsEnabled = store.bool(forKey: Keys.biometrics.rawValue)
         defaultSignaturePNG = store.data(forKey: Keys.signature.rawValue)
@@ -58,7 +58,7 @@ final class AppSettings: ObservableObject {
     }
 
     var defaultCurrency: Currency {
-        availableCurrencies.first { $0.code == defaultCurrencyCode } ?? .pkr
+        availableCurrencies.first { $0.code == defaultCurrencyCode } ?? .usd
     }
 
     func recordScan(now: Date = Date()) {

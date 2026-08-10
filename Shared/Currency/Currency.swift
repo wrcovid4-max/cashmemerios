@@ -9,11 +9,12 @@ struct Currency: Codable, Hashable, Identifiable {
 
     var id: String { code }
 
+    static let usd = Currency(code: "USD", symbol: "$", name: "US Dollar")
     static let pkr = Currency(code: "PKR", symbol: "Rs", name: "Pakistani Rupee")
 
     static let builtIn: [Currency] = [
+        .usd,
         .pkr,
-        Currency(code: "USD", symbol: "$", name: "US Dollar"),
         Currency(code: "EUR", symbol: "€", name: "Euro"),
         Currency(code: "GBP", symbol: "£", name: "British Pound"),
         Currency(code: "SAR", symbol: "﷼", name: "Saudi Riyal"),

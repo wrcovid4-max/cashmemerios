@@ -85,9 +85,10 @@ struct GeminiReceiptScanner: ReceiptScanning {
 
     private static let prompt = """
     Extract the contents of this shop receipt. Amounts must be plain numbers with no \
-    currency symbols or thousands separators. Use ISO 4217 for currency (PKR when the \
-    receipt shows Rs). Use ISO 8601 for the date. Omit any field the receipt does not \
-    show rather than guessing. Category must be one of: shopping, groceries, food, fuel, \
+    currency symbols or thousands separators. Use ISO 4217 for currency (USD when the \
+    receipt shows $, PKR when it shows Rs). Use ISO 8601 for the date. Omit any field \
+    the receipt does not show rather than guessing. Category must be one of: \
+    shopping, groceries, food, fuel, \
     travel, utilities, health, education, services, other.
     """
 

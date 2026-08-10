@@ -15,8 +15,9 @@ final class QuickStatsService: ObservableObject {
     private let rateService = ExchangeRateService()
     private let locationService = LocationService()
 
-    /// Currencies shown as chips in the sidebar, in the order the iPad build lists them.
-    static let chipCodes = ["USD", "EUR", "GBP", "SAR"]
+    /// Currencies shown as chips in the sidebar. The base is filtered out where
+    /// they are rendered, so this can list it without producing a "USD → USD" chip.
+    static let chipCodes = ["EUR", "GBP", "PKR", "SAR"]
 
     func start(settings: AppSettings) async {
         rates = await rateService.lastSnapshot

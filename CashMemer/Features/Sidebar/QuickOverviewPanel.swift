@@ -38,18 +38,29 @@ struct QuickOverviewPanel: View {
         .padding(.bottom, Theme.Spacing.l)
     }
 
+    /// Two columns, matching the tiles below.
+    ///
+    /// This was a horizontal ScrollView, which the sidebar is too narrow for: four
+    /// chips do not fit, so the last one was sliced down the middle at the edge and
+    /// read as a rendering bug rather than as something scrollable.
     private var currencyChips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: Theme.Spacing.s) {
-                ForEach(QuickStatsService.chipCodes, id: \.self) { code in
-                    CurrencyChip(
-                        code: code,
-                        baseCode: settings.defaultCurrencyCode,
-                        value: stats.inverseRate(for: code)
-                    )
-                }
+        LazyVGrid(
+            columns: [GridItem(.flexible(), spacing: Theme.Spacing.s), GridItem(.flexible(), spacing: Theme.Spacing.s)],
+            spacing: Theme.Spacing.s
+        ) {
+            ForEach(chipCodes, id: \.self) { code in
+                CurrencyChip(
+                    code: code,
+                    baseCode: settings.defaultCurrencyCode,
+                    value: stats.inverseRate(for: code)
+                )
             }
         }
+    }
+
+    /// Never quote the base against itself — "USD → USD" is noise.
+    private var chipCodes: [String] {
+        QuickStatsService.chipCodes.filter { $0 != settings.defaultCurrencyCode }
     }
 
     private var tiles: some View {
