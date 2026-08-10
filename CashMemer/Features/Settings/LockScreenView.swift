@@ -44,7 +44,7 @@ struct LockScreenView: View {
                 if showsPasscodeEntry {
                     passcodeEntry
                 } else {
-                    PrimaryButton(titleKey: .appLock, systemImage: biometrySymbol, action: authenticate)
+                    PrimaryButton(titleKey: .appLock, systemImage: biometrySymbol) { authenticate() }
                         .frame(maxWidth: 260)
 
                     if lock.hasCustomPasscode {

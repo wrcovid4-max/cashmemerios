@@ -198,7 +198,7 @@ struct CloudSyncCard: View {
                 fill: Theme.brandSoft,
                 isBusy: isSyncing,
                 isEnabled: settings.isSignedIntoGoogle && !isSyncing,
-                action: syncNow
+                action: { syncNow() }
             )
 
             // Blue, box, works signed out — that difference is the point.
@@ -209,7 +209,7 @@ struct CloudSyncCard: View {
                 fill: Theme.googleBlue.opacity(0.13),
                 isBusy: isBackingUp,
                 isEnabled: !isBackingUp,
-                action: backUpNow
+                action: { backUpNow() }
             )
         }
     }

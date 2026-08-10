@@ -268,7 +268,7 @@ struct NewReceiptView: View {
                 Image(systemName: "map.fill")
                     .foregroundStyle(Theme.brand)
             }
-            Button(action: captureLocation) {
+            Button { captureLocation() } label: {
                 Group {
                     if isLocating {
                         ProgressView()
@@ -343,7 +343,7 @@ struct NewReceiptView: View {
                 titleKey: .generate,
                 systemImage: "checkmark",
                 isEnabled: draft.canGenerate,
-                action: generate
+                action: { generate() }
             )
             .frame(maxWidth: .infinity)
         }
