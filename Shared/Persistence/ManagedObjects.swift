@@ -37,6 +37,10 @@ public final class CDReceipt: NSManagedObject {
     @NSManaged public var issuedByEmail: String
     /// Last local edit, compared against the remote copy to settle conflicts.
     @NSManaged public var updatedAt: Date?
+    /// Firestore document id this receipt came from, when it was written by the
+    /// Android app. Kept so edits go back to *that* document in the shape Android
+    /// expects, rather than landing beside it as a second, iOS-shaped copy.
+    @NSManaged public var remoteDocID: String?
     @NSManaged public var items: NSSet?
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<CDReceipt> {

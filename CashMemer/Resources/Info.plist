@@ -29,7 +29,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchScreen</key>
-	<dict/>
+	<dict>
+		<!-- Background only. The wordmark is drawn by SplashView once the app is
+		     up, so the system launch screen just has to match its colour and not
+		     flash white first. -->
+		<key>UIColorName</key>
+		<string>SplashBackground</string>
+	</dict>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

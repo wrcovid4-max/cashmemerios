@@ -140,6 +140,7 @@ targets:
       - path: Shared/Currency/Currency.swift
       - path: Shared/Localization
       - path: Shared/Theme/Theme.swift
+      - path: Shared/Theme/SplashView.swift
       - path: Shared/Sync/WatchPayload.swift
     settings:
       base:

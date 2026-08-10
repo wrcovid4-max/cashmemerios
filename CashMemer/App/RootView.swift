@@ -27,6 +27,7 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: lock.isLocked)
+        .splashScreen()
         .onAppear {
             if settings.appLockEnabled { lock.lock() }
             navigation.consumePendingDestination()

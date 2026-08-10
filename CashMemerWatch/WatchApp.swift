@@ -27,5 +27,6 @@ struct WatchRootView: View {
             WatchRatesView()
         }
         .tabViewStyle(.page)
+        .splashScreen(duration: 1.1)
     }
 }

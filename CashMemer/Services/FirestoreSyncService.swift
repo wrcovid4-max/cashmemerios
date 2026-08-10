@@ -121,7 +121,21 @@ final class FirestoreSyncService: ObservableObject {
 
         for change in changes {
             let document = change.document.data()
-            guard let id = (document["id"] as? String).flatMap(UUID.init(uuidString:)) else { continue }
+            let documentID = change.document.documentID
+
+            // Android and iOS write different shapes into the same account, so
+            // each document is identified by what it looks like rather than by
+            // where it is. Android's `id` is the printed receipt number, not a
+            // UUID, so its local id is derived from the Firestore document id.
+            let isAndroid = AndroidReceiptDocument.matches(document)
+            let id: UUID
+            if isAndroid {
+                id = AndroidReceiptDocument.localID(forDocument: documentID)
+            } else if let parsed = (document["id"] as? String).flatMap(UUID.init(uuidString:)) {
+                id = parsed
+            } else {
+                continue
+            }
 
             let request = CDReceipt.fetchRequest()
             request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
@@ -133,14 +147,27 @@ final class FirestoreSyncService: ObservableObject {
                 if let existing = existing { context.delete(existing) }
             case .added, .modified:
                 // A local edit newer than the remote one wins and is pushed back.
-                let remoteDate = ReceiptDocument.date(document["updatedAt"]) ?? .distantPast
+                // Android's timestamps are epoch milliseconds; read as seconds
+                // they land in the year 58,000 and every local edit would lose.
+                let remoteDate = isAndroid
+                    ? AndroidReceiptDocument.date(document["lastModified"]) ?? .distantPast
+                    : ReceiptDocument.date(document["updatedAt"]) ?? .distantPast
                 if let existing = existing, let localDate = existing.updatedAt, localDate > remoteDate {
                     Task { await push(receipt: existing) }
                     continue
                 }
                 let receipt = existing ?? CDReceipt(context: context)
                 if existing == nil { receipt.id = id }
-                ReceiptDocument.apply(document, to: receipt, in: context)
+                if isAndroid {
+                    AndroidReceiptDocument.apply(
+                        document,
+                        to: receipt,
+                        documentID: documentID,
+                        in: context
+                    )
+                } else {
+                    ReceiptDocument.apply(document, to: receipt, in: context)
+                }
             }
         }
 
@@ -236,9 +263,9 @@ final class FirestoreSyncService: ObservableObject {
 
         for object in deleted {
             if let receipt = object as? CDReceipt {
-                await delete(id: receipt.id, from: "receipts")
+                await delete(documentID: receipt.remoteDocID ?? receipt.id.uuidString, from: "receipts")
             } else if let member = object as? CDMember {
-                await delete(id: member.id, from: "members")
+                await delete(documentID: member.id.uuidString, from: "members")
             }
         }
     }
@@ -251,8 +278,19 @@ final class FirestoreSyncService: ObservableObject {
         if receipt.updatedAt == nil || !applyingRemote.isSet {
             receipt.updatedAt = Date()
         }
-        let payload = ReceiptDocument.dictionary(from: receipt)
-        let id = receipt.id.uuidString
+
+        // A receipt that arrived from Android goes back to its own document, in
+        // Android's shape. Writing an iOS-shaped copy under a fresh UUID would
+        // leave the phone's original untouched and the memo duplicated.
+        let payload: [String: Any]
+        let id: String
+        if let remoteDocID = receipt.remoteDocID, !remoteDocID.isEmpty {
+            payload = AndroidReceiptDocument.dictionary(from: receipt)
+            id = remoteDocID
+        } else {
+            payload = ReceiptDocument.dictionary(from: receipt)
+            id = receipt.id.uuidString
+        }
 
         do {
             try await database.collection("users").document(uid)
@@ -284,10 +322,10 @@ final class FirestoreSyncService: ObservableObject {
         }
     }
 
-    private func delete(id: UUID, from collection: String) async {
-        guard let uid = uid else { return }
+    private func delete(documentID: String, from collection: String) async {
+        guard let uid = uid, !documentID.isEmpty else { return }
         try? await database.collection("users").document(uid)
-            .collection(collection).document(id.uuidString).delete()
+            .collection(collection).document(documentID).delete()
     }
 
     /// Full push, used on first sign-in and from the manual upload button.
