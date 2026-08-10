@@ -224,3 +224,7 @@ public final class CDProduct: NSManagedObject {
         return try? context.fetch(request).first
     }
 }
+
+/// `id` is already a UUID, so the conformance is empty — but SwiftUI needs it
+/// spelled out. `ForEach` and `sheet(item:)` both refuse a plain NSManagedObject.
+extension CDProduct: Identifiable {}
