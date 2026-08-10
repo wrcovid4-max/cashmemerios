@@ -25,6 +25,10 @@ settings:
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: NO
     SWIFT_EMIT_LOC_STRINGS: YES
+    # Xcode's "Update to recommended settings" prompt asks for this. Accepting it
+    # there edits the generated project, which the next `xcodegen generate`
+    # discards -- so it is set here instead, where it survives.
+    DEAD_CODE_STRIPPING: YES
 
 packages:
   GoogleSignIn:
