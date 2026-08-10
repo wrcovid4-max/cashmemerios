@@ -4,7 +4,6 @@ import SwiftUI
 struct MembersDirectoryView: View {
     @Environment(\.managedObjectContext) private var context
     @Environment(\.appLanguage) private var language
-    @Environment(\.dismiss) private var dismiss
 
     @FetchRequest(fetchRequest: CDMember.allRequest()) private var members: FetchedResults<CDMember>
 

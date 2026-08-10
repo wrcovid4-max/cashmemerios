@@ -75,7 +75,7 @@ struct ScanView: View {
                 .foregroundColor(Theme.textPrimary)
                 .multilineTextAlignment(.center)
 
-            Text("Take a picture of any paper receipt, and the scanner will parse it and fill the form for you.")
+            Text(L10n.string(.scannerHint, language: language))
                 .font(.subheadline)
                 .foregroundColor(Theme.textSecondary)
                 .multilineTextAlignment(.center)

@@ -8,7 +8,6 @@ struct SettingsView: View {
     @Environment(\.appLanguage) private var language
 
     @State private var isShowingSignature = false
-    @State private var isShowingMembers = false
     @State private var isConfirmingDeleteAll = false
     @State private var newPasscode = ""
     @State private var confirmPasscode = ""
@@ -29,7 +28,6 @@ struct SettingsView: View {
                 securitySection
                 passcodeSection
                 signatureSection
-                membersSection
             }
             Group {
                 customCurrencySection
@@ -45,9 +43,6 @@ struct SettingsView: View {
         .navigationTitle(L10n.string(.settings, language: language))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $isShowingSignature) { signatureSheet }
-        .sheet(isPresented: $isShowingMembers) {
-            NavigationStack { MembersDirectoryView() }
-        }
         .sheet(isPresented: $isSharingBackup) {
             if let backupURL = backupURL { ShareSheet(items: [backupURL]) }
         }
@@ -162,17 +157,6 @@ struct SettingsView: View {
                 Button(L10n.string(.removeSignature, language: language), role: .destructive) {
                     settings.defaultSignaturePNG = nil
                 }
-            }
-        }
-    }
-
-    private var membersSection: some View {
-        Section(L10n.string(.members, language: language)) {
-            Button {
-                isShowingMembers = true
-            } label: {
-                Label(L10n.string(.membersDirectory, language: language), systemImage: "person.2.fill")
-                    .foregroundColor(Theme.brand)
             }
         }
     }

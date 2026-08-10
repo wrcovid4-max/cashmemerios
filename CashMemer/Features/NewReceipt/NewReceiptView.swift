@@ -22,9 +22,17 @@ struct NewReceiptView: View {
 
     private let locationService = LocationService()
 
+    /// iPad only. Checking the idiom as well as the size class matters: a Plus or
+    /// Max iPhone reports a regular width in landscape, and the live preview is
+    /// not wanted there — only on iPad, where there is room for a real second
+    /// column. An iPad in Slide Over is compact, so it correctly drops out too.
+    private var showsLivePreview: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad && sizeClass == .regular
+    }
+
     var body: some View {
         Group {
-            if sizeClass == .regular {
+            if showsLivePreview {
                 HStack(alignment: .top, spacing: 0) {
                     formColumn
                     Divider()
@@ -93,16 +101,10 @@ struct NewReceiptView: View {
                     saveAsDefault: $draft.saveSignatureAsDefault
                 )
                 actionButtons
-
-                // On iPhone there is no side-by-side pane, so the memo preview
-                // lives inline at the bottom of the form instead.
-                if sizeClass != .regular {
-                    inlinePreview
-                }
             }
             .padding(Theme.Spacing.l)
         }
-        .frame(maxWidth: sizeClass == .regular ? 520 : .infinity)
+        .frame(maxWidth: showsLivePreview ? 520 : .infinity)
         .scrollDismissesKeyboard(.interactively)
     }
 
@@ -125,20 +127,6 @@ struct NewReceiptView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.top, Theme.Spacing.l)
-    }
-
-    private var inlinePreview: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.s) {
-            Text(L10n.string(.livePreview, language: language)).sectionCaption()
-            ForEach(CashMemoView.Page.allCases) { page in
-                CashMemoView(memo: draft.snapshot, style: .preview, page: page)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
-                            .stroke(Theme.separator, lineWidth: 1)
-                    )
-            }
-        }
     }
 
     // MARK: - Sections

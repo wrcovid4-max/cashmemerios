@@ -34,7 +34,7 @@ struct SidebarView: View {
 
     private var destinationList: some View {
         VStack(spacing: 2) {
-            ForEach(Destination.allCases) { destination in
+            ForEach(Destination.sidebarDestinations) { destination in
                 SidebarRow(
                     destination: destination,
                     isSelected: selection == destination,

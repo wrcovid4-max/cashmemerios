@@ -37,6 +37,8 @@ final class AppNavigation: ObservableObject {
             selected = .dashboard
         case "new":
             selected = .newReceipt
+        case "members":
+            selected = .members
         default:
             break
         }

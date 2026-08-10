@@ -81,6 +81,8 @@ enum L10n {
 
         // Misc
         case cloudBackupAndSync, connected, notConnected, syncing, syncFailed, done, save, retry, ok
+        case syncNow, backUpNow, backingUp, backupReady, backupFailed, backupNeedsNoAccount
+        case scannerHint, signHere, applePencilOnly
     }
 
     static func string(_ key: Key, language: AppLanguage) -> String {

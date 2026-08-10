@@ -40,7 +40,7 @@ struct SignaturePadView: View {
 
             if UIDevice.current.userInterfaceIdiom == .pad {
                 Toggle(isOn: $isPencilOnly) {
-                    Label("Apple Pencil Only", systemImage: "applepencil")
+                    Label(L10n.string(.applePencilOnly, language: language), systemImage: "applepencil")
                         .font(.subheadline)
                         .foregroundColor(Theme.textPrimary)
                 }
@@ -104,7 +104,7 @@ struct SignaturePadView: View {
                 .padding(10)
                 .allowsHitTesting(false)
         } else if drawing.strokes.isEmpty {
-            Text("Sign here")
+            Text(L10n.string(.signHere, language: language))
                 .font(.caption)
                 .foregroundColor(Theme.textTertiary)
                 .padding(12)
