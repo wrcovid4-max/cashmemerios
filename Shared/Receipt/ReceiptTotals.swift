@@ -10,6 +10,18 @@ struct ReceiptTotals: Equatable {
     let cashGiven: Decimal
     let change: Decimal
 
+    /// What the memo would have come to with no discount applied.
+    ///
+    /// Tax is recomputed on the full subtotal rather than reusing `tax`, because
+    /// the real tax is charged on the discounted base — carrying it over would
+    /// quietly understate the undiscounted figure and make the saving look
+    /// larger than it is.
+    let totalWithoutDiscount: Decimal
+
+    /// What the memo comes to before tax: subtotal less discount. This is the
+    /// same figure the tax is charged on.
+    let totalWithoutTax: Decimal
+
     init(
         items: [(quantity: Int, unitPrice: Decimal)],
         discountType: DiscountType,
@@ -39,6 +51,10 @@ struct ReceiptTotals: Equatable {
         self.cashGiven = cashGiven.rounded(2)
         // Change is only meaningful once the customer has handed over at least the total.
         self.change = max(cashGiven - grandTotal, 0).rounded(2)
+
+        let taxOnFullSubtotal = (subtotal * taxPercent / 100).rounded(2)
+        self.totalWithoutDiscount = (subtotal + taxOnFullSubtotal).rounded(2)
+        self.totalWithoutTax = taxable.rounded(2)
     }
 }
 

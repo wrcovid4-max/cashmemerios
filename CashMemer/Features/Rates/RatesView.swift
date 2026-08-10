@@ -26,21 +26,73 @@ struct RatesCard: View {
     @EnvironmentObject private var settings: AppSettings
     @EnvironmentObject private var stats: QuickStatsService
     @Environment(\.appLanguage) private var language
+    @Environment(\.locale) private var locale
 
+    @State private var query = ""
+
+    /// The toman is not an ISO code and the API does not quote it, so it is
+    /// synthesised from the rial. Iran prices in tomans in practice.
+    private static let tomanCode = "TMN"
+
+    /// The compact card on the Dashboard keeps the short curated list; the Rates
+    /// tab lists everything the API actually returned.
+    ///
+    /// Reading the codes off the response rather than a hardcoded table means the
+    /// list is always exactly what this key supports — it cannot drift, and a
+    /// currency the API adds or drops needs no change here.
     private var codes: [String] {
-        settings.availableCurrencies
+        let curated = settings.availableCurrencies
             .map(\.code)
             .filter { $0 != settings.defaultCurrencyCode }
+
+        guard !compact, let rates = stats.rates?.rates, !rates.isEmpty else {
+            return curated
+        }
+
+        var all = Set(rates.keys)
+        if rates["IRR"] != nil { all.insert(Self.tomanCode) }
+        all.remove(settings.defaultCurrencyCode)
+
+        let sorted = all.sorted()
+        let trimmed = query.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return sorted }
+        return sorted.filter {
+            $0.localizedCaseInsensitiveContains(trimmed)
+                || name(for: $0).localizedCaseInsensitiveContains(trimmed)
+        }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.m) {
             header
             baseRow
+            if !compact { searchField }
             grid
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .cardSurface()
+    }
+
+    private var searchField: some View {
+        HStack(spacing: Theme.Spacing.s) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(Theme.textTertiary)
+            TextField(L10n.string(.searchCurrencies, language: language), text: $query)
+                .textInputAutocapitalization(.characters)
+                .autocorrectionDisabled()
+            if !query.isEmpty {
+                Button {
+                    query = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(Theme.textTertiary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, Theme.Spacing.m)
+        .padding(.vertical, 9)
+        .background(Theme.cardAlt, in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
     }
 
     private var header: some View {
@@ -101,6 +153,12 @@ struct RatesCard: View {
                     Text(code)
                         .font(.subheadline.weight(.semibold))
                         .foregroundColor(Theme.textPrimary)
+                    if !compact {
+                        Text(name(for: code))
+                            .font(.caption2)
+                            .foregroundColor(Theme.textTertiary)
+                            .lineLimit(1)
+                    }
                     Text(rateText(for: code))
                         .font(.caption.monospacedDigit())
                         .foregroundColor(Theme.textSecondary)
@@ -114,11 +172,27 @@ struct RatesCard: View {
 
     /// Units of `code` per one unit of the base currency, as the API reports it.
     private func rateText(for code: String) -> String {
-        guard let rate = stats.rates?.rates[code] else { return "—" }
+        guard let rate = rate(for: code) else { return "—" }
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
+        formatter.locale = locale
         formatter.minimumFractionDigits = 4
         formatter.maximumFractionDigits = 4
         return formatter.string(from: rate as NSDecimalNumber) ?? "—"
+    }
+
+    private func rate(for code: String) -> Decimal? {
+        guard let rates = stats.rates?.rates else { return nil }
+        guard code == Self.tomanCode else { return rates[code] }
+        // 1 toman = 10 rials, so a base buying N rials buys N/10 tomans.
+        guard let rial = rates["IRR"] else { return nil }
+        return rial / 10
+    }
+
+    /// Foundation already knows every ISO currency name in every language it
+    /// ships, so there is no table to write or translate here.
+    private func name(for code: String) -> String {
+        if code == Self.tomanCode { return L10n.string(.iranianToman, language: language) }
+        return locale.localizedString(forCurrencyCode: code) ?? code
     }
 }

@@ -246,6 +246,18 @@ struct CashMemoView: View {
                           "+ " + CurrencyFormatter.string(memo.totals.tax, currency: memo.currency))
             }
 
+            // Each only earns a line when it differs from the grand total —
+            // printing "Total without Tax" on a memo with no tax would just be
+            // the same number twice.
+            if memo.totals.discount > 0 {
+                amountRow(L10n.string(.totalWithoutDiscount, language: language) + ":",
+                          CurrencyFormatter.string(memo.totals.totalWithoutDiscount, currency: memo.currency))
+            }
+            if memo.totals.tax > 0 {
+                amountRow(L10n.string(.totalWithoutTax, language: language) + ":",
+                          CurrencyFormatter.string(memo.totals.totalWithoutTax, currency: memo.currency))
+            }
+
             singleRule
 
             HStack {

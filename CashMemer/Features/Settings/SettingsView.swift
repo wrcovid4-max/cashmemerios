@@ -202,12 +202,15 @@ struct SettingsView: View {
                 Button {
                     GoogleAuthService.shared.signIn(into: settings)
                 } label: {
+                    // No Spacer: the label centres in the blue box rather than
+                    // hugging the leading edge, which looked off on iPad where
+                    // the row is much wider than the text.
                     HStack(spacing: Theme.Spacing.m) {
                         Image(systemName: "g.circle.fill")
                         Text(L10n.string(.signInWithGoogle, language: language))
                             .font(.body.weight(.semibold))
-                        Spacer()
                     }
+                    .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
                     .padding(.horizontal, Theme.Spacing.m)
                     .foregroundColor(.white)
