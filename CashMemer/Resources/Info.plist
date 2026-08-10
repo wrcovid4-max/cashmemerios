@@ -2,6 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Required boilerplate. This project sets INFOPLIST_FILE rather than
+	     GENERATE_INFOPLIST_FILE, so nothing is synthesised from build settings
+	     and every key has to be present here. Without CFBundleIdentifier the
+	     built app has no bundle id at all, and signing fails with
+	     "Failed to get bundle ID ... Missing bundle ID". -->
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+
 	<key>CFBundleDisplayName</key>
 	<string>Cash Memer</string>
 	<key>CFBundleShortVersionString</key>
