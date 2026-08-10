@@ -1,31 +1,23 @@
 rules_version = '2';
 
-// Cash Memer — every receipt belongs to exactly one signed-in account.
+// Cash Memer — the rules already published on the cash-memer project.
 //
-// Paste into Firebase console → Firestore Database → Rules → Publish.
-// Without these, the default rules either deny everything (sync silently fails)
-// or, in test mode, let anyone on the internet read your receipts.
+// This file is a record of what is live, not a change to apply. The recursive
+// `{document=**}` wildcard covers every subcollection under a user — receipts,
+// members, and anything added later — so it never needs editing.
+//
+// A user reaches only their own tree, and the uid comes from Firebase Auth, so
+// the iOS and Android apps signed into the same Google account share one tree.
+// That shared uid is what makes them one dataset rather than two.
+//
+// Firestore denies anything unmatched by default, so no explicit catch-all is
+// needed.
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // A user reaches only their own document tree. The uid comes from Firebase
-    // Auth, so the iOS and Android apps signed into the same Google account
-    // share one tree — which is what makes them one dataset.
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-
-      match /receipts/{receiptId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-
-      match /members/{memberId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-    }
-
-    // Anything not matched above is denied.
-    match /{document=**} {
-      allow read, write: if false;
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null &&
+                            request.auth.uid == userId;
     }
   }
 }

@@ -174,9 +174,12 @@ Firebase Auth one. The resulting uid is the same one the Android app signs in as
 which is what makes the two apps one dataset rather than two. The signed-in account
 also stamps `Issuer Account` onto page 2 of each memo.
 
-**Console steps:** Authentication → Sign-in method → **Google → Enable**, and
-Firestore Database → Rules → paste [`firestore.rules`](firestore.rules) → Publish.
-Without the rules, sync fails silently or your receipts are world-readable.
+**Console step:** Authentication → Sign-in method → **Google → Enable**.
+
+Firestore rules are already published on the project and need no change — the
+recursive `users/{userId}/{document=**}` wildcard covers receipts and members and
+anything added later. [`firestore.rules`](firestore.rules) is a record of what is
+live, not a change to apply.
 
 ## Backup and sync
 
