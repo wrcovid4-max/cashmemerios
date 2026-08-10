@@ -94,7 +94,48 @@ If Homebrew is already installed, skip its line. Follow any "Next steps" Homebre
 prints about adding itself to your `PATH`.
 
 On macOS 12 Homebrew prints a warning that the version is old and unsupported.
-It installs and works regardless — and macOS 12.5+ is all Xcode 14.2 needs.
+Homebrew itself installs and works regardless.
+
+### On macOS 12, `brew install xcodegen` will fail
+
+Homebrew has no prebuilt XcodeGen for macOS 12, so it tries to compile it — and the
+current formula needs Xcode 15.3, which cannot run on macOS 12. Circular, and not
+worth fighting. **Do not upgrade macOS to get around it:** macOS 12 is the reason
+this project targets Xcode 14.2 in the first place.
+
+Use a prebuilt XcodeGen binary instead. 2.35.0 is from early 2023, built with
+Xcode 14, and needs no compiling:
+
+```bash
+cd ~/Downloads
+```
+```bash
+curl -L -o xcodegen.zip https://github.com/yonaskolb/XcodeGen/releases/download/2.35.0/xcodegen.zip
+```
+```bash
+unzip -o xcodegen.zip
+```
+
+Check it landed where expected — this should print `xcodegen`:
+
+```bash
+ls xcodegen/bin
+```
+
+Then run it by full path everywhere this guide says `xcodegen`:
+
+```bash
+~/Downloads/xcodegen/bin/xcodegen generate
+```
+
+To type just `xcodegen` instead, add it to your PATH once:
+
+```bash
+echo 'export PATH="$HOME/Downloads/xcodegen/bin:$PATH"' >> ~/.zprofile
+```
+```bash
+source ~/.zprofile
+```
 
 ---
 
@@ -115,8 +156,13 @@ The last line matters. **The code is not on `main`.**
 
 ```bash
 xcodegen generate
+```
+```bash
 open CashMemer.xcodeproj
 ```
+
+On macOS 12, use the full path instead of `xcodegen` — see step 3:
+`~/Downloads/xcodegen/bin/xcodegen generate`
 
 Xcode starts resolving Swift packages the moment it opens — GoogleSignIn and
 Firebase. **The first resolve is slow**, several minutes, because Firebase pulls
