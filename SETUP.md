@@ -183,20 +183,25 @@ TARGETS appears. Do this for **each** of `CashMemer`, `CashMemerWidgets` and
 
 1. **Signing & Capabilities** tab
 2. Tick **Automatically manage signing**
-3. **Team** → your Apple ID
+3. **Team** should already read *Umer Butt (Personal Team)* — `project.yml` carries
+   the team id `767U6C2BYN`, so regenerating no longer wipes it. If the project
+   moves to another Apple account, change `DEVELOPMENT_TEAM` there.
 
-### If you are on a free Apple ID
+### What a free Apple ID costs you
 
-Two capabilities need a paid Apple Developer account ($99/yr):
+The entitlements files are deliberately empty, because **App Groups needs a paid
+account** and signing fails without one. Consequences:
 
-- **App Groups** — click the small **×** on the App Groups capability in all three
-  targets to remove it. The app works fine; the widget and watch app just cannot
-  read the phone's receipts. The code already falls back to per-app storage when
-  the group is unavailable, so nothing crashes.
-- **WeatherKit** — the sidebar weather tile shows `—`. Nothing else changes.
+- The widget and watch app cannot read the phone's receipts — the shared Core Data
+  store is what App Groups provides. The code falls back to per-app storage, so
+  nothing crashes.
+- **WeatherKit** is unavailable; the sidebar weather tile shows `—`.
+- Builds **expire after 7 days** and need a rebuild from Xcode.
 
-Also note a free account's builds **expire after 7 days** and need a rebuild from
-Xcode. A paid account lasts a year.
+**Firestore sync is unaffected** — it is a cloud service, not an entitlement. Backup
+and cross-device sync work exactly the same on a free account.
+
+Each `.entitlements` file carries the snippet to paste back if you ever go paid.
 
 ---
 
