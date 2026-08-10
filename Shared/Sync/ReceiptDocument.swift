@@ -66,7 +66,10 @@ enum ReceiptDocument {
     /// a receipt's lines are small and always travel together.
     static func apply(_ document: [String: Any], to receipt: CDReceipt, in context: NSManagedObjectContext) {
         receipt.number = document["number"] as? String ?? receipt.number
-        receipt.createdAt = date(document["createdAt"]) ?? receipt.createdAt
+        // Never fall back to `receipt.createdAt`: it is non-optional with no model
+        // default, so reading it on a newly inserted object traps. See the same
+        // guard in AndroidReceiptDocument.
+        receipt.createdAt = date(document["createdAt"]) ?? Date()
         receipt.updatedAt = date(document["updatedAt"])
         receipt.title = document["title"] as? String ?? ""
         receipt.storeName = document["storeName"] as? String ?? ""

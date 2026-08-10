@@ -67,8 +67,16 @@ enum AndroidReceiptDocument {
     ) {
         receipt.remoteDocID = documentID
         receipt.number = numberText(document["id"]) ?? receipt.number
-        receipt.createdAt = date(document["timestamp"]) ?? receipt.createdAt
-        receipt.updatedAt = date(document["lastModified"]) ?? receipt.createdAt
+
+        // `createdAt` is a non-optional Date with no default in the model, so on a
+        // freshly inserted CDReceipt it is nil until something assigns it. Using it
+        // as the `??` fallback reads it while still nil, and bridging nil to a
+        // non-optional Date traps in Date._unconditionallyBridgeFromObjectiveC —
+        // which is exactly how a document missing `timestamp` crashed the app.
+        // Fall back to a value that always exists.
+        let created = date(document["timestamp"]) ?? Date()
+        receipt.createdAt = created
+        receipt.updatedAt = date(document["lastModified"]) ?? created
 
         receipt.title = string(document["title"])
         // Android's `place` is the store; its `locationAddress` is the GPS fix.
