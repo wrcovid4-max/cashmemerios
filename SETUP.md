@@ -41,8 +41,13 @@ features that need a paid account.
 Steps 3, 4 and 5 are typed into **Terminal**, not Xcode.
 
 Open it with **⌘ + Space**, type `Terminal`, press Return. Paste a command with
-**⌘V** and press Return to run it. Do one line at a time and wait for the prompt
-(`yourname@Mac ~ %`) to come back before the next.
+**⌘V** and press Return to run it.
+
+**Paste one line at a time.** Wait for the prompt (`yourname@Mac ~ %`) to come back
+before the next. This matters more than it looks: the Homebrew installer stops
+half-way to ask you to press Return, and if a second line is already pasted it gets
+swallowed as that keypress and the install aborts with a confusing
+`command not found: brew` afterwards.
 
 Three things that look broken but are not:
 
@@ -72,13 +77,24 @@ There is no `.xcodeproj` in this repository on purpose — Xcode project files
 corrupt easily and conflict on every change. The project is generated from
 `project.yml` instead.
 
+Paste this **on its own**, press Return, then press Return again when it asks
+`Press RETURN/ENTER to continue`:
+
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+It takes 5–10 minutes. Only once the prompt is back, run:
+
+```bash
 brew install xcodegen
 ```
 
 If Homebrew is already installed, skip its line. Follow any "Next steps" Homebrew
 prints about adding itself to your `PATH`.
+
+On macOS 12 Homebrew prints a warning that the version is old and unsupported.
+It installs and works regardless — and macOS 12.5+ is all Xcode 14.2 needs.
 
 ---
 
