@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// Cash Memer — the rules already published on the cash-memer project.
+//
+// This file is a record of what is live, not a change to apply. The recursive
+// `{document=**}` wildcard covers every subcollection under a user — receipts,
+// members, and anything added later — so it never needs editing.
+//
+// A user reaches only their own tree, and the uid comes from Firebase Auth, so
+// the iOS and Android apps signed into the same Google account share one tree.
+// That shared uid is what makes them one dataset rather than two.
+//
+// Firestore denies anything unmatched by default, so no explicit catch-all is
+// needed.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null &&
+                            request.auth.uid == userId;
+    }
+  }
+}

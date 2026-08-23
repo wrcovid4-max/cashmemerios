@@ -1,0 +1,179 @@
+name: CashMemer
+
+options:
+  bundleIdPrefix: com.cashmemer
+  deploymentTarget:
+    iOS: "16.0"
+    watchOS: "9.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+  generateEmptyDirectories: false
+
+settings:
+  base:
+    # Set explicitly as well as via options.deploymentTarget. Xcode validates a
+    # package's platform requirements against every target in the project, so a
+    # target that never gets IPHONEOS_DEPLOYMENT_TARGET written falls back to the
+    # SDK default (iOS 11) and fails Firebase's nanopb, which needs iOS 12.
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+    WATCHOS_DEPLOYMENT_TARGET: "9.0"
+    SWIFT_VERSION: "5.7"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # Free personal team. Change this if the project moves to another account.
+    DEVELOPMENT_TEAM: 767U6C2BYN
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    SWIFT_EMIT_LOC_STRINGS: YES
+    # Xcode's "Update to recommended settings" prompt asks for this. Accepting it
+    # there edits the generated project, which the next `xcodegen generate`
+    # discards -- so it is set here instead, where it survives.
+    DEAD_CODE_STRIPPING: YES
+
+packages:
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    exactVersion: 7.0.0
+  # Pinned low on purpose. Later Firebase 10.x releases pull nanopb 2.30910,
+  # which declares iOS 12 while Firebase itself still declares iOS 11 — an
+  # inconsistency Xcode 14.2's SwiftPM rejects outright ("package product
+  # 'nanopb' requires minimum platform version 12.0 ... but this target supports
+  # 11.0"). 10.9.0 predates that bump. Nothing here uses a newer API, and 11.x
+  # needs Xcode 15.2 anyway.
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    exactVersion: 10.9.0
+
+fileGroups:
+  - README.md
+  - project.yml
+
+targets:
+  # ---------------------------------------------------------------- iOS / iPadOS
+  CashMemer:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: CashMemer
+        excludes:
+          - "Resources/Info.plist"
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cashmemer.app
+        INFOPLIST_FILE: CashMemer/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: CashMemer/Resources/CashMemer.entitlements
+        # CarPlay's entitlement is request-only from Apple, and a device build
+        # carrying it fails signing on a free personal team. The simulator does
+        # not validate entitlements against a provisioning profile, so it gets
+        # its own file and device builds stay signable.
+        CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]: CashMemer/Resources/CashMemer-Simulator.entitlements
+        TARGETED_DEVICE_FAMILY: "1,2"          # iPhone + iPad
+        SUPPORTS_MAC_CATALYST: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_PREVIEWS: YES
+    dependencies:
+      - sdk: CoreData.framework
+      - sdk: CoreSpotlight.framework
+      - sdk: AppIntents.framework
+      - sdk: PencilKit.framework
+      - sdk: PDFKit.framework
+      - sdk: VisionKit.framework
+      - sdk: CarPlay.framework
+      - sdk: Charts.framework
+      - sdk: WeatherKit.framework
+        weak: true
+      - sdk: ActivityKit.framework
+        weak: true
+      - package: GoogleSignIn
+        product: GoogleSignIn
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
+      - target: CashMemerWidgets
+      - target: CashMemerWatch
+
+  # ---------------------------------------------------------------- Widgets + Live Activity
+  CashMemerWidgets:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: CashMemerWidgets
+        excludes:
+          - "Info.plist"
+      # The extension needs the store, the theme and the activity attributes,
+      # but not the app's view layer.
+      - path: Shared/Models
+      - path: Shared/Currency
+      - path: Shared/Localization
+      - path: Shared/Theme
+      - path: Shared/Persistence
+      - path: Shared/LiveActivity
+      - path: Shared/Receipt/ReceiptTotals.swift
+      - path: Shared/Spotlight
+      - path: CashMemer/Features/Dashboard/DashboardMetrics.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cashmemer.app.widgets
+        INFOPLIST_FILE: CashMemerWidgets/Info.plist
+        CODE_SIGN_ENTITLEMENTS: CashMemerWidgets/CashMemerWidgets.entitlements
+        SKIP_INSTALL: YES
+    dependencies:
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+      - sdk: CoreData.framework
+      - sdk: ActivityKit.framework
+        weak: true
+
+  # ---------------------------------------------------------------- watchOS
+  CashMemerWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "9.0"
+    sources:
+      - path: CashMemerWatch
+        excludes:
+          - "Info.plist"
+      # Deliberately narrow: the watch shows History and Dashboard from a synced
+      # payload, so it never links Core Data, PDFKit or the scanner.
+      - path: Shared/Models/Enums.swift
+      - path: Shared/Models/AppSettings.swift
+      - path: Shared/Currency/Currency.swift
+      - path: Shared/Localization
+      - path: Shared/Theme/Theme.swift
+      - path: Shared/Theme/SplashView.swift
+      - path: Shared/Sync/WatchPayload.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cashmemer.app.watchkitapp
+        INFOPLIST_FILE: CashMemerWatch/Info.plist
+        CODE_SIGN_ENTITLEMENTS: CashMemerWatch/CashMemerWatch.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SKIP_INSTALL: YES
+        TARGETED_DEVICE_FAMILY: "4"
+        WATCHOS_DEPLOYMENT_TARGET: "9.0"
+    dependencies:
+      - sdk: WatchConnectivity.framework
+      - sdk: SwiftUI.framework
+
+schemes:
+  CashMemer:
+    build:
+      targets:
+        CashMemer: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    archive:
+      config: Release
+
+  CashMemerWatch:
+    build:
+      targets:
+        CashMemerWatch: all
+    run:
+      config: Debug

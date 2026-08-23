@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Required boilerplate. This project sets INFOPLIST_FILE rather than
+	     GENERATE_INFOPLIST_FILE, so nothing is synthesised from build settings
+	     and every key has to be present here. Without CFBundleIdentifier the
+	     built app has no bundle id at all, and signing fails with
+	     "Failed to get bundle ID ... Missing bundle ID". -->
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+
+	<key>CFBundleDisplayName</key>
+	<string>Cash Memer</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UILaunchScreen</key>
+	<dict>
+		<!-- Background only. The wordmark is drawn by SplashView once the app is
+		     up, so the system launch screen just has to match its colour and not
+		     flash white first. -->
+		<key>UIColorName</key>
+		<string>SplashBackground</string>
+	</dict>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<true/>
+		<!-- Only the CarPlay role is declared. The phone and iPad window comes
+		     from the SwiftUI App scene, which needs no entry here; adding one
+		     would replace it. -->
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>CPTemplateApplicationSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>CPTemplateApplicationScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>CarPlay</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).CarPlaySceneDelegate</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<!-- Live Activities for the scanner -->
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+
+	<!-- Deep links from Spotlight results, widgets and Siri shortcuts -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.cashmemer.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>cashmemer</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.cashmemer.app.googlesignin</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- REVERSED_CLIENT_ID from GoogleService-Info.plist -->
+				<string>com.googleusercontent.apps.159444468545-7odacfdr8japhmvhlrcqmen9skpp62j6</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- Right-to-left support for the Urdu interface -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ur</string>
+	</array>
+
+	<!-- API keys. Restrict each one to bundle id com.cashmemer.app in its console. -->
+	<key>GEMINI_API_KEY</key>
+	<string>AIzaSyChaEasRdOBl9Yt6UywvCoLhZF-pqqFMaQ</string>
+	<key>EXCHANGE_RATE_API_KEY</key>
+	<string>1019e9c7b1b8116172747878</string>
+	<key>GOOGLE_MAPS_API_KEY</key>
+	<string>AIzaSyAf_tqLgCSTOO0htQzKSEJI_vfgABiOF0Q</string>
+
+	<key>NSCameraUsageDescription</key>
+	<string>Cash Memer uses the camera to scan paper receipts and barcodes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Cash Memer imports receipt photos from your library so it can read them.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Cash Memer saves the shop location on a receipt so you can find it later.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Face ID unlocks Cash Memer and keeps your receipts private.</string>
+</dict>
+</plist>

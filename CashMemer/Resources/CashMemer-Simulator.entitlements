@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Simulator builds only. `project.yml` selects this file with
+	     CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*], so device builds keep using
+	     the empty CashMemer.entitlements and go on signing with the free
+	     personal team.
+
+	     The split exists because CarPlay entitlements are request-only: Apple
+	     grants them per app, to a short list of categories. A device build
+	     carrying this key fails signing with "provisioning profile does not
+	     include the com.apple.developer.carplay-driving-task entitlement",
+	     because no profile a free account can create ever will.
+
+	     The simulator does not validate entitlements against a provisioning
+	     profile, so CarPlay can be developed and tested there today. Moving it
+	     to a real head unit means applying to Apple at
+	     https://developer.apple.com/contact/carplay/ and, if granted, adding
+	     this key to CashMemer.entitlements as well. -->
+	<key>com.apple.developer.carplay-driving-task</key>
+	<true/>
+</dict>
+</plist>

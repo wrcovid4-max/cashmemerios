@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21335" systemVersion="22G91" minimumToolsVersion="Xcode 13.0" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="CDMember" representedClassName=".CDMember" syncable="YES">
+        <attribute name="avatarPNG" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="email" attributeType="String" defaultValueString=""/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String" defaultValueString=""/>
+        <attribute name="notes" attributeType="String" defaultValueString=""/>
+        <attribute name="phone" attributeType="String" defaultValueString=""/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="CDReceipt" representedClassName=".CDReceipt" syncable="YES">
+        <attribute name="address" attributeType="String" defaultValueString=""/>
+        <attribute name="cashGiven" attributeType="Decimal" defaultValueString="0"/>
+        <attribute name="categoryRaw" attributeType="String" defaultValueString="shopping"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="currencyCode" attributeType="String" defaultValueString="PKR"/>
+        <attribute name="customerAddress" attributeType="String" defaultValueString=""/>
+        <attribute name="customerEmail" attributeType="String" defaultValueString=""/>
+        <attribute name="customerName" attributeType="String" defaultValueString=""/>
+        <attribute name="customerPhone" attributeType="String" defaultValueString=""/>
+        <attribute name="discountTypeRaw" attributeType="String" defaultValueString="none"/>
+        <attribute name="discountValue" attributeType="Decimal" defaultValueString="0"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isArchived" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="issuedByEmail" attributeType="String" defaultValueString=""/>
+        <attribute name="issuedByName" attributeType="String" defaultValueString=""/>
+        <attribute name="latitude" optional="YES" attributeType="Double" usesScalarValueType="NO"/>
+        <attribute name="longitude" optional="YES" attributeType="Double" usesScalarValueType="NO"/>
+        <attribute name="memberID" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="note" attributeType="String" defaultValueString=""/>
+        <attribute name="notesPageTwo" attributeType="String" defaultValueString=""/>
+        <attribute name="number" attributeType="String" defaultValueString=""/>
+        <attribute name="paymentMethodRaw" attributeType="String" defaultValueString="cash"/>
+        <attribute name="remoteDocID" optional="YES" attributeType="String"/>
+        <attribute name="signaturePNG" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <attribute name="storeName" attributeType="String" defaultValueString=""/>
+        <attribute name="taxPercent" attributeType="Decimal" defaultValueString="0"/>
+        <attribute name="title" attributeType="String" defaultValueString=""/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="items" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDReceiptItem" inverseName="receipt" inverseEntity="CDReceiptItem"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="CDReceiptItem" representedClassName=".CDReceiptItem" syncable="YES">
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String" defaultValueString=""/>
+        <attribute name="quantity" attributeType="Integer 32" defaultValueString="1" usesScalarValueType="YES"/>
+        <attribute name="sortIndex" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="unitPrice" attributeType="Decimal" defaultValueString="0"/>
+        <relationship name="receipt" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDReceipt" inverseName="items" inverseEntity="CDReceipt"/>
+    </entity>
+    <entity name="CDProduct" representedClassName=".CDProduct" syncable="YES">
+        <attribute name="barcode" optional="YES" attributeType="String"/>
+        <attribute name="category" attributeType="String" defaultValueString=""/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isArchived" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="lowStockThreshold" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" attributeType="String" defaultValueString=""/>
+        <attribute name="notes" attributeType="String" defaultValueString=""/>
+        <attribute name="price" attributeType="Decimal" defaultValueString="0"/>
+        <attribute name="stock" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="unit" attributeType="String" defaultValueString="piece"/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+</model>
