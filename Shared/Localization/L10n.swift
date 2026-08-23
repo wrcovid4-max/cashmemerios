@@ -94,6 +94,13 @@ enum L10n {
 
         // Markup
         case markupTools, pageLabel, addNote
+
+        // Website
+        case websitePage, newsUpdates, downloadPage, supportPage
+        case privacyPolicy, termsOfUse, trademarksPage
+        case explore, supportAndLegal
+        case platformMobile, platformWearables, platformSpatial
+        case platformDriving, platformLanguages, platformWeb
     }
 
     static func string(_ key: Key, language: AppLanguage) -> String {

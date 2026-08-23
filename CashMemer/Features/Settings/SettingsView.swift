@@ -34,6 +34,8 @@ struct SettingsView: View {
                 googleSection
                 backupSection
                 dataSection
+                exploreSection
+                supportLegalSection
                 informationSection
                 contactSection
             }
@@ -242,6 +244,49 @@ struct SettingsView: View {
                 isConfirmingDeleteAll = true
             } label: {
                 Label(L10n.string(.deleteAllReceipts, language: language), systemImage: "trash")
+            }
+        }
+    }
+
+    /// The marketing pages, grouped by what they are about rather than listed
+    /// flat — six links in a row reads as a sitemap, not a menu.
+    private var exploreSection: some View {
+        Section(L10n.string(.explore, language: language)) {
+            linkRow(.websitePage, "safari", AppLinks.home)
+            linkRow(.newsUpdates, "newspaper", AppLinks.news)
+            linkRow(.downloadPage, "arrow.down.circle", AppLinks.download)
+            linkRow(.platformMobile, "iphone", AppLinks.mobile)
+            linkRow(.platformWearables, "applewatch", AppLinks.wearables)
+            linkRow(.platformSpatial, "visionpro", AppLinks.spatial)
+            linkRow(.platformDriving, "car", AppLinks.driving)
+            linkRow(.platformWeb, "globe", AppLinks.webApp)
+            linkRow(.platformLanguages, "character.bubble", AppLinks.languages)
+        }
+    }
+
+    private var supportLegalSection: some View {
+        Section(L10n.string(.supportAndLegal, language: language)) {
+            linkRow(.supportPage, "lifepreserver", AppLinks.support)
+            linkRow(.privacyPolicy, "hand.raised", AppLinks.privacy)
+            linkRow(.termsOfUse, "doc.text", AppLinks.terms)
+            linkRow(.trademarksPage, "checkmark.seal", AppLinks.trademarks)
+        }
+    }
+
+    /// `Link` rather than a Button opening a URL: it gets the system's own
+    /// handling, including opening in Safari View on iPad and long-press preview.
+    @ViewBuilder
+    private func linkRow(_ key: L10n.Key, _ symbol: String, _ url: URL?) -> some View {
+        if let url = url {
+            Link(destination: url) {
+                HStack {
+                    Label(L10n.string(key, language: language), systemImage: symbol)
+                        .foregroundColor(Theme.textPrimary)
+                    Spacer()
+                    Image(systemName: "arrow.up.right")
+                        .font(.caption)
+                        .foregroundColor(Theme.textTertiary)
+                }
             }
         }
     }

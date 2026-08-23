@@ -100,7 +100,7 @@ struct ContactFooter: View {
                 .foregroundStyle(Theme.textPrimary)
 
             row(label: .mail, value: AppInfo.supportEmail, url: URL(string: "mailto:\(AppInfo.supportEmail)"))
-            row(label: .web, value: AppInfo.website, url: URL(string: "https://\(AppInfo.website)"))
+            row(label: .web, value: AppInfo.website, url: AppLinks.home)
             row(label: .social, value: AppInfo.socialHandle, url: AppInfo.socialURL)
 
             Text(L10n.string(.contactResponseNote, language: settings.language))
@@ -131,7 +131,7 @@ struct ContactFooter: View {
 
 enum AppInfo {
     static let supportEmail = "support@cashmemer.com"
-    static let website = "www.cashmemer.com"
+    static let website = AppLinks.displayHost
     static let socialHandle = "@cashmemerapp"
     static let socialURL = URL(string: "https://twitter.com/cashmemerapp")
 
