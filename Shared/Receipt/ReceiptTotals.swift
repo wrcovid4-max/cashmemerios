@@ -9,6 +9,8 @@ struct ReceiptTotals: Equatable {
     let grandTotal: Decimal
     let cashGiven: Decimal
     let change: Decimal
+    /// Other charges that are not tax, added to the grand total.
+    let extraFees: Decimal
 
     /// What the memo would have come to with no discount applied.
     ///
@@ -27,7 +29,8 @@ struct ReceiptTotals: Equatable {
         discountType: DiscountType,
         discountValue: Decimal,
         taxPercent: Decimal,
-        cashGiven: Decimal
+        cashGiven: Decimal,
+        extraFees: Decimal = 0
     ) {
         let subtotal = items.reduce(Decimal.zero) { $0 + $1.unitPrice * Decimal($1.quantity) }
 
@@ -42,7 +45,7 @@ struct ReceiptTotals: Equatable {
 
         let taxable = subtotal - cappedDiscount
         let tax = (taxable * taxPercent / 100).rounded(2)
-        let grandTotal = (taxable + tax).rounded(2)
+        let grandTotal = (taxable + tax + extraFees).rounded(2)
 
         self.subtotal = subtotal.rounded(2)
         self.discount = cappedDiscount.rounded(2)
@@ -50,10 +53,11 @@ struct ReceiptTotals: Equatable {
         self.grandTotal = grandTotal
         self.cashGiven = cashGiven.rounded(2)
         // Change is only meaningful once the customer has handed over at least the total.
+        self.extraFees = extraFees.rounded(2)
         self.change = max(cashGiven - grandTotal, 0).rounded(2)
 
         let taxOnFullSubtotal = (subtotal * taxPercent / 100).rounded(2)
-        self.totalWithoutDiscount = (subtotal + taxOnFullSubtotal).rounded(2)
+        self.totalWithoutDiscount = (subtotal + taxOnFullSubtotal + extraFees).rounded(2)
         self.totalWithoutTax = taxable.rounded(2)
     }
 }

@@ -309,6 +309,15 @@ struct NewReceiptView: View {
                 ))
             )
             FormFieldRow(
+                placeholderKey: .extraFees,
+                text: $draft.extraFeesText,
+                keyboard: .decimalPad,
+                trailing: AnyView(InfoButton(
+                    title: L10n.string(.extraFees, language: language),
+                    message: L10n.string(.infoExtraFees, language: language)
+                ))
+            )
+            FormFieldRow(
                 placeholderKey: .cashGiven,
                 text: $draft.cashGivenText,
                 keyboard: .decimalPad,

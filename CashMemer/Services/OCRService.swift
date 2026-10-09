@@ -15,6 +15,13 @@ struct ScannedReceipt: Equatable {
     var lines: [Line]
     var taxPercent: Decimal?
     var total: Decimal?
+    var extraFees: Decimal?
+    var taxes: [ScannedTax] = []
+
+    struct ScannedTax: Equatable {
+        var name: String
+        var percent: Decimal
+    }
 
     struct Line: Equatable {
         var name: String
@@ -97,6 +104,7 @@ struct GeminiReceiptScanner: ReceiptScanning {
     Advance Tax, Service Charge, Service Tax, Stamp Duty, Octroi, Extra Tax, PRA Tax. \
     Set taxPercent to the combined percentage of all of them. If a tax shows only an amount, \
     work out its percentage from the subtotal.
+    List each tax in taxes with its name and percent. Put delivery, packing or service fees that are not tax in extraFees as an amount.
     """
 
     private static let responseSchema: [String: Any] = [
@@ -110,6 +118,8 @@ struct GeminiReceiptScanner: ReceiptScanning {
             "currencyCode": ["type": "STRING"],
             "taxPercent": ["type": "NUMBER"],
             "total": ["type": "NUMBER"],
+            "extraFees": ["type": "NUMBER"],
+            "taxes": ["type": "ARRAY", "items": ["type": "OBJECT", "properties": ["name": ["type": "STRING"], "percent": ["type": "NUMBER"]], "required": ["name", "percent"]]],
             "lines": [
                 "type": "ARRAY",
                 "items": [
@@ -140,6 +150,10 @@ struct GeminiReceiptScanner: ReceiptScanning {
     }
 
     private struct ParsedReceipt: Decodable {
+        struct Tax: Decodable {
+            let name: String
+            let percent: Double?
+        }
         struct Line: Decodable {
             let name: String
             let quantity: Int?
@@ -153,6 +167,8 @@ struct GeminiReceiptScanner: ReceiptScanning {
         let currencyCode: String?
         let taxPercent: Double?
         let total: Double?
+        let extraFees: Double?
+        let taxes: [Tax]?
         let lines: [Line]
 
         var asScannedReceipt: ScannedReceipt {
@@ -171,7 +187,9 @@ struct GeminiReceiptScanner: ReceiptScanning {
                     )
                 },
                 taxPercent: taxPercent.map { Decimal($0) },
-                total: total.map { Decimal($0) }
+                total: total.map { Decimal($0) },
+                extraFees: extraFees.map { Decimal($0) },
+                taxes: (taxes ?? []).map { ScannedReceipt.ScannedTax(name: $0.name, percent: Decimal($0.percent ?? 0)) }
             )
         }
     }

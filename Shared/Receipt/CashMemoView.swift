@@ -241,9 +241,20 @@ struct CashMemoView: View {
                 amountRow(L10n.string(.discount, language: language) + ":",
                           "- " + CurrencyFormatter.string(memo.totals.discount, currency: memo.currency))
             }
-            if memo.totals.tax > 0 {
+            if !memo.taxLines.isEmpty {
+                ForEach(Array(memo.taxLines.enumerated()), id: \.offset) { _, line in
+                    amountRow("\(line.name) (\(line.percent)%):",
+                              "+ " + CurrencyFormatter.string(
+                                  (memo.totals.totalWithoutTax * line.percent / 100).rounded(2),
+                                  currency: memo.currency))
+                }
+            } else if memo.totals.tax > 0 {
                 amountRow("\(L10n.string(.tax, language: language)) (\(memo.taxPercentText)%):",
                           "+ " + CurrencyFormatter.string(memo.totals.tax, currency: memo.currency))
+            }
+            if memo.totals.extraFees > 0 {
+                amountRow(L10n.string(.extraFees, language: language) + ":",
+                          "+ " + CurrencyFormatter.string(memo.totals.extraFees, currency: memo.currency))
             }
 
             // Each only earns a line when it differs from the grand total —

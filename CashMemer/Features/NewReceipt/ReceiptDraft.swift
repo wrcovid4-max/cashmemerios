@@ -35,6 +35,9 @@ final class ReceiptDraft: ObservableObject {
     @Published var discountValueText = ""
     @Published var taxPercentText = ""
     @Published var cashGivenText = ""
+    @Published var extraFeesText = ""
+    /// Each tax from a scan, shown on the memo when the per-tax setting is on.
+    @Published var taxLines: [MemoTaxLine] = []
 
     /// Pre-filled with `MemoDefaults.noteOne`; edit or clear it freely.
     @Published var note = MemoDefaults.noteOne
@@ -57,6 +60,7 @@ final class ReceiptDraft: ObservableObject {
     var discountValue: Decimal { Decimal(string: discountValueText) ?? 0 }
     var taxPercent: Decimal { Decimal(string: taxPercentText) ?? 0 }
     var cashGiven: Decimal { Decimal(string: cashGivenText) ?? 0 }
+    var extraFees: Decimal { Decimal(string: extraFeesText) ?? 0 }
 
     var totals: ReceiptTotals {
         ReceiptTotals(
@@ -64,7 +68,8 @@ final class ReceiptDraft: ObservableObject {
             discountType: discountType,
             discountValue: discountValue,
             taxPercent: taxPercent,
-            cashGiven: cashGiven
+            cashGiven: cashGiven,
+            extraFees: extraFees
         )
     }
 
@@ -94,6 +99,7 @@ final class ReceiptDraft: ObservableObject {
             },
             totals: totals,
             taxPercent: taxPercent,
+            taxLines: taxLines,
             note: note,
             notesPageTwo: notesPageTwo,
             issuedByName: issuedByName,
@@ -141,6 +147,18 @@ final class ReceiptDraft: ObservableObject {
            let matched = settings.availableCurrencies.first(where: { $0.code == code }) {
             currency = matched
         }
+        if !scan.taxes.isEmpty {
+            taxLines = settings.showTaxBreakdown
+                ? scan.taxes.map { MemoTaxLine(name: $0.name, percent: $0.percent) }
+                : []
+            if taxPercentText.isEmpty {
+                let sum = scan.taxes.reduce(Decimal.zero) { $0 + $1.percent }
+                if sum > 0 { taxPercentText = "\(sum)" }
+            }
+        }
+        if let fees = scan.extraFees, fees > 0, settings.includeScanFees {
+            extraFeesText = "\(fees)"
+        }
         if let tax = scan.taxPercent, taxPercentText.isEmpty, tax > 0 {
             taxPercentText = "\(tax)"
         }
@@ -180,6 +198,8 @@ final class ReceiptDraft: ObservableObject {
         lines = []
         discountType = .none
         discountValueText = ""
+        extraFeesText = ""
+        taxLines = []
         taxPercentText = ""
         cashGivenText = ""
         note = MemoDefaults.noteOne
@@ -229,6 +249,8 @@ final class ReceiptDraft: ObservableObject {
         receipt.discountValue = NSDecimalNumber(decimal: discountValue)
         receipt.taxPercent = NSDecimalNumber(decimal: taxPercent)
         receipt.cashGiven = NSDecimalNumber(decimal: cashGiven)
+        receipt.extraFees = NSDecimalNumber(decimal: extraFees)
+        receipt.taxBreakdownJSON = MemoTaxLine.encode(taxLines)
         receipt.note = note
         receipt.notesPageTwo = notesPageTwo
         receipt.signaturePNG = signaturePNG

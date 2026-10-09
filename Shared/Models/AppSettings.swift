@@ -37,6 +37,10 @@ final class AppSettings: ObservableObject {
     @Published var lockFooterTwo: Bool { didSet { store(lockFooterTwo, .lockFooterTwo) } }
     /// When on, the signature pad ignores touches so a signed memo cannot be marked by accident.
     @Published var lockSignature: Bool { didSet { store(lockSignature, .lockSignature) } }
+    /// Prints each tax of a scanned receipt on its own memo line.
+    @Published var showTaxBreakdown: Bool { didSet { store(showTaxBreakdown, .showTaxBreakdown) } }
+    /// Adds fees read from a scanned receipt (delivery, packing) to the total.
+    @Published var includeScanFees: Bool { didSet { store(includeScanFees, .includeScanFees) } }
 
     init(defaults: UserDefaults? = nil) {
         let store = defaults
@@ -61,6 +65,8 @@ final class AppSettings: ObservableObject {
         lockFooterOne = store.bool(forKey: Keys.lockFooterOne.rawValue)
         lockFooterTwo = store.bool(forKey: Keys.lockFooterTwo.rawValue)
         lockSignature = store.bool(forKey: Keys.lockSignature.rawValue)
+        showTaxBreakdown = store.bool(forKey: Keys.showTaxBreakdown.rawValue)
+        includeScanFees = store.object(forKey: Keys.includeScanFees.rawValue) as? Bool ?? true
 
         // A counter labelled "Scans Today" must not carry over from yesterday.
         if let last = lastScanDate, !Calendar.current.isDateInToday(last) {
@@ -113,6 +119,8 @@ final class AppSettings: ObservableObject {
         case lockFooterOne = "settings.lockFooterOne"
         case lockFooterTwo = "settings.lockFooterTwo"
         case lockSignature = "settings.lockSignature"
+        case showTaxBreakdown = "settings.showTaxBreakdown"
+        case includeScanFees = "settings.includeScanFees"
         case settingsStamp = "settings.syncStamp"
     }
 

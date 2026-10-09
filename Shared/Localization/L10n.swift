@@ -82,6 +82,7 @@ enum L10n {
         case gotIt, infoDiscountBody, infoTaxBody, infoCashBody, infoScannerBody, infoDetailsBody
         case switchLanguageTitle, switchLanguageBody, switchLanguageConfirm, switchLanguageCancel, infoUrduLanguage, infoLockFooter
         case lockSignature, infoLockSignature
+        case extraFees, infoExtraFees, scanning, showTaxBreakdown, infoShowTaxBreakdown, includeScanFees, infoIncludeScanFees
 
         // Misc
         case cloudBackupAndSync, connected, notConnected, syncing, syncFailed, done, save, retry, ok

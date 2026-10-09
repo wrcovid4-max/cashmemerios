@@ -27,6 +27,9 @@ public final class CDReceipt: NSManagedObject {
     @NSManaged public var discountTypeRaw: String
     @NSManaged public var discountValue: NSDecimalNumber
     @NSManaged public var taxPercent: NSDecimalNumber
+    @NSManaged public var extraFees: NSDecimalNumber
+    /// JSON list of each tax on the receipt. Nil or "[]" when shown combined.
+    @NSManaged public var taxBreakdownJSON: String?
     @NSManaged public var cashGiven: NSDecimalNumber
     @NSManaged public var note: String
     @NSManaged public var notesPageTwo: String
@@ -91,7 +94,8 @@ extension CDReceipt: Identifiable {
             discountValue: discountValue as Decimal,
             taxPercent: taxPercent as Decimal,
             cashGiven: cashGiven as Decimal
-        )
+        ,
+            extraFees: extraFees as Decimal)
     }
 
     /// `#41` — the form the memo and the exported filename both use.

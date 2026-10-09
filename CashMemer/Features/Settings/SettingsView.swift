@@ -30,6 +30,7 @@ struct SettingsView: View {
                 securitySection
                 passcodeSection
                 signatureSection
+                scanningSection
                 footersSection
             }
             Group {
@@ -173,6 +174,31 @@ struct SettingsView: View {
             Text(L10n.string(.customPasscodeLock, language: language))
         } footer: {
             Text(L10n.string(.customPasscodeHint, language: language))
+        }
+    }
+
+    private var scanningSection: some View {
+        Section(L10n.string(.scanning, language: language)) {
+            Toggle(isOn: $settings.showTaxBreakdown) {
+                HStack(spacing: Theme.Spacing.xs) {
+                    Text(L10n.string(.showTaxBreakdown, language: language))
+                    InfoButton(
+                        title: L10n.string(.showTaxBreakdown, language: language),
+                        message: L10n.string(.infoShowTaxBreakdown, language: language)
+                    )
+                }
+            }
+            .tint(Theme.brand)
+            Toggle(isOn: $settings.includeScanFees) {
+                HStack(spacing: Theme.Spacing.xs) {
+                    Text(L10n.string(.includeScanFees, language: language))
+                    InfoButton(
+                        title: L10n.string(.includeScanFees, language: language),
+                        message: L10n.string(.infoIncludeScanFees, language: language)
+                    )
+                }
+            }
+            .tint(Theme.brand)
         }
     }
 
