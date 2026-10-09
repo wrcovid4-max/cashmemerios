@@ -43,28 +43,47 @@ protocol ReceiptScanning {
 struct GeminiReceiptScanner: ReceiptScanning {
     static var apiKey: String? { APIKeys.gemini }
 
-    var model = "gemini-2.0-flash"
+    /// Newest model first; falls back to the next one if the newest stays busy.
+    /// Matches the Android scanner (GeminiOcrClient.MODELS).
+    var models = ["gemini-3.8-flash", "gemini-3.6-flash"]
     var session: URLSession = .shared
+
+    /// Busy or overloaded responses worth retrying (matches Android RETRYABLE).
+    private static let retryable: Set<Int> = [429, 500, 503]
 
     func scan(imageData: Data) async throws -> ScannedReceipt {
         guard let apiKey = Self.apiKey, !apiKey.isEmpty else {
             throw ScanError.missingAPIKey
         }
-        guard let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/\(model):generateContent") else {
-            throw ScanError.badResponse
+        let body = try JSONSerialization.data(withJSONObject: requestBody(imageData: imageData))
+
+        var lastError: Error = ScanError.badResponse
+        for model in models {
+            guard let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/\(model):generateContent") else {
+                continue
+            }
+            for attempt in 1...3 {
+                var request = URLRequest(url: url)
+                request.httpMethod = "POST"
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.setValue(apiKey, forHTTPHeaderField: "x-goog-api-key")
+                request.httpBody = body
+
+                let (data, response) = try await session.data(for: request)
+                let code = (response as? HTTPURLResponse)?.statusCode ?? -1
+                if (200...299).contains(code) {
+                    return try parse(data)
+                }
+                lastError = ScanError.http(code, String(data: data, encoding: .utf8) ?? "")
+                // Not a busy error (for example, model unavailable): try the next model.
+                if !Self.retryable.contains(code) { break }
+                try await Task.sleep(nanoseconds: UInt64(attempt) * 2_000_000_000)
+            }
         }
+        throw lastError
+    }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(apiKey, forHTTPHeaderField: "x-goog-api-key")
-        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody(imageData: imageData))
-
-        let (data, response) = try await session.data(for: request)
-        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            throw ScanError.badResponse
-        }
-
+    private func parse(_ data: Data) throws -> ScannedReceipt {
         let envelope = try JSONDecoder().decode(GeminiResponse.self, from: data)
         guard let text = envelope.candidates.first?.content.parts.first?.text,
               let payload = text.data(using: .utf8) else {
@@ -196,9 +215,12 @@ struct GeminiReceiptScanner: ReceiptScanning {
 
     enum ScanError: LocalizedError {
         case missingAPIKey, badResponse, unreadable
+        case http(Int, String)
 
         var errorDescription: String? {
             switch self {
+            case .http(let code, let body):
+                return "Gemini request failed: HTTP \(code) \(body)"
             case .missingAPIKey:
                 return "Add your Gemini API key as GEMINI_API_KEY in Info.plist to enable AI scanning."
             case .badResponse:
