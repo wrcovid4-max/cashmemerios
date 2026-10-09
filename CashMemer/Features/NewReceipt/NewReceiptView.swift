@@ -8,7 +8,14 @@ struct NewReceiptView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.appLanguage) private var language
 
-    @StateObject private var draft = ReceiptDraft()
+    @StateObject private var draft: ReceiptDraft
+    /// True when opened from the bulk scan list: Generate is hidden, Save all is used instead.
+    private let isBulkItem: Bool
+
+    init(draft: ReceiptDraft? = nil, isBulkItem: Bool = false) {
+        _draft = StateObject(wrappedValue: draft ?? ReceiptDraft())
+        self.isBulkItem = isBulkItem
+    }
     @StateObject private var scanner = ScannerCoordinator()
     @State private var isPresentingMembers = false
     @State private var isPresentingGallery = false
@@ -111,7 +118,9 @@ struct NewReceiptView: View {
                     signaturePNG: $draft.signaturePNG,
                     saveAsDefault: $draft.saveSignatureAsDefault
                 )
-                actionButtons
+                if !isBulkItem {
+                    actionButtons
+                }
             }
             .padding(Theme.Spacing.l)
         }
@@ -155,6 +164,17 @@ struct NewReceiptView: View {
                 }
                 SoftActionButton(titleKey: .scanBarcode, systemImage: "barcode.viewfinder") {
                     isPresentingBarcode = true
+                }
+                NavigationLink {
+                    BulkScanView()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "photo.stack")
+                        Text(L10n.string(.bulkScanTile, language: language))
+                            .font(.subheadline)
+                        Spacer()
+                    }
+                    .foregroundStyle(Theme.brand)
                 }
 
                 if scanner.isScanning {
