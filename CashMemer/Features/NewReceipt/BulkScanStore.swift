@@ -1,5 +1,6 @@
 import Foundation
 import CoreData
+import Network
 
 /// Scans a batch of receipt photos one after another. Each receipt has its own
 /// `ReceiptDraft`, so it can be opened in the form, edited, and saved later.
@@ -17,8 +18,27 @@ final class BulkScanStore: ObservableObject {
     }
 
     @Published private(set) var items: [Item] = []
+    /// True while the batch waits for a network that Settings allows.
+    @Published private(set) var waitingForNetwork = false
+    private let monitor = NWPathMonitor()
+    private var currentPath: NWPath?
     private var durations: [TimeInterval] = []
     private var worker: Task<Void, Never>?
+
+    private init() {
+        monitor.pathUpdateHandler = { [weak self] path in
+            Task { @MainActor in self?.currentPath = path }
+        }
+        monitor.start(queue: .main)
+    }
+
+    /// Wi-Fi and wired always allowed; mobile data only when Settings allow it.
+    private func networkAllowed(_ settings: AppSettings) -> Bool {
+        guard let path = currentPath, path.status == .satisfied else { return false }
+        if path.usesInterfaceType(.wifi) || path.usesInterfaceType(.wiredEthernet) { return true }
+        if path.usesInterfaceType(.cellular) { return settings.allowBulkOnCellular }
+        return true
+    }
 
     var finishedCount: Int {
         items.filter { $0.status == .done || $0.status == .failed }.count
@@ -45,6 +65,11 @@ final class BulkScanStore: ObservableObject {
 
     private func runWorker(settings: AppSettings) async {
         while let index = items.firstIndex(where: { $0.status == .waiting }) {
+            while !networkAllowed(settings) {
+                waitingForNetwork = true
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+            }
+            waitingForNetwork = false
             await scanItem(at: index, settings: settings)
         }
         worker = nil

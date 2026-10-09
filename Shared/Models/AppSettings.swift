@@ -41,6 +41,8 @@ final class AppSettings: ObservableObject {
     @Published var showTaxBreakdown: Bool { didSet { store(showTaxBreakdown, .showTaxBreakdown) } }
     /// Adds fees read from a scanned receipt (delivery, packing) to the total.
     @Published var includeScanFees: Bool { didSet { store(includeScanFees, .includeScanFees) } }
+    /// When off, bulk scanning pauses on mobile data and carries on once Wi-Fi is back.
+    @Published var allowBulkOnCellular: Bool { didSet { store(allowBulkOnCellular, .allowBulkCellular) } }
 
     init(defaults: UserDefaults? = nil) {
         let store = defaults
@@ -67,6 +69,7 @@ final class AppSettings: ObservableObject {
         lockSignature = store.bool(forKey: Keys.lockSignature.rawValue)
         showTaxBreakdown = store.bool(forKey: Keys.showTaxBreakdown.rawValue)
         includeScanFees = store.object(forKey: Keys.includeScanFees.rawValue) as? Bool ?? true
+        allowBulkOnCellular = store.object(forKey: Keys.allowBulkCellular.rawValue) as? Bool ?? true
 
         // A counter labelled "Scans Today" must not carry over from yesterday.
         if let last = lastScanDate, !Calendar.current.isDateInToday(last) {
@@ -121,6 +124,7 @@ final class AppSettings: ObservableObject {
         case lockSignature = "settings.lockSignature"
         case showTaxBreakdown = "settings.showTaxBreakdown"
         case includeScanFees = "settings.includeScanFees"
+        case allowBulkCellular = "settings.allowBulkCellular"
         case settingsStamp = "settings.syncStamp"
     }
 

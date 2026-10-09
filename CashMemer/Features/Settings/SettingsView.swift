@@ -199,6 +199,16 @@ struct SettingsView: View {
                 }
             }
             .tint(Theme.brand)
+            Toggle(isOn: $settings.allowBulkOnCellular) {
+                HStack(spacing: Theme.Spacing.xs) {
+                    Text(L10n.string(.allowBulkCellular, language: language))
+                    InfoButton(
+                        title: L10n.string(.allowBulkCellular, language: language),
+                        message: L10n.string(.infoAllowBulkCellular, language: language)
+                    )
+                }
+            }
+            .tint(Theme.brand)
         }
     }
 

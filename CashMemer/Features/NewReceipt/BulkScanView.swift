@@ -17,6 +17,11 @@ struct BulkScanView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.l) {
                 pickCard
+                if store.waitingForNetwork {
+                    Text(L10n.string(.bulkWaitingNetwork, language: language))
+                        .font(.subheadline)
+                        .foregroundStyle(.red)
+                }
                 if !store.items.isEmpty {
                     progressCard
                     receiptsList
@@ -54,8 +59,18 @@ struct BulkScanView: View {
 
     private var pickCard: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.s) {
-            Text(L10n.string(.bulkHint, language: language))
-                .font(.subheadline)
+            HStack(alignment: .top, spacing: Theme.Spacing.s) {
+                Text(L10n.string(.bulkHint, language: language))
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer()
+                InfoButton(
+                    title: L10n.string(.bulkTitle, language: language),
+                    message: L10n.string(.infoBulk, language: language)
+                )
+            }
+            Text(L10n.string(.bulkNetworkNote, language: language))
+                .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
             PhotosPicker(selection: $selections, maxSelectionCount: 10, matching: .images) {
                 Label(L10n.string(.bulkPick, language: language), systemImage: "photo.on.rectangle.angled")
