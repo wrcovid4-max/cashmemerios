@@ -317,7 +317,9 @@ struct NewReceiptView: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.s) {
             FormSection(titleKey: .notes) {
                 FormFieldRow(placeholderKey: .note, text: $draft.note)
+                    .disabled(settings.lockFooterOne)
                 FormFieldRow(placeholderKey: .notesPageTwo, text: $draft.notesPageTwo, showsDivider: false)
+                    .disabled(settings.lockFooterTwo)
             }
             Text(L10n.string(.noteTwoPrivateHint, language: language))
                 .font(.caption2)

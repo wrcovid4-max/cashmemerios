@@ -78,6 +78,7 @@ enum L10n {
         case issuedBy, accountEmail
         case pageTwo, placeStore, customerDetails, customerAddress
         case issuerAccount, notePageTwoLabel, each, noteTwoPrivateHint
+        case prefilledFooters, footerOneDefault, footerTwoDefault, lockFooterOne, lockFooterTwo, footerLockedHint
 
         // Misc
         case cloudBackupAndSync, connected, notConnected, syncing, syncFailed, done, save, retry, ok

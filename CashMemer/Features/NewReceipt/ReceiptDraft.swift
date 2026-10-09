@@ -188,7 +188,19 @@ final class ReceiptDraft: ObservableObject {
 
     /// Stamps the signed-in Google account onto the draft so page 2 records who
     /// issued the memo even if the account is signed out later.
+    /// Pre-fills both footers from Settings. A locked footer always takes the Settings
+    /// value; an unlocked one is only replaced while it is still empty or untouched.
+    func adoptFooters(from settings: AppSettings) {
+        if settings.lockFooterOne || note.isEmpty || note == MemoDefaults.noteOne {
+            note = settings.footerOneDefault
+        }
+        if settings.lockFooterTwo || notesPageTwo.isEmpty {
+            notesPageTwo = settings.footerTwoDefault
+        }
+    }
+
     func adoptIssuer(from settings: AppSettings) {
+        adoptFooters(from: settings)
         issuedByName = settings.googleAccountName ?? ""
         issuedByEmail = settings.googleAccountEmail ?? ""
     }

@@ -28,6 +28,7 @@ struct SettingsView: View {
                 securitySection
                 passcodeSection
                 signatureSection
+                footersSection
             }
             Group {
                 customCurrencySection
@@ -144,6 +145,22 @@ struct SettingsView: View {
             Text(L10n.string(.customPasscodeLock, language: language))
         } footer: {
             Text(L10n.string(.customPasscodeHint, language: language))
+        }
+    }
+
+    private var footersSection: some View {
+        Section(L10n.string(.prefilledFooters, language: language)) {
+            TextField(L10n.string(.footerOneDefault, language: language), text: $settings.footerOneDefault)
+            Toggle(isOn: $settings.lockFooterOne) {
+                Text(L10n.string(.lockFooterOne, language: language))
+            }
+            TextField(L10n.string(.footerTwoDefault, language: language), text: $settings.footerTwoDefault)
+            Toggle(isOn: $settings.lockFooterTwo) {
+                Text(L10n.string(.lockFooterTwo, language: language))
+            }
+            Text(L10n.string(.footerLockedHint, language: language))
+                .font(.footnote)
+                .foregroundColor(.secondary)
         }
     }
 

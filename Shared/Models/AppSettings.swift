@@ -28,6 +28,13 @@ final class AppSettings: ObservableObject {
     @Published var customCurrencies: [Currency] { didSet { storeJSON(customCurrencies, .customCurrencies) } }
     @Published var lastScanDate: Date? { didSet { store(lastScanDate, .lastScanDate) } }
     @Published var scansToday: Int { didSet { store(scansToday, .scansToday) } }
+    /// Pre-filled Page 1 footer on every new receipt (Android: Prefilled footers).
+    @Published var footerOneDefault: String { didSet { store(footerOneDefault, .footerOne) } }
+    /// Pre-filled Page 2 footer on every new receipt.
+    @Published var footerTwoDefault: String { didSet { store(footerTwoDefault, .footerTwo) } }
+    /// When on, new receipts always use the Settings footer and it cannot be edited.
+    @Published var lockFooterOne: Bool { didSet { store(lockFooterOne, .lockFooterOne) } }
+    @Published var lockFooterTwo: Bool { didSet { store(lockFooterTwo, .lockFooterTwo) } }
 
     init(defaults: UserDefaults? = nil) {
         let store = defaults
@@ -47,6 +54,10 @@ final class AppSettings: ObservableObject {
         customCurrencies = Self.loadJSON([Currency].self, key: .customCurrencies, defaults: store) ?? []
         lastScanDate = store.object(forKey: Keys.lastScanDate.rawValue) as? Date
         scansToday = store.integer(forKey: Keys.scansToday.rawValue)
+        footerOneDefault = store.string(forKey: Keys.footerOne.rawValue) ?? MemoDefaults.noteOne
+        footerTwoDefault = store.string(forKey: Keys.footerTwo.rawValue) ?? ""
+        lockFooterOne = store.bool(forKey: Keys.lockFooterOne.rawValue)
+        lockFooterTwo = store.bool(forKey: Keys.lockFooterTwo.rawValue)
 
         // A counter labelled "Scans Today" must not carry over from yesterday.
         if let last = lastScanDate, !Calendar.current.isDateInToday(last) {
@@ -94,6 +105,10 @@ final class AppSettings: ObservableObject {
         case customCurrencies = "settings.customCurrencies"
         case lastScanDate = "settings.lastScanDate"
         case scansToday = "settings.scansToday"
+        case footerOne = "settings.footerOne"
+        case footerTwo = "settings.footerTwo"
+        case lockFooterOne = "settings.lockFooterOne"
+        case lockFooterTwo = "settings.lockFooterTwo"
         case settingsStamp = "settings.syncStamp"
     }
 
