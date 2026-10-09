@@ -111,17 +111,12 @@ struct BulkScanView: View {
     private func receiptRow(_ item: BulkScanStore.Item) -> some View {
         let label = String(format: L10n.string(.bulkReceiptNumber, language: language), item.id + 1)
         HStack(spacing: Theme.Spacing.m) {
-            if item.status == .scanning {
-                ProgressView()
-            } else {
-                Image(systemName: statusIcon(item.status))
-                    .foregroundStyle(item.status == .failed ? Color.red : Color.green)
-            }
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(label).font(.body)
                 Text(statusText(item.status))
                     .font(.caption)
                     .foregroundStyle(item.status == .failed ? Color.red : Theme.textSecondary)
+                rowBar(item.status)
             }
             Spacer()
             if item.status == .done || item.status == .failed {
@@ -136,6 +131,21 @@ struct BulkScanView: View {
         }
         .padding(Theme.Spacing.m)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
+    }
+
+    /// Each receipt's own bar: animated while scanning, full when done, red when it failed.
+    @ViewBuilder
+    private func rowBar(_ status: BulkScanStore.Status) -> some View {
+        switch status {
+        case .scanning:
+            ProgressView().progressViewStyle(.linear).tint(.green)
+        case .done:
+            ProgressView(value: 1).tint(.green)
+        case .failed:
+            ProgressView(value: 1).tint(.red)
+        case .waiting:
+            ProgressView(value: 0).tint(.green)
+        }
     }
 
     private func statusIcon(_ status: BulkScanStore.Status) -> String {
