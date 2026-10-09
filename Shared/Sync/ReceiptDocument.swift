@@ -36,6 +36,8 @@ enum ReceiptDocument {
             "discountValue": receipt.discountValue.stringValue,
             "taxPercent": receipt.taxPercent.stringValue,
             "cashGiven": receipt.cashGiven.stringValue,
+            "extraFees": receipt.extraFees.stringValue,
+            "taxBreakdownJson": receipt.taxBreakdownJSON ?? "[]",
             "note": receipt.note,
             "notesPageTwo": receipt.notesPageTwo,
             "issuedByName": receipt.issuedByName,
@@ -88,6 +90,8 @@ enum ReceiptDocument {
         receipt.discountValue = decimal(document["discountValue"])
         receipt.taxPercent = decimal(document["taxPercent"])
         receipt.cashGiven = decimal(document["cashGiven"])
+        receipt.extraFees = decimal(document["extraFees"])
+        receipt.taxBreakdownJSON = document["taxBreakdownJson"] as? String ?? "[]"
         receipt.note = document["note"] as? String ?? ""
         receipt.notesPageTwo = document["notesPageTwo"] as? String ?? ""
         receipt.issuedByName = document["issuedByName"] as? String ?? ""

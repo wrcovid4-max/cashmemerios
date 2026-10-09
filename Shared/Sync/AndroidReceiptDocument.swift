@@ -97,6 +97,8 @@ enum AndroidReceiptDocument {
         receipt.discountValue = decimal(document["discountValue"])
         receipt.taxPercent = decimal(document["taxPercentage"])
         receipt.cashGiven = decimal(document["cashGiven"])
+        receipt.extraFees = decimal(document["extraFees"])
+        receipt.taxBreakdownJSON = document["taxBreakdownJson"] as? String ?? "[]"
 
         receipt.note = string(document["note"])
         receipt.notesPageTwo = string(document["notePage2"])
@@ -163,6 +165,8 @@ enum AndroidReceiptDocument {
             "discountValue": receipt.discountValue.doubleValue,
             "taxPercentage": receipt.taxPercent.doubleValue,
             "cashGiven": receipt.cashGiven.doubleValue,
+            "extraFees": receipt.extraFees.doubleValue,
+            "taxBreakdownJson": receipt.taxBreakdownJSON ?? "[]",
             "changeAmount": NSDecimalNumber(decimal: totals.change).doubleValue,
             "subtotal": NSDecimalNumber(decimal: totals.subtotal).doubleValue,
             "grandTotal": NSDecimalNumber(decimal: totals.grandTotal).doubleValue,

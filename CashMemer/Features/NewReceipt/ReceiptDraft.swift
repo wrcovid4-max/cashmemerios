@@ -33,7 +33,10 @@ final class ReceiptDraft: ObservableObject {
 
     @Published var discountType: DiscountType = .none
     @Published var discountValueText = ""
-    @Published var taxPercentText = ""
+    /// Typing a tax percentage by hand means the per-tax lines no longer match it, so they go.
+    @Published var taxPercentText = "" {
+        didSet { if taxPercentText != oldValue { taxLines = [] } }
+    }
     @Published var cashGivenText = ""
     @Published var extraFeesText = ""
     /// Each tax from a scan, shown on the memo when the per-tax setting is on.
@@ -148,13 +151,14 @@ final class ReceiptDraft: ObservableObject {
             currency = matched
         }
         if !scan.taxes.isEmpty {
-            taxLines = settings.showTaxBreakdown
-                ? scan.taxes.map { MemoTaxLine(name: $0.name, percent: $0.percent) }
-                : []
+            // Set the percentage first: changing it clears the lines, so the lines go in last.
             if taxPercentText.isEmpty {
                 let sum = scan.taxes.reduce(Decimal.zero) { $0 + $1.percent }
                 if sum > 0 { taxPercentText = "\(sum)" }
             }
+            taxLines = settings.showTaxBreakdown
+                ? scan.taxes.map { MemoTaxLine(name: $0.name, percent: $0.percent) }
+                : []
         }
         if let fees = scan.extraFees, fees > 0, settings.includeScanFees {
             extraFeesText = "\(fees)"
