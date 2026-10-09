@@ -211,6 +211,17 @@ struct SettingsView: View {
             }
             .foregroundColor(Theme.brand)
 
+            Toggle(isOn: $settings.lockSignature) {
+                HStack(spacing: Theme.Spacing.xs) {
+                    Text(L10n.string(.lockSignature, language: language))
+                    InfoButton(
+                        title: L10n.string(.lockSignature, language: language),
+                        message: L10n.string(.infoLockSignature, language: language)
+                    )
+                }
+            }
+            .tint(Theme.brand)
+
             if settings.defaultSignaturePNG != nil {
                 Button(L10n.string(.removeSignature, language: language), role: .destructive) {
                     settings.defaultSignaturePNG = nil

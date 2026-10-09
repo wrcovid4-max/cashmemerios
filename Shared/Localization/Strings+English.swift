@@ -215,6 +215,8 @@ extension L10n {
         .switchLanguageCancel: "Cancel",
         .infoUrduLanguage: "Shows the app in Urdu, right to left. Turn it off to go back to English.",
         .infoLockFooter: "New receipts always use this footer, and it cannot be edited on the receipt.",
+        .lockSignature: "Lock signature pad",
+        .infoLockSignature: "Stops touches on the signature pad, so a signed memo cannot be marked by accident.",
         .each: "each",
         .issuedBy: "Issued By",
         .accountEmail: "Account Email",

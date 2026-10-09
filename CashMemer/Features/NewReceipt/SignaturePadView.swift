@@ -31,6 +31,7 @@ struct SignaturePadView: View {
                 onChange: rasterise
             )
             .frame(height: 170)
+            .allowsHitTesting(!settings.lockSignature)
             .background(Color.white, in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)

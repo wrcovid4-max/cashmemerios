@@ -35,6 +35,8 @@ final class AppSettings: ObservableObject {
     /// When on, new receipts always use the Settings footer and it cannot be edited.
     @Published var lockFooterOne: Bool { didSet { store(lockFooterOne, .lockFooterOne) } }
     @Published var lockFooterTwo: Bool { didSet { store(lockFooterTwo, .lockFooterTwo) } }
+    /// When on, the signature pad ignores touches so a signed memo cannot be marked by accident.
+    @Published var lockSignature: Bool { didSet { store(lockSignature, .lockSignature) } }
 
     init(defaults: UserDefaults? = nil) {
         let store = defaults
@@ -58,6 +60,7 @@ final class AppSettings: ObservableObject {
         footerTwoDefault = store.string(forKey: Keys.footerTwo.rawValue) ?? ""
         lockFooterOne = store.bool(forKey: Keys.lockFooterOne.rawValue)
         lockFooterTwo = store.bool(forKey: Keys.lockFooterTwo.rawValue)
+        lockSignature = store.bool(forKey: Keys.lockSignature.rawValue)
 
         // A counter labelled "Scans Today" must not carry over from yesterday.
         if let last = lastScanDate, !Calendar.current.isDateInToday(last) {
@@ -109,6 +112,7 @@ final class AppSettings: ObservableObject {
         case footerTwo = "settings.footerTwo"
         case lockFooterOne = "settings.lockFooterOne"
         case lockFooterTwo = "settings.lockFooterTwo"
+        case lockSignature = "settings.lockSignature"
         case settingsStamp = "settings.syncStamp"
     }
 

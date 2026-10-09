@@ -23,6 +23,8 @@ struct ReceiptDetailView: View {
     @State private var selectedMark: UUID?
     @State private var pendingTextMark: MemoMarkup.Mark?
     @State private var textEntry = ""
+    /// Tapping the memo (outside markup mode) hides the navigation bar, leaving just the memo.
+    @State private var chromeHidden = false
 
     private var memo: MemoSnapshot { MemoSnapshot(receipt: receipt) }
 
@@ -38,7 +40,9 @@ struct ReceiptDetailView: View {
                     tool: tool,
                     isEditing: isMarkingUp,
                     pageIndex: $pageIndex,
-                    onTap: place,
+                    onTap: { point in
+                        if isMarkingUp { place(point) } else { chromeHidden.toggle() }
+                    },
                     onDrag: dragSelected
                 )
                 .overlay(alignment: .bottom) {
@@ -66,6 +70,7 @@ struct ReceiptDetailView: View {
         .background(Theme.background)
         .navigationTitle(memo.headerSubtitle.isEmpty ? memo.number : memo.headerSubtitle)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(chromeHidden ? .hidden : .visible, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 Button {
