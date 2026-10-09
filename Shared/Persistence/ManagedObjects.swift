@@ -30,6 +30,8 @@ public final class CDReceipt: NSManagedObject {
     @NSManaged public var extraFees: NSDecimalNumber
     /// JSON list of each tax on the receipt. Nil or "[]" when shown combined.
     @NSManaged public var taxBreakdownJSON: String?
+    /// Bill split between two customers; empty when the bill is not split.
+    @NSManaged public var splitJSON: String?
     @NSManaged public var cashGiven: NSDecimalNumber
     @NSManaged public var note: String
     @NSManaged public var notesPageTwo: String

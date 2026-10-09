@@ -33,6 +33,8 @@ struct MemoSnapshot: Equatable {
     var taxPercent: Decimal
     /// Each tax on the memo. Empty unless the receipt was saved with the per-tax breakdown on.
     var taxLines: [MemoTaxLine] = []
+    var isSplit: Bool = false
+    var splitFirst: Decimal? = nil
     var note: String
     var notesPageTwo: String
     /// Google account the memo was issued from. Page 2 only.
@@ -130,6 +132,8 @@ extension MemoSnapshot {
             totals: receipt.totals,
             taxPercent: receipt.taxPercent as Decimal,
             taxLines: MemoTaxLine.decode(receipt.taxBreakdownJSON),
+            isSplit: BillSplit.isSplit(receipt.splitJSON),
+            splitFirst: BillSplit.first(receipt.splitJSON),
             note: receipt.note,
             notesPageTwo: receipt.notesPageTwo,
             issuedByName: receipt.issuedByName,

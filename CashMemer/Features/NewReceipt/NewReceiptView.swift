@@ -335,6 +335,24 @@ struct NewReceiptView: View {
                     message: L10n.string(.infoTaxBody, language: language)
                 ))
             )
+            Toggle(isOn: $draft.splitEnabled) {
+                Text(L10n.string(.splitBill, language: language))
+            }
+            .tint(Theme.brand)
+            if draft.splitEnabled {
+                FormFieldRow(
+                    placeholderKey: .splitCustomer1,
+                    text: $draft.splitFirstText,
+                    keyboard: .decimalPad
+                )
+                Text(String(
+                    format: L10n.string(.splitSummary, language: language),
+                    NSString(string: CurrencyFormatter.string(draft.splitParts.first, currency: draft.currency)),
+                    NSString(string: CurrencyFormatter.string(draft.splitParts.second, currency: draft.currency))
+                ))
+                .font(.footnote)
+                .foregroundStyle(Theme.textSecondary)
+            }
             FormFieldRow(
                 placeholderKey: .extraFees,
                 text: $draft.extraFeesText,

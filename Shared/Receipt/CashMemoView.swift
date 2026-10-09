@@ -257,6 +257,14 @@ struct CashMemoView: View {
                           "+ " + CurrencyFormatter.string(memo.totals.extraFees, currency: memo.currency))
             }
 
+            if memo.isSplit {
+                let first = memo.splitFirst ?? (memo.totals.grandTotal / 2)
+                amountRow(L10n.string(.splitCustomer1, language: language) + ":",
+                          CurrencyFormatter.string(first, currency: memo.currency))
+                amountRow(L10n.string(.splitCustomer2, language: language) + ":",
+                          CurrencyFormatter.string(memo.totals.grandTotal - first, currency: memo.currency))
+            }
+
             // Each only earns a line when it differs from the grand total —
             // printing "Total without Tax" on a memo with no tax would just be
             // the same number twice.

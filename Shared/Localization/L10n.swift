@@ -86,6 +86,7 @@ enum L10n {
         case bulkTitle, bulkHint, bulkPick, bulkClear, bulkSave, bulkEdit, bulkWaiting, bulkScanning, bulkDone, bulkFailed, bulkAllDone, bulkEtaCalculating, bulkEtaMinutes, bulkEtaSeconds, bulkProgress, bulkReceiptNumber, bulkScanTile
         case allowBulkCellular, infoAllowBulkCellular, infoBulk, bulkNetworkNote, bulkWaitingNetwork
         case appSounds, infoAppSounds
+        case aiTitle, aiHint, aiPlaceholder, aiSend, aiThinking, aiError, splitBill, splitCustomer1, splitCustomer2, splitSummary
 
         // Misc
         case cloudBackupAndSync, connected, notConnected, syncing, syncFailed, done, save, retry, ok

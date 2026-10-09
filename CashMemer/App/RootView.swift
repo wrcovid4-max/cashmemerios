@@ -24,6 +24,11 @@ struct RootView: View {
         .overlay {
             HalloweenDecor()
         }
+        .overlay(alignment: .bottomTrailing) {
+            AskAIButton()
+                .padding(.trailing, 16)
+                .padding(.bottom, 72)
+        }
         .overlayPreferenceValue(LeafPerchKey.self) { anchors in
             GeometryReader { proxy in
                 AutumnLeavesView(perches: anchors.map { proxy[$0] })

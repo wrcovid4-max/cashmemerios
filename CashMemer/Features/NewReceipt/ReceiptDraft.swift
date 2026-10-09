@@ -39,6 +39,9 @@ final class ReceiptDraft: ObservableObject {
     }
     @Published var cashGivenText = ""
     @Published var extraFeesText = ""
+    /// Bill split between two customers, and what Customer 1 pays.
+    @Published var splitEnabled = false
+    @Published var splitFirstText = ""
     /// Each tax from a scan, shown on the memo when the per-tax setting is on.
     @Published var taxLines: [MemoTaxLine] = []
 
@@ -64,6 +67,14 @@ final class ReceiptDraft: ObservableObject {
     var taxPercent: Decimal { Decimal(string: taxPercentText) ?? 0 }
     var cashGiven: Decimal { Decimal(string: cashGivenText) ?? 0 }
     var extraFees: Decimal { Decimal(string: extraFeesText) ?? 0 }
+    var splitFirst: Decimal? { splitEnabled ? Decimal(string: splitFirstText) : nil }
+
+    /// What each customer pays: Customer 1 (typed, or half) and Customer 2 (the rest).
+    var splitParts: (first: Decimal, second: Decimal) {
+        let total = totals.grandTotal
+        let first = splitFirst ?? (total / 2)
+        return (first, total - first)
+    }
 
     var totals: ReceiptTotals {
         ReceiptTotals(
@@ -103,6 +114,8 @@ final class ReceiptDraft: ObservableObject {
             totals: totals,
             taxPercent: taxPercent,
             taxLines: taxLines,
+            isSplit: splitEnabled,
+            splitFirst: splitFirst,
             note: note,
             notesPageTwo: notesPageTwo,
             issuedByName: issuedByName,
@@ -255,6 +268,7 @@ final class ReceiptDraft: ObservableObject {
         receipt.cashGiven = NSDecimalNumber(decimal: cashGiven)
         receipt.extraFees = NSDecimalNumber(decimal: extraFees)
         receipt.taxBreakdownJSON = MemoTaxLine.encode(taxLines)
+        receipt.splitJSON = BillSplit.encode(enabled: splitEnabled, first: splitFirst)
         receipt.note = note
         receipt.notesPageTwo = notesPageTwo
         receipt.signaturePNG = signaturePNG
