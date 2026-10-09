@@ -72,6 +72,7 @@ final class BulkScanStore: ObservableObject {
             waitingForNetwork = false
             await scanItem(at: index, settings: settings)
         }
+        AppSounds.shared.play(.sting)
         worker = nil
     }
 

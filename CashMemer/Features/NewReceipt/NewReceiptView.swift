@@ -446,6 +446,7 @@ struct NewReceiptView: View {
     private func generate() {
         do {
             let receipt = try draft.persist(in: context)
+            AppSounds.shared.play(.whoosh)
             if draft.saveSignatureAsDefault, let signature = draft.signaturePNG {
                 settings.defaultSignaturePNG = signature
             }

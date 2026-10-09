@@ -43,6 +43,13 @@ final class AppSettings: ObservableObject {
     @Published var includeScanFees: Bool { didSet { store(includeScanFees, .includeScanFees) } }
     /// When off, bulk scanning pauses on mobile data and carries on once Wi-Fi is back.
     @Published var allowBulkOnCellular: Bool { didSet { store(allowBulkOnCellular, .allowBulkCellular) } }
+    /// Spooky sound effects and background music. Off means silent.
+    @Published var appSounds: Bool {
+        didSet {
+            store(appSounds, .appSounds)
+            AppSounds.shared.setEnabled(appSounds)
+        }
+    }
 
     init(defaults: UserDefaults? = nil) {
         let store = defaults
@@ -70,6 +77,7 @@ final class AppSettings: ObservableObject {
         showTaxBreakdown = store.bool(forKey: Keys.showTaxBreakdown.rawValue)
         includeScanFees = store.object(forKey: Keys.includeScanFees.rawValue) as? Bool ?? true
         allowBulkOnCellular = store.object(forKey: Keys.allowBulkCellular.rawValue) as? Bool ?? true
+        appSounds = store.object(forKey: Keys.appSounds.rawValue) as? Bool ?? true
 
         // A counter labelled "Scans Today" must not carry over from yesterday.
         if let last = lastScanDate, !Calendar.current.isDateInToday(last) {
@@ -125,6 +133,7 @@ final class AppSettings: ObservableObject {
         case showTaxBreakdown = "settings.showTaxBreakdown"
         case includeScanFees = "settings.includeScanFees"
         case allowBulkCellular = "settings.allowBulkCellular"
+        case appSounds = "settings.appSounds"
         case settingsStamp = "settings.syncStamp"
     }
 

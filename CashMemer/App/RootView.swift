@@ -5,6 +5,7 @@ struct RootView: View {
     @EnvironmentObject private var lock: AppLockService
     @EnvironmentObject private var navigation: AppNavigation
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.scenePhase) private var scenePhase
 
     /// What the More tab currently has pushed. Driven by deep links as well as taps.
     @State private var morePath: [Destination] = []
@@ -21,7 +22,10 @@ struct RootView: View {
         }
         .background(Theme.background)
         .overlay {
-            HalloweenDecor()
+            ZStack {
+                HalloweenDecor()
+                AutumnLeavesView()
+            }
         }
         .overlay {
             if lock.isLocked && settings.appLockEnabled {
@@ -31,8 +35,13 @@ struct RootView: View {
         }
         .animation(.easeInOut(duration: 0.2), value: lock.isLocked)
         .splashScreen()
+        .onChange(of: scenePhase) { phase in
+            if phase == .active { AppSounds.shared.resumeMusic() } else { AppSounds.shared.pauseMusic() }
+        }
         .onAppear {
             if settings.appLockEnabled { lock.lock() }
+            AppSounds.shared.setEnabled(settings.appSounds)
+            AppSounds.shared.startMusic()
             navigation.consumePendingDestination()
         }
         .onChange(of: navigation.pendingDestination) { _ in

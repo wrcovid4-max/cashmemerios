@@ -44,6 +44,7 @@ struct BulkScanView: View {
                     }
                 }
                 selections = []
+                AppSounds.shared.play(.chime)
                 store.enqueue(images, settings: settings)
             }
         }

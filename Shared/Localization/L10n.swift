@@ -85,6 +85,7 @@ enum L10n {
         case extraFees, infoExtraFees, scanning, showTaxBreakdown, infoShowTaxBreakdown, includeScanFees, infoIncludeScanFees
         case bulkTitle, bulkHint, bulkPick, bulkClear, bulkSave, bulkEdit, bulkWaiting, bulkScanning, bulkDone, bulkFailed, bulkAllDone, bulkEtaCalculating, bulkEtaMinutes, bulkEtaSeconds, bulkProgress, bulkReceiptNumber, bulkScanTile
         case allowBulkCellular, infoAllowBulkCellular, infoBulk, bulkNetworkNote, bulkWaitingNetwork
+        case appSounds, infoAppSounds
 
         // Misc
         case cloudBackupAndSync, connected, notConnected, syncing, syncFailed, done, save, retry, ok

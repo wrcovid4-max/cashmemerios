@@ -246,6 +246,8 @@ extension L10n {
         .infoBulk: "Scans up to 10 receipt photos with AI. It needs an internet connection: Wi-Fi works, and mobile data works unless you turn it off in Settings. Scanning shows progress in the Dynamic Island while the app is open.",
         .bulkNetworkNote: "Needs Wi-Fi or mobile data. Mobile data can be turned off in Settings.",
         .bulkWaitingNetwork: "Waiting for Wi-Fi, or for mobile data to be allowed in Settings…",
+        .appSounds: "App sounds",
+        .infoAppSounds: "Spooky sound effects and background music. Turn off for silence.",
         .each: "each",
         .issuedBy: "Issued By",
         .accountEmail: "Account Email",
