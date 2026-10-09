@@ -90,6 +90,13 @@ struct GeminiReceiptScanner: ReceiptScanning {
     the receipt does not show rather than guessing. Category must be one of: \
     shopping, groceries, food, fuel, \
     travel, utilities, health, education, services, other.
+    Pakistani receipts often show several taxes, so look for every one and its percentage: \
+    GST, G.S.T, General Sales Tax, Sales Tax, S.Tax, Sindh Sales Tax, SST, Punjab Sales Tax, \
+    KPK Sales Tax, Balochistan Sales Tax, Further Tax, Further GST, Further Sales Tax, FED, \
+    Federal Excise Duty, Excise Duty, WHT, Withholding Tax, Income Tax, Advance Income Tax, \
+    Advance Tax, Service Charge, Service Tax, Stamp Duty, Octroi, Extra Tax, PRA Tax. \
+    Set taxPercent to the combined percentage of all of them. If a tax shows only an amount, \
+    work out its percentage from the subtotal.
     """
 
     private static let responseSchema: [String: Any] = [
