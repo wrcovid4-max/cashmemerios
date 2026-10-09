@@ -13,9 +13,8 @@ struct InfoButton: View {
         Button {
             isShowing = true
         } label: {
-            Image(systemName: "info.circle")
+            Text("👻")
                 .font(.body)
-                .foregroundColor(Theme.brand)
         }
         .buttonStyle(.borderless)
         .accessibilityLabel(Text(title))

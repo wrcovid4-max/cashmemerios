@@ -10,20 +10,20 @@ import UIKit
 enum Theme {
     // MARK: Brand
 
-    static let brand = Color(light: 0x1B7A24, dark: 0x34A93F)
-    static let brandDeep = Color(light: 0x146018, dark: 0x2A8C33)
-    static let brandSoft = Color(light: 0xE3F1E1, dark: 0x1B3320)
+    static let brand = Color(light: 0xE8680C, dark: 0xFF9A3D)
+    static let brandDeep = Color(light: 0xA94A06, dark: 0xFF7A18)
+    static let brandSoft = Color(light: 0xFFE2C7, dark: 0x4A2A0A)
     /// Heading green used for section titles on the receipt form.
-    static let heading = Color(light: 0x2F7A28, dark: 0x5FC167)
+    static let heading = Color(light: 0xE8680C, dark: 0xFF9A3D)
     /// The "CASH MEMO" title on the printed memo.
     static let memoTitle = Color(light: 0x245DA6, dark: 0x6BA6E8)
 
     // MARK: Surfaces
 
-    static let background = Color(light: 0xF2F2F7, dark: 0x0C0C0F)
-    static let card = Color(light: 0xFFFFFF, dark: 0x1A1A1E)
-    static let cardAlt = Color(light: 0xF7F8F4, dark: 0x202024)
-    static let separator = Color(light: 0xE3E3E8, dark: 0x2E2E34)
+    static let background = Color(light: 0xFFF8F0, dark: 0x120A1A)
+    static let card = Color(light: 0xFFFFFF, dark: 0x1E1430)
+    static let cardAlt = Color(light: 0xFBEBDA, dark: 0x2C1F45)
+    static let separator = Color(light: 0xE0B98E, dark: 0x4B3A66)
     /// The memo sheet itself stays near-white in both appearances so exports match print.
     static let memoPaper = Color(light: 0xFFFFFF, dark: 0xF7F8F4)
     static let memoInk = Color(light: 0x11131A, dark: 0x11131A)
