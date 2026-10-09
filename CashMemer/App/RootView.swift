@@ -21,6 +21,9 @@ struct RootView: View {
         }
         .background(Theme.background)
         .overlay {
+            HalloweenDecor()
+        }
+        .overlay {
             if lock.isLocked && settings.appLockEnabled {
                 LockScreenView()
                     .transition(.opacity)
