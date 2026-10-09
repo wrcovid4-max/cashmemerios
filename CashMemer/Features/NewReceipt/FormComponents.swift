@@ -5,15 +5,26 @@ import UIKit
 /// the New Receipt form and Settings.
 struct FormSection<Content: View>: View {
     let titleKey: L10n.Key
+    /// When set, an (i) button beside the title explains the section.
+    var infoKey: L10n.Key? = nil
     @ViewBuilder var content: Content
 
     @Environment(\.appLanguage) private var language
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.s) {
-            Text(L10n.string(titleKey, language: language))
-                .sectionCaption()
-                .padding(.horizontal, Theme.Spacing.xs)
+            HStack(spacing: Theme.Spacing.xs) {
+                Text(L10n.string(titleKey, language: language))
+                    .sectionCaption()
+                if let infoKey {
+                    InfoButton(
+                        title: L10n.string(titleKey, language: language),
+                        message: L10n.string(infoKey, language: language)
+                    )
+                }
+                Spacer()
+            }
+            .padding(.horizontal, Theme.Spacing.xs)
             VStack(spacing: 0) {
                 content
             }

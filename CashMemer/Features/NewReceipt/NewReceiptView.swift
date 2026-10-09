@@ -143,7 +143,7 @@ struct NewReceiptView: View {
     // MARK: - Sections
 
     private var scannerSection: some View {
-        FormSection(titleKey: .aiReceiptScanner) {
+        FormSection(titleKey: .aiReceiptScanner, infoKey: .infoScannerBody) {
             VStack(spacing: Theme.Spacing.s) {
                 HStack(spacing: Theme.Spacing.s) {
                     SoftActionButton(titleKey: .gallery, systemImage: "photo.on.rectangle") {
@@ -184,7 +184,7 @@ struct NewReceiptView: View {
     }
 
     private var detailsSection: some View {
-        FormSection(titleKey: .receiptDetails) {
+        FormSection(titleKey: .receiptDetails, infoKey: .infoDetailsBody) {
             // Split into groups: a ViewBuilder takes at most 10 children.
             Group {
                 FormFieldRow(placeholderKey: .titleField, text: $draft.title)
@@ -284,7 +284,7 @@ struct NewReceiptView: View {
     }
 
     private var discountSection: some View {
-        FormSection(titleKey: .discountAndTax) {
+        FormSection(titleKey: .discountAndTax, infoKey: .infoDiscountBody) {
             FormPickerRow(
                 titleKey: .discountType,
                 selection: $draft.discountType,
@@ -302,13 +302,21 @@ struct NewReceiptView: View {
             FormFieldRow(
                 placeholderKey: .taxPercentOptional,
                 text: $draft.taxPercentText,
-                keyboard: .decimalPad
+                keyboard: .decimalPad,
+                trailing: AnyView(InfoButton(
+                    title: L10n.string(.taxPercentOptional, language: language),
+                    message: L10n.string(.infoTaxBody, language: language)
+                ))
             )
             FormFieldRow(
                 placeholderKey: .cashGiven,
                 text: $draft.cashGivenText,
                 keyboard: .decimalPad,
-                showsDivider: false
+                showsDivider: false,
+                trailing: AnyView(InfoButton(
+                    title: L10n.string(.cashGiven, language: language),
+                    message: L10n.string(.infoCashBody, language: language)
+                ))
             )
         }
     }
