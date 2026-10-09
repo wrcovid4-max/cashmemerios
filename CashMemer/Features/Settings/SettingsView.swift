@@ -6,6 +6,8 @@ struct SettingsView: View {
     @EnvironmentObject private var lock: AppLockService
     @Environment(\.managedObjectContext) private var context
     @Environment(\.appLanguage) private var language
+    /// The language the user picked, waiting for confirmation.
+    @State private var pendingLanguage: AppLanguage?
 
     @State private var isShowingSignature = false
     @State private var isConfirmingDeleteAll = false
@@ -66,11 +68,37 @@ struct SettingsView: View {
         Section(L10n.string(.appearance, language: language)) {
             Toggle(isOn: Binding(
                 get: { settings.language == .urdu },
-                set: { settings.language = $0 ? .urdu : .english }
+                set: { wantsUrdu in
+                    let target: AppLanguage = wantsUrdu ? .urdu : .english
+                    if target != settings.language { pendingLanguage = target }
+                }
             )) {
-                Text(L10n.string(.urduLanguage, language: language))
+                HStack(spacing: Theme.Spacing.xs) {
+                    Text(L10n.string(.urduLanguage, language: language))
+                    InfoButton(
+                        title: L10n.string(.urduLanguage, language: language),
+                        message: L10n.string(.infoUrduLanguage, language: language)
+                    )
+                }
             }
             .tint(Theme.brand)
+            .alert(
+                L10n.string(.switchLanguageTitle, language: language),
+                isPresented: Binding(
+                    get: { pendingLanguage != nil },
+                    set: { if !$0 { pendingLanguage = nil } }
+                )
+            ) {
+                Button(L10n.string(.switchLanguageConfirm, language: language)) {
+                    if let target = pendingLanguage { settings.language = target }
+                    pendingLanguage = nil
+                }
+                Button(L10n.string(.switchLanguageCancel, language: language), role: .cancel) {
+                    pendingLanguage = nil
+                }
+            } message: {
+                Text(L10n.string(.switchLanguageBody, language: language))
+            }
 
             Picker(L10n.string(.theme, language: language), selection: $settings.theme) {
                 ForEach(AppTheme.allCases) { theme in
@@ -152,11 +180,23 @@ struct SettingsView: View {
         Section(L10n.string(.prefilledFooters, language: language)) {
             TextField(L10n.string(.footerOneDefault, language: language), text: $settings.footerOneDefault)
             Toggle(isOn: $settings.lockFooterOne) {
-                Text(L10n.string(.lockFooterOne, language: language))
+                HStack(spacing: Theme.Spacing.xs) {
+                    Text(L10n.string(.lockFooterOne, language: language))
+                    InfoButton(
+                        title: L10n.string(.lockFooterOne, language: language),
+                        message: L10n.string(.infoLockFooter, language: language)
+                    )
+                }
             }
             TextField(L10n.string(.footerTwoDefault, language: language), text: $settings.footerTwoDefault)
             Toggle(isOn: $settings.lockFooterTwo) {
-                Text(L10n.string(.lockFooterTwo, language: language))
+                HStack(spacing: Theme.Spacing.xs) {
+                    Text(L10n.string(.lockFooterTwo, language: language))
+                    InfoButton(
+                        title: L10n.string(.lockFooterTwo, language: language),
+                        message: L10n.string(.infoLockFooter, language: language)
+                    )
+                }
             }
             Text(L10n.string(.footerLockedHint, language: language))
                 .font(.footnote)
