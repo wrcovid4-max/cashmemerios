@@ -1,18 +1,29 @@
 import SwiftUI
 
+/// Where cards report their bounds, so leaves can land on them.
+struct LeafPerchKey: PreferenceKey {
+    static var defaultValue: [Anchor<CGRect>] = []
+
+    static func reduce(value: inout [Anchor<CGRect>], nextValue: () -> [Anchor<CGRect>]) {
+        value.append(contentsOf: nextValue())
+    }
+}
+
 /// Falling autumn leaves across the app: they blow in from above, drift right to left,
-/// some collect in a pile along the bottom and the rest blow away. Takes no touches.
+/// land on cards, stick in the gaps between cards, and some collect in a pile along the
+/// bottom while the rest blow away. Takes no touches.
 struct AutumnLeavesView: View {
+    /// Bounds of the cards on screen, in this view's coordinates.
+    var perches: [CGRect] = []
     @State private var sim = LeafSimulation()
 
     var body: some View {
-        GeometryReader { _ in
-            TimelineView(.animation) { timeline in
-                Canvas { context, size in
-                    sim.step(now: timeline.date.timeIntervalSinceReferenceDate, size: size)
-                    for leaf in sim.leaves {
-                        AutumnLeafShape.draw(&context, leaf)
-                    }
+        TimelineView(.animation) { timeline in
+            Canvas { context, size in
+                sim.perches = perches
+                sim.step(now: timeline.date.timeIntervalSinceReferenceDate, size: size)
+                for leaf in sim.leaves {
+                    AutumnLeafShape.draw(&context, leaf)
                 }
             }
         }
@@ -21,7 +32,7 @@ struct AutumnLeavesView: View {
     }
 }
 
-enum LeafState { case falling, piled, leaving }
+enum LeafState { case falling, resting, piled, leaving }
 
 struct Leaf {
     var x: CGFloat
@@ -34,6 +45,8 @@ struct Leaf {
     var colour: Color
     var sway: Double
     var state: LeafState = .falling
+    var restUntil: Double = 0
+    var prevBottom: CGFloat = 0
 }
 
 private let leafColours: [Color] = [
@@ -46,6 +59,8 @@ private let leafColours: [Color] = [
 
 final class LeafSimulation {
     var leaves: [Leaf] = []
+    var perches: [CGRect] = []
+    private var gaps: [CGRect] = []
     private var time: Double = 0
     private var last: Double = 0
     private var spawnTimer: Double = 0
@@ -60,8 +75,9 @@ final class LeafSimulation {
         guard size.width > 0 else { return }
         time += dt
         spawnTimer -= dt
+        gaps = gapsBetween(perches)
 
-        let falling = leaves.reduce(0) { $0 + ($1.state == .leaving || $1.state == .falling ? 1 : 0) }
+        let falling = leaves.reduce(0) { $0 + ($1.state == .piled ? 0 : 1) }
         if spawnTimer <= 0 && falling < maxFalling {
             spawn()
             spawnTimer = Double.random(in: 0.04...0.12)
@@ -78,6 +94,22 @@ final class LeafSimulation {
         }
     }
 
+    /// Gaps between two surfaces stacked one above the other, overlapping horizontally.
+    private func gapsBetween(_ rects: [CGRect]) -> [CGRect] {
+        var result: [CGRect] = []
+        for upper in rects {
+            for lower in rects where lower != upper {
+                let height = lower.minY - upper.maxY
+                let left = max(upper.minX, lower.minX)
+                let right = min(upper.maxX, lower.maxX)
+                if height >= 4 && height <= 60 && right - left > 40 {
+                    result.append(CGRect(x: left, y: upper.maxY, width: right - left, height: height))
+                }
+            }
+        }
+        return result
+    }
+
     private func update(_ i: Int, dt: Double, wind: CGFloat, piled: inout Int) {
         var leaf = leaves[i]
         let step = CGFloat(dt)
@@ -89,7 +121,22 @@ final class LeafSimulation {
             leaf.y += leaf.vy * step
             leaf.angle += leaf.spin * dt
             let bottom = leaf.y + leaf.size * 0.6
-            if bottom >= size.height - 18 {
+
+            if let gap = gaps.first(where: { g in
+                leaf.x >= g.minX && leaf.x <= g.maxX && leaf.prevBottom <= g.minY && bottom >= g.minY
+            }), Double.random(in: 0..<1) < 0.8 {
+                // Stuck in the gap between two cards, for a while.
+                leaf.y = gap.midY
+                leaf.state = .resting
+                leaf.restUntil = time + Double.random(in: 6...10)
+            } else if let landing = perches.first(where: { r in
+                leaf.x >= r.minX && leaf.x <= r.maxX && leaf.prevBottom <= r.minY && bottom >= r.minY
+            }), Double.random(in: 0..<1) < 0.35 {
+                // Lands on top of a card, for a few seconds.
+                leaf.y = landing.minY - leaf.size * 0.6
+                leaf.state = .resting
+                leaf.restUntil = time + Double.random(in: 3...6)
+            } else if bottom >= size.height - 18 {
                 if piled < maxPiled && Double.random(in: 0..<1) < 0.4 {
                     leaf.state = .piled
                     leaf.x = CGFloat.random(in: 0...size.width)
@@ -98,6 +145,14 @@ final class LeafSimulation {
                 } else {
                     leaf.state = .leaving
                 }
+            }
+            leaf.prevBottom = leaf.y + leaf.size * 0.6
+        case .resting:
+            leaf.x += CGFloat(sin(time * 3 + leaf.sway)) * 3 * step
+            if time >= leaf.restUntil {
+                leaf.state = .falling
+                leaf.vy = CGFloat.random(in: 60...100)
+                leaf.prevBottom = leaf.y + leaf.size * 0.6
             }
         case .leaving:
             leaf.x += leaf.vx * step
@@ -121,8 +176,10 @@ final class LeafSimulation {
             angle: Double.random(in: 0..<360),
             spin: Double.random(in: -60...60),
             colour: leafColours.randomElement() ?? .orange,
-            sway: Double.random(in: 0..<6.28)
+            sway: Double.random(in: 0..<6.28),
+            prevBottom: 0
         ))
+        leaves[leaves.count - 1].prevBottom = leaves[leaves.count - 1].y + leaves[leaves.count - 1].size * 0.6
     }
 }
 

@@ -115,6 +115,7 @@ struct CardSurface: ViewModifier {
         content
             .padding(padding)
             .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+            .anchorPreference(key: LeafPerchKey.self, value: .bounds) { [$0] }
     }
 }
 

@@ -22,9 +22,11 @@ struct RootView: View {
         }
         .background(Theme.background)
         .overlay {
-            ZStack {
-                HalloweenDecor()
-                AutumnLeavesView()
+            HalloweenDecor()
+        }
+        .overlayPreferenceValue(LeafPerchKey.self) { anchors in
+            GeometryReader { proxy in
+                AutumnLeavesView(perches: anchors.map { proxy[$0] })
             }
         }
         .overlay {
