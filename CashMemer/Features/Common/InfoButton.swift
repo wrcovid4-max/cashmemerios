@@ -13,8 +13,14 @@ struct InfoButton: View {
         Button {
             isShowing = true
         } label: {
-            Text("👻")
-                .font(.body)
+            if Holiday.halloween {
+                Text("👻")
+                    .font(.body)
+            } else {
+                Image(systemName: "info.circle")
+                    .font(.body)
+                    .foregroundColor(Theme.brand)
+            }
         }
         .buttonStyle(.borderless)
         .accessibilityLabel(Text(title))

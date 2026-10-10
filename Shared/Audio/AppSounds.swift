@@ -20,7 +20,7 @@ final class AppSounds {
     }
 
     func setEnabled(_ on: Bool) {
-        enabled = on
+        enabled = on && Holiday.halloween
         if !on { stopMusic() }
     }
 

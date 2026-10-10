@@ -52,9 +52,11 @@ struct NewReceiptView: View {
         .background {
             ZStack {
                 Theme.background
-                Text("👻")
-                    .font(.system(size: 260))
-                    .opacity(0.08)
+                if Holiday.halloween {
+                    Text("👻")
+                        .font(.system(size: 260))
+                        .opacity(0.08)
+                }
             }
         }
         .navigationTitle(L10n.string(.appName, language: language))

@@ -23,8 +23,8 @@ struct RootView: View {
         .background(Theme.background)
         .overlay {
             ZStack {
-                HalloweenDecor()
-                BatFlyerView()
+                if Holiday.halloween { HalloweenDecor() }
+                if Holiday.halloween { BatFlyerView() }
             }
         }
         .overlay(alignment: .bottomTrailing) {
@@ -34,7 +34,7 @@ struct RootView: View {
         }
         .overlayPreferenceValue(LeafPerchKey.self) { anchors in
             GeometryReader { proxy in
-                AutumnLeavesView(perches: anchors.map { proxy[$0] })
+                if Holiday.halloween { AutumnLeavesView(perches: anchors.map { proxy[$0] }) }
             }
         }
         .overlay {
