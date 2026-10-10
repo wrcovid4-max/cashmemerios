@@ -47,7 +47,6 @@ final class AppSettings: ObservableObject {
     @Published var appSounds: Bool {
         didSet {
             store(appSounds, .appSounds)
-            AppSounds.shared.setEnabled(appSounds)
         }
     }
 
@@ -69,7 +68,7 @@ final class AppSettings: ObservableObject {
         customCurrencies = Self.loadJSON([Currency].self, key: .customCurrencies, defaults: store) ?? []
         lastScanDate = store.object(forKey: Keys.lastScanDate.rawValue) as? Date
         scansToday = store.integer(forKey: Keys.scansToday.rawValue)
-        footerOneDefault = store.string(forKey: Keys.footerOne.rawValue) ?? MemoDefaults.noteOne
+        footerOneDefault = store.string(forKey: Keys.footerOne.rawValue) ?? "Thank You for shopping !!!"
         footerTwoDefault = store.string(forKey: Keys.footerTwo.rawValue) ?? ""
         lockFooterOne = store.bool(forKey: Keys.lockFooterOne.rawValue)
         lockFooterTwo = store.bool(forKey: Keys.lockFooterTwo.rawValue)
