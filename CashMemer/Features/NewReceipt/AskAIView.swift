@@ -94,7 +94,8 @@ struct AskAIView: View {
                 Text(L10n.string(.aiHint, language: language))
                     .font(.subheadline)
                     .foregroundStyle(Theme.textSecondary)
-                    .multilineTextAlignment(.center)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
 
                 VStack(spacing: 10) {
                     suggestion(L10n.string(.aiSuggest1, language: language))
