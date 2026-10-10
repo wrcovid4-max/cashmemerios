@@ -429,15 +429,21 @@ final class FirestoreSyncService: ObservableObject {
             queue: nil
         ) { [weak self] notification in
             guard let self = self, !self.applyingRemote.isSet else { return }
-            Task { @MainActor in await self.pushChanges(from: notification) }
+            // Read the changes here, on the thread that posted the save, then hand over only the sets.
+            let info = notification.userInfo ?? [:]
+            let changes = SaveChanges(
+                inserted: info[NSInsertedObjectsKey] as? Set<NSManagedObject> ?? [],
+                updated: info[NSUpdatedObjectsKey] as? Set<NSManagedObject> ?? [],
+                deleted: info[NSDeletedObjectsKey] as? Set<NSManagedObject> ?? []
+            )
+            Task { @MainActor in await self.pushChanges(changes) }
         }
     }
 
-    private func pushChanges(from notification: Notification) async {
-        let info = notification.userInfo ?? [:]
-        let inserted = info[NSInsertedObjectsKey] as? Set<NSManagedObject> ?? []
-        let updated = info[NSUpdatedObjectsKey] as? Set<NSManagedObject> ?? []
-        let deleted = info[NSDeletedObjectsKey] as? Set<NSManagedObject> ?? []
+    private func pushChanges(_ changes: SaveChanges) async {
+        let inserted = changes.inserted
+        let updated = changes.updated
+        let deleted = changes.deleted
 
         for object in inserted.union(updated) {
             if let receipt = object as? CDReceipt {
@@ -582,4 +588,11 @@ private final class RemoteApplyFlag: @unchecked Sendable {
             lock.unlock()
         }
     }
+}
+
+/// The changed objects from one save. Created on the posting thread, then used on the main actor.
+struct SaveChanges: @unchecked Sendable {
+    let inserted: Set<NSManagedObject>
+    let updated: Set<NSManagedObject>
+    let deleted: Set<NSManagedObject>
 }
