@@ -209,16 +209,6 @@ struct SettingsView: View {
                 }
             }
             .tint(Theme.brand)
-            Toggle(isOn: $settings.appSounds) {
-                HStack(spacing: Theme.Spacing.xs) {
-                    Text(L10n.string(.appSounds, language: language))
-                    InfoButton(
-                        title: L10n.string(.appSounds, language: language),
-                        message: L10n.string(.infoAppSounds, language: language)
-                    )
-                }
-            }
-            .tint(Theme.brand)
         }
     }
 

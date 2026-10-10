@@ -19,9 +19,10 @@ final class AppSounds {
         try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
     }
 
+    /// Sounds follow only the developer switch (Holiday.halloween); there is no user setting.
     func setEnabled(_ on: Bool) {
-        enabled = on && Holiday.halloween
-        if !on { stopMusic() }
+        enabled = Holiday.halloween
+        if !enabled { stopMusic() }
     }
 
     func play(_ kind: Kind) {
