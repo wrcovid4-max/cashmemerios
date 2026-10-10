@@ -57,6 +57,7 @@ struct AskAIView: View {
                     showingHistory = true
                 } label: {
                     Image(systemName: "clock.arrow.circlepath")
+                        .foregroundStyle(Theme.brand)
                 }
                 .accessibilityLabel(L10n.string(.aiHistory, language: language))
             }
