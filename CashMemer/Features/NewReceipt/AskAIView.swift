@@ -21,8 +21,10 @@ struct AskAIView: View {
                 conversation
             }
             inputBar
-            Text(L10n.string(.aiDisclaimer, language: language)
-                .replacingOccurrences(of: "%@", with: "gemini-3.8-flash"))
+            Text(speech.listening
+                 ? L10n.string(.aiListening, language: language)
+                 : L10n.string(.aiDisclaimer, language: language)
+                    .replacingOccurrences(of: "%@", with: "gemini-3.8-flash"))
                 .font(.caption2)
                 .foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center)

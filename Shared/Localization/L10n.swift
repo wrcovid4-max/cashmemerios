@@ -87,7 +87,7 @@ enum L10n {
         case allowBulkCellular, infoAllowBulkCellular, infoBulk, bulkNetworkNote, bulkWaitingNetwork
         case appSounds, infoAppSounds
         case aiTitle, aiHint, aiPlaceholder, aiSend, aiThinking, aiError, splitBill, splitCustomer1, splitCustomer2, splitSummary
-        case aiModelInfo, aiDisclaimer, aiVoice
+        case aiModelInfo, aiDisclaimer, aiVoice, aiListening
         case aiSubtitle, aiEmptyTitle, aiSuggest1, aiSuggest2, aiSuggest3, aiNewChat, aiHistory, aiHistoryEmpty
 
         // Misc
