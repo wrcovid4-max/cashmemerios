@@ -9,19 +9,13 @@ struct RootView: View {
 
     /// What the More tab currently has pushed. Driven by deep links as well as taps.
     @State private var morePath: [Destination] = []
-    /// iPad only: true shows the rounded tab bar across the top instead of the sidebar.
-    @AppStorage("navigationOnTop") private var navigationOnTop = false
 
     var body: some View {
         Group {
             // Regular width is the iPad experience: persistent sidebar with the
             // quick-overview panel docked beneath the destinations.
             if sizeClass == .regular {
-                if navigationOnTop {
-                    topBarLayout
-                } else {
-                    splitLayout
-                }
+                splitLayout
             } else {
                 tabLayout
             }
@@ -96,36 +90,10 @@ struct RootView: View {
         }
     }
 
-    /// iPad layout with the destinations in a rounded bar across the top.
-    private var topBarLayout: some View {
-        VStack(spacing: 0) {
-            TopNavigationBar(selection: $navigation.selected) {
-                navigationOnTop = false
-            }
-            NavigationStack {
-                content(for: navigation.selected)
-                    .frame(maxWidth: 860)
-                    .frame(maxWidth: .infinity)
-            }
-        }
-    }
-
     private var splitLayout: some View {
         NavigationSplitView {
             SidebarView(selection: $navigation.selected)
                 .navigationSplitViewColumnWidth(min: 300, ideal: 330, max: 380)
-                .overlay(alignment: .topTrailing) {
-                    Button {
-                        navigationOnTop = true
-                    } label: {
-                        Image(systemName: "rectangle.tophalf.inset.filled")
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(Theme.brand)
-                            .padding(10)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Show tabs on top")
-                }
         } detail: {
             NavigationStack {
                 content(for: navigation.selected)

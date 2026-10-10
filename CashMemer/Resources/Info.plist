@@ -136,7 +136,26 @@
 			<dict>
 				<key>CFBundleIconFiles</key>
 				<array>
-					<string>HalloweenIcon</string>
+					<string>HalloweenIcon60x60</string>
+				</array>
+			</dict>
+		</dict>
+	</dict>
+	<key>CFBundleIcons~ipad</key>
+	<dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconName</key>
+			<string>AppIcon</string>
+		</dict>
+		<key>CFBundleAlternateIcons</key>
+		<dict>
+			<key>HalloweenIcon</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>HalloweenIcon76x76</string>
+					<string>HalloweenIcon83.5x83.5</string>
 				</array>
 			</dict>
 		</dict>

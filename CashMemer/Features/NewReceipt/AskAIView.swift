@@ -14,6 +14,11 @@ struct AskAIView: View {
     }
 
     var body: some View {
+        screen
+            .foregroundStyle(Theme.brand)
+    }
+
+    private var screen: some View {
         VStack(spacing: 0) {
             if ai.messages.isEmpty {
                 emptyState
