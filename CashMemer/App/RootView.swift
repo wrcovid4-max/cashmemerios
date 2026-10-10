@@ -27,6 +27,11 @@ struct RootView: View {
                 if Holiday.halloween { BatFlyerView() }
             }
         }
+        .overlay(alignment: .topTrailing) {
+            GlobalLanguageButton()
+                .padding(.top, 6)
+                .padding(.trailing, 12)
+        }
         .overlay(alignment: .bottomTrailing) {
             AskAIButton()
                 .padding(.trailing, 16)
