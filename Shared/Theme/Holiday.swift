@@ -3,5 +3,5 @@
 /// false = the normal app theme (the look from before Halloween).
 /// Change only this line, then rebuild.
 enum Holiday {
-    static let halloween = false
+    static let halloween = true
 }
