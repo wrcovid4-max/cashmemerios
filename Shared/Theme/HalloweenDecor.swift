@@ -15,7 +15,8 @@ struct HalloweenDecor: View {
             drawWeb(&context, corner: CGPoint(x: 0, y: size.height), startDegrees: 270, radius: webRadius, colour: web)
             drawWeb(&context, corner: CGPoint(x: size.width, y: size.height), startDegrees: 180, radius: webRadius, colour: web)
 
-            let pumpkinSize = unit * 0.15
+            // Scale with the screen, but never beyond a set size (keeps them small on iPad).
+            let pumpkinSize = min(unit * 0.15, 56)
             let inset = unit * 0.1
             drawPumpkin(&context, centre: CGPoint(x: inset, y: size.height - inset), size: pumpkinSize)
             drawPumpkin(&context, centre: CGPoint(x: size.width - inset, y: size.height - inset), size: pumpkinSize)
