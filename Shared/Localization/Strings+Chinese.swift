@@ -2,7 +2,7 @@ import Foundation
 
 extension L10n {
     static let chinese: [Key: String] = [
-        .appName: "Cash Memer",
+        .appName: "现金记账",
         .appTagline: "专业收据管理工具",
         .newReceipt: "新建收据",
         .history: "历史记录",
