@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// A large bat that flies in from the left edge towards the status bar, swoops across to the
-/// right and disappears, once every two minutes. Takes no touches.
+/// right and disappears, in a continuous loop. Takes no touches.
 struct BatFlyerView: View {
     @State private var flight = BatFlight()
 
@@ -19,7 +19,7 @@ struct BatFlyerView: View {
 }
 
 final class BatFlight {
-    private let interval: Double = 120
+    private let interval: Double = 10
     private let duration: Double = 7
     private var nextStart: Double?
     private var startedAt: Double?
