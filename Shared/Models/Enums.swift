@@ -94,9 +94,9 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .english: return "ENG"
-        case .urdu: return "اردو"
-        case .chinese: return "中文"
+        case .english: return "English (ENG)"
+        case .urdu: return "Urdu (اردو)"
+        case .chinese: return "Chinese (中文)"
         }
     }
 
