@@ -257,7 +257,7 @@ extension L10n {
         .aiHistory: "Recent chats",
         .aiHistoryEmpty: "No chats yet. Your conversations will appear here.",
         .aiModelInfo: "Powered by Google Gemini (%@). If the model is busy, the app switches to the previous model automatically.",
-        .aiDisclaimer: "AI can make mistakes. Check important amounts against your receipts.",
+        .aiDisclaimer: "Model: %@. AI can make mistakes. Check important amounts against your receipts.",
         .aiVoice: "Speak your question",
         .aiTitle: "Ask AI",
         .aiHint: "Ask anything about your receipts or exchange rates, for example: How much did I spend on groceries this month? What is 500 USD in PKR?",

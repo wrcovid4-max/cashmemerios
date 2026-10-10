@@ -35,7 +35,11 @@
 		     flash white first. -->
 		<key>UIColorName</key>
 		<string>SplashBackground</string>
-	</dict>
+		<key>NSMicrophoneUsageDescription</key>
+	<string>Cash Memer uses the microphone so you can speak your question to Ask AI.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Cash Memer turns your spoken question into text for Ask AI.</string>
+</dict>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
