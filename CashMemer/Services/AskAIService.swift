@@ -220,7 +220,7 @@ final class AskAIService: ObservableObject {
             sums[memo.currency.code, default: 0] += memo.totals.grandTotal
         }
         return sums.sorted { $0.key < $1.key }.map { code, sum in
-            let currency = Currency.allCases.first { $0.code == code } ?? .pkr
+            let currency = Currency.builtIn.first { $0.code == code } ?? .pkr
             return ["currency": code, "receipts": receipts.count,
                     "total": CurrencyFormatter.string(sum, currency: currency)]
         }
