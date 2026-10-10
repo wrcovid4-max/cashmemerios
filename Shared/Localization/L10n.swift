@@ -118,6 +118,7 @@ enum L10n {
         switch language {
         case .english: return english[key] ?? key.rawValue
         case .urdu: return urdu[key] ?? english[key] ?? key.rawValue
+        case .chinese: return chinese[key] ?? english[key] ?? key.rawValue
         }
     }
 }
