@@ -97,6 +97,8 @@ struct RootView: View {
         } detail: {
             NavigationStack {
                 content(for: navigation.selected)
+                    .frame(maxWidth: 860)
+                    .frame(maxWidth: .infinity)
             }
         }
         .navigationSplitViewStyle(.balanced)
