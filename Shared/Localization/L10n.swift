@@ -87,6 +87,7 @@ enum L10n {
         case allowBulkCellular, infoAllowBulkCellular, infoBulk, bulkNetworkNote, bulkWaitingNetwork
         case appSounds, infoAppSounds
         case aiTitle, aiHint, aiPlaceholder, aiSend, aiThinking, aiError, splitBill, splitCustomer1, splitCustomer2, splitSummary
+        case aiSubtitle, aiEmptyTitle, aiSuggest1, aiSuggest2, aiSuggest3, aiNewChat, aiHistory, aiHistoryEmpty
 
         // Misc
         case cloudBackupAndSync, connected, notConnected, syncing, syncFailed, done, save, retry, ok

@@ -22,7 +22,10 @@ struct RootView: View {
         }
         .background(Theme.background)
         .overlay {
-            HalloweenDecor()
+            ZStack {
+                HalloweenDecor()
+                BatFlyerView()
+            }
         }
         .overlay(alignment: .bottomTrailing) {
             AskAIButton()
