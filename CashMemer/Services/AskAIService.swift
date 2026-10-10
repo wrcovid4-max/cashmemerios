@@ -1,6 +1,22 @@
 import Foundation
 import CoreData
 
+/// One message as it is saved on the device.
+struct StoredMessage: Codable, Equatable {
+    let fromUser: Bool
+    let text: String
+}
+
+/// One saved conversation. Kept only on this device, the latest 20.
+struct SavedChat: Identifiable, Codable, Equatable {
+    let id: String
+    let title: String
+    let updatedAt: Date
+    let messages: [StoredMessage]
+    /// The conversation as Gemini sees it, so a reopened chat carries on in context.
+    let gemini: String
+}
+
 /// Ask AI: Gemini answers a question, calling read-only tools that read the app's data.
 @MainActor
 final class AskAIService: ObservableObject {
@@ -12,10 +28,15 @@ final class AskAIService: ObservableObject {
 
     @Published private(set) var messages: [Message] = []
     @Published private(set) var busy = false
+    @Published private(set) var chats: [SavedChat] = []
 
-    /// The conversation as Gemini sees it. Kept only while the chat is open.
+    /// The conversation as Gemini sees it. Saved with the chat.
     private var history: [[String: Any]] = []
+    private var currentID = UUID().uuidString
     private let exchange = ExchangeRateService()
+
+    private static let storageKey = "ai_chat_history"
+    private static let limit = 20
 
     private static let systemPrompt =
         "You are the assistant inside Cash Memer, a receipt app. Answer questions about the " +
@@ -29,6 +50,10 @@ final class AskAIService: ObservableObject {
         return f
     }()
 
+    init() {
+        chats = Self.loadChats()
+    }
+
     func ask(_ question: String, failedText: String, context: NSManagedObjectContext) {
         let text = question.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !busy else { return }
@@ -39,7 +64,67 @@ final class AskAIService: ObservableObject {
             let reply = await runConversation(failedText: failedText, context: context)
             messages.append(Message(fromUser: false, text: reply))
             busy = false
+            persist()
         }
+    }
+
+    /// Starts an empty conversation. The current one stays in the history.
+    func newChat() {
+        guard !busy else { return }
+        currentID = UUID().uuidString
+        history = []
+        messages = []
+    }
+
+    /// Reopens a saved conversation, with its context.
+    func open(_ chat: SavedChat) {
+        guard !busy else { return }
+        currentID = chat.id
+        history = Self.decodeHistory(chat.gemini)
+        messages = chat.messages.map { Message(fromUser: $0.fromUser, text: $0.text) }
+    }
+
+    func delete(_ id: String) {
+        chats.removeAll { $0.id == id }
+        Self.saveChats(chats)
+        if id == currentID { newChat() }
+    }
+
+    private func persist() {
+        let first = messages.first(where: { $0.fromUser })?.text ?? ""
+        let title = String(first.prefix(60))
+        let chat = SavedChat(
+            id: currentID,
+            title: title.isEmpty ? "Untitled chat" : title,
+            updatedAt: Date(),
+            messages: messages.map { StoredMessage(fromUser: $0.fromUser, text: $0.text) },
+            gemini: Self.encodeHistory(history)
+        )
+        chats = Array(([chat] + chats.filter { $0.id != currentID }).prefix(Self.limit))
+        Self.saveChats(chats)
+    }
+
+    private static func loadChats() -> [SavedChat] {
+        guard let data = UserDefaults.standard.data(forKey: storageKey),
+              let decoded = try? JSONDecoder().decode([SavedChat].self, from: data) else { return [] }
+        return decoded
+    }
+
+    private static func saveChats(_ chats: [SavedChat]) {
+        if let data = try? JSONEncoder().encode(chats) {
+            UserDefaults.standard.set(data, forKey: storageKey)
+        }
+    }
+
+    private static func encodeHistory(_ history: [[String: Any]]) -> String {
+        guard let data = try? JSONSerialization.data(withJSONObject: history) else { return "[]" }
+        return String(data: data, encoding: .utf8) ?? "[]"
+    }
+
+    private static func decodeHistory(_ text: String) -> [[String: Any]] {
+        guard let data = text.data(using: .utf8),
+              let object = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return [] }
+        return object
     }
 
     private func runConversation(failedText: String, context: NSManagedObjectContext) async -> String {
