@@ -40,8 +40,8 @@ struct ReceiptDetailView: View {
                     tool: tool,
                     isEditing: isMarkingUp,
                     pageIndex: $pageIndex,
-                    onTap: { point in
-                        if isMarkingUp { place(point) } else { chromeHidden.toggle() }
+                    onTap: { page, x, y in
+                        if isMarkingUp { place(page: page, x: x, y: y) } else { chromeHidden.toggle() }
                     },
                     onDrag: dragSelected
                 )
