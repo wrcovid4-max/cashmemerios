@@ -1,13 +1,5 @@
 import SwiftUI
 
-/// Where cards report their bounds, so leaves can land on them.
-struct LeafPerchKey: PreferenceKey {
-    static var defaultValue: [Anchor<CGRect>] = []
-
-    static func reduce(value: inout [Anchor<CGRect>], nextValue: () -> [Anchor<CGRect>]) {
-        value.append(contentsOf: nextValue())
-    }
-}
 
 /// Falling autumn leaves across the app: they blow in from above, drift right to left,
 /// land on cards, stick in the gaps between cards, and some collect in a pile along the
