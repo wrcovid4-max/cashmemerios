@@ -48,6 +48,7 @@ final class AskAIService: ObservableObject {
                 "system_instruction": ["parts": [["text": Self.systemPrompt]]],
                 "contents": history,
                 "tools": [["functionDeclarations": Self.declarations]],
+                "generationConfig": ["temperature": 0.2, "maxOutputTokens": 1024],
             ]
             guard let reply = try? await GeminiChat.generate(body),
                   let candidates = reply["candidates"] as? [[String: Any]],
