@@ -51,6 +51,7 @@ struct RootView: View {
         .onAppear {
             if settings.appLockEnabled { lock.lock() }
             AppSounds.shared.setEnabled(settings.appSounds)
+            AppIconSwitcher.apply()
             AppSounds.shared.startMusic()
             navigation.consumePendingDestination()
         }

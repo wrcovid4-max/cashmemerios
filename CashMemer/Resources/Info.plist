@@ -123,5 +123,23 @@
 	<string>Cash Memer saves the shop location on a receipt so you can find it later.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Face ID unlocks Cash Memer and keeps your receipts private.</string>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconName</key>
+			<string>AppIcon</string>
+		</dict>
+		<key>CFBundleAlternateIcons</key>
+		<dict>
+			<key>HalloweenIcon</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>HalloweenIcon</string>
+				</array>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>
