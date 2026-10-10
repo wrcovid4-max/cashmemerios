@@ -289,6 +289,8 @@ struct AskAIButton: View {
                         }
                     }
             }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
     }
 }
