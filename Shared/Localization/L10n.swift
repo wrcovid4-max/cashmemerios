@@ -122,6 +122,7 @@ enum L10n {
         case .arabic: return arabic[key] ?? english[key] ?? key.rawValue
         case .englishUS, .englishNZ: return english[key] ?? key.rawValue
         case .chineseTraditional: return chineseTraditional[key] ?? chinese[key] ?? english[key] ?? key.rawValue
+        case .spanish: return spanish[key] ?? english[key] ?? key.rawValue
         }
     }
 }
