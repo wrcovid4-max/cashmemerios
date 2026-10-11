@@ -1,16 +1,20 @@
 import SwiftUI
 
-/// Halloween effect for iPad. Loops every 16 seconds: a thin brown wire drops from the top centre, a black
+/// Halloween effect for iPad. Appears every 2 minutes: a thin brown wire drops from the top centre, a black
 /// spider comes down on it, the wire breaks near the bottom, the spider falls and hangs upside down for a few
 /// seconds, then turns over, walks away towards the bottom and disappears.
 struct SpiderDropView: View {
-    private let cycle: Double = 16
+    /// The spider appears for `active` seconds once every `cycle` seconds (every 2 minutes).
+    private let cycle: Double = 120
+    private let active: Double = 16
 
     var body: some View {
         TimelineView(.animation) { timeline in
             let t = timeline.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: cycle)
             Canvas { context, size in
-                drawScene(&context, size: size, t: t)
+                if t < active {
+                    drawScene(&context, size: size, t: t)
+                }
             }
         }
         .allowsHitTesting(false)

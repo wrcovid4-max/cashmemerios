@@ -337,10 +337,14 @@ struct NewReceiptView: View {
                     message: L10n.string(.infoTaxBody, language: language)
                 ))
             )
-            Toggle(isOn: $draft.splitEnabled) {
+            HStack {
                 Text(L10n.string(.splitBill, language: language))
+                    .foregroundStyle(Theme.textPrimary)
+                Spacer()
+                Toggle("", isOn: $draft.splitEnabled)
+                    .labelsHidden()
+                    .toggleStyle(SwitchToggleStyle(tint: Theme.brand))
             }
-            .tint(Theme.brand)
             if draft.splitEnabled {
                 FormFieldRow(
                     placeholderKey: .splitCustomer1,
