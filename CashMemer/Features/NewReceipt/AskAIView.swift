@@ -428,7 +428,7 @@ private struct PencilWritingPad: View {
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         InfoButton(
-                            title: L10n.string(.aiPencilInfo, language: language),
+                            title: L10n.string(.aiTitle, language: language),
                             message: L10n.string(.aiPencilInfo, language: language)
                         )
                     }
