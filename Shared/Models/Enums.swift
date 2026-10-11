@@ -91,6 +91,7 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
     case chineseTraditional = "zh-TW"
     case spanish = "es"
     case persian = "fa"
+    case punjabi = "pa"
     case arabic = "ar"
 
     var id: String { rawValue }
@@ -108,6 +109,7 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
         case .chineseTraditional: return "Chinese Traditional (繁體中文)"
         case .spanish: return "Spanish (Español)"
         case .persian: return "Persian (فارسی)"
+        case .punjabi: return "Punjabi (ਪੰਜਾਬੀ)"
         case .arabic: return "Arabic (العربية)"
         }
     }
