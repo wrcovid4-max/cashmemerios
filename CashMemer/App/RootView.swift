@@ -107,6 +107,12 @@ struct RootView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
+        // iPad only: the Halloween spider drops on its wire, on a loop.
+        .overlay {
+            if Holiday.halloween {
+                SpiderDropView()
+            }
+        }
     }
 
     private var tabLayout: some View {
