@@ -84,8 +84,11 @@ enum DiscountType: String, CaseIterable, Codable, Identifiable {
 
 enum AppLanguage: String, CaseIterable, Codable, Identifiable {
     case english = "en"
+    case englishUS = "en-US"
+    case englishNZ = "en-NZ"
     case urdu = "ur"
     case chinese = "zh"
+    case chineseTraditional = "zh-TW"
     case arabic = "ar"
 
     var id: String { rawValue }
@@ -96,8 +99,11 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
     var displayName: String {
         switch self {
         case .english: return "English (ENG)"
+        case .englishUS: return "English US (ENG)"
+        case .englishNZ: return "English NZ (ENG)"
         case .urdu: return "Urdu (اردو)"
         case .chinese: return "Chinese (中文)"
+        case .chineseTraditional: return "Chinese Traditional (繁體中文)"
         case .arabic: return "Arabic (العربية)"
         }
     }
