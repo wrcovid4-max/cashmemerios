@@ -4,6 +4,7 @@ import SwiftUI
 /// right and disappears, in a continuous loop. Takes no touches.
 struct BatFlyerView: View {
     @State private var flight = BatFlight()
+    @State private var arc = ArcBatFlight()
 
     var body: some View {
         TimelineView(.animation) { timeline in
@@ -11,6 +12,8 @@ struct BatFlyerView: View {
             Canvas { context, size in
                 flight.update(now: now)
                 flight.draw(&context, size: size, now: now)
+                arc.update(now: now)
+                arc.draw(&context, size: size, now: now)
             }
         }
         .allowsHitTesting(false)
@@ -40,7 +43,7 @@ final class BatFlight {
         let progress = min(max((now - started) / duration, 0), 1)
         let w = size.width
         let h = size.height
-        let batSize = min(w, h) * 0.24
+        let batSize = min(w, h) * 0.48
         let position = point(progress, w: w, h: h)
         let ahead = point(min(progress + 0.01, 1), w: w, h: h)
         let angle = atan2(ahead.y - position.y, ahead.x - position.x)
@@ -77,7 +80,7 @@ final class BatFlight {
     }
 
     /// The bat drawn pointing right, centred on the origin; its wings flap with `flap` (0..1).
-    private func drawBat(_ c: inout GraphicsContext, s: CGFloat, flap: CGFloat) {
+    func drawBat(_ c: inout GraphicsContext, s: CGFloat, flap: CGFloat) {
         let ink = Color(red: 26 / 255, green: 15 / 255, blue: 46 / 255)
         let lift = 0.35 + 0.65 * flap
 
@@ -103,5 +106,54 @@ final class BatFlight {
             wing.closeSubpath()
             c.fill(wing, with: .color(ink))
         }
+    }
+}
+
+/// A second bat: starts at the bottom-right corner, flies a curved (parabolic) path up and across,
+/// and leaves the screen through the top centre. Twice the size of the first bat, on its own timing.
+final class ArcBatFlight {
+    private let interval: Double = 12
+    private let duration: Double = 6
+    private let offset: Double = 6
+    private var nextStart: Double?
+    private var startedAt: Double?
+    private let bat = BatFlight()
+
+    func update(now: Double) {
+        if nextStart == nil { nextStart = now + offset }
+        if startedAt == nil, let next = nextStart, now >= next {
+            startedAt = now
+            nextStart = now + interval
+        }
+        if let started = startedAt, now - started >= duration {
+            startedAt = nil
+        }
+    }
+
+    func draw(_ context: inout GraphicsContext, size: CGSize, now: Double) {
+        guard let started = startedAt else { return }
+        let progress = min(max((now - started) / duration, 0), 1)
+        let w = size.width
+        let h = size.height
+        let batSize = min(w, h) * 0.48
+        let position = point(progress, w: w, h: h)
+        let ahead = point(min(progress + 0.01, 1), w: w, h: h)
+        let angle = atan2(ahead.y - position.y, ahead.x - position.x)
+        let flap = CGFloat(sin(now * 14) * 0.5 + 0.5)
+
+        var c = context
+        c.translateBy(x: position.x, y: position.y)
+        c.rotate(by: .radians(Double(angle)))
+        bat.drawBat(&c, s: batSize, flap: flap)
+    }
+
+    /// Bottom-right corner, up and across in a curve, out of the top centre.
+    private func point(_ t: Double, w: CGFloat, h: CGFloat) -> CGPoint {
+        let start = CGPoint(x: w * 1.08, y: h * 0.92)
+        let end = CGPoint(x: w * 0.5, y: -h * 0.1)
+        let bulge = CGFloat(4 * t * (1 - t))
+        let x = start.x + (end.x - start.x) * CGFloat(t) + w * 0.12 * bulge
+        let y = start.y + (end.y - start.y) * CGFloat(t) - h * 0.18 * bulge
+        return CGPoint(x: x, y: y)
     }
 }
