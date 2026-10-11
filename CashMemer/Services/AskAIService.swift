@@ -190,26 +190,26 @@ final class AskAIService: ObservableObject {
         let payment = (args["payment"] as? String ?? "").trimmingCharacters(in: .whitespaces)
 
         return all.filter { r in
-            let date: Date = r.createdAt ?? .distantPast
+            let date: Date = r.createdAt
             if let from, date < from { return false }
             if let to, date >= to { return false }
-            if !store.isEmpty, !(r.storeName ?? "").localizedCaseInsensitiveContains(store) { return false }
-            if !category.isEmpty, !(r.categoryRaw ?? "").localizedCaseInsensitiveContains(category) { return false }
-            if !payment.isEmpty, !(r.paymentMethodRaw ?? "").localizedCaseInsensitiveContains(payment) { return false }
+            if !store.isEmpty, !r.storeName.localizedCaseInsensitiveContains(store) { return false }
+            if !category.isEmpty, !r.categoryRaw.localizedCaseInsensitiveContains(category) { return false }
+            if !payment.isEmpty, !r.paymentMethodRaw.localizedCaseInsensitiveContains(payment) { return false }
             return true
         }
-        .sorted { ($0.createdAt ?? .distantPast) > ($1.createdAt ?? .distantPast) }
+        .sorted { $0.createdAt > $1.createdAt }
     }
 
     private func summary(_ r: CDReceipt) -> [String: Any] {
         let memo = MemoSnapshot(receipt: r)
-        let date: Date = r.createdAt ?? .distantPast
+        let date: Date = r.createdAt
         return [
             "date": Self.dayFormatter.string(from: date),
-            "store": r.storeName ?? "",
+            "store": r.storeName,
             "total": CurrencyFormatter.string(memo.totals.grandTotal, currency: memo.currency),
-            "category": r.categoryRaw ?? "",
-            "payment": r.paymentMethodRaw ?? "",
+            "category": r.categoryRaw,
+            "payment": r.paymentMethodRaw,
         ]
     }
 
