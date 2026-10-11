@@ -246,6 +246,7 @@ extension L10n {
         .aiModelInfo: "由 Google Gemini（%@）提供支持。如果模型繁忙，应用会自动切换到上一个模型。",
         .aiDisclaimer: "这是一个 AI，可能会出错。本体验所使用的模型为 Google Inc. 的 Gemini。",
         .aiVoice: "语音提问",
+        .aiPencilInfo: "用 Apple Pencil 写下您的问题。点击“完成”将其放入消息框，然后点击发送。如果无法开始书写，请在“设置 → Apple Pencil”中开启 Scribble。",
         .aiListening: "正在聆听…点击麦克风停止",
         .aiTitle: "问 AI",
         .aiHint: "询问您的收据和汇率",

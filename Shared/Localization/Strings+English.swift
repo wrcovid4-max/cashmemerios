@@ -259,6 +259,7 @@ extension L10n {
         .aiModelInfo: "Powered by Google Gemini (%@). If the model is busy, the app switches to the previous model automatically.",
         .aiDisclaimer: "This is an AI and can make mistake. The Model used in this experience is Gemini by Google Inc.",
         .aiVoice: "Speak your question",
+        .aiPencilInfo: "Write your question with the Apple Pencil. Tap Done to send it to the message box, then press send. If writing does not start, turn on Scribble in Settings > Apple Pencil.",
         .aiListening: "Listening… tap the mic to stop",
         .aiTitle: "Ask AI",
         .aiHint: "Ask about your receipts and exchange rates",

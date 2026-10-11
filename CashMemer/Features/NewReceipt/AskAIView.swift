@@ -426,6 +426,12 @@ private struct PencilWritingPad: View {
                             dismiss()
                         }
                     }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        InfoButton(
+                            title: L10n.string(.aiPencilInfo, language: language),
+                            message: L10n.string(.aiPencilInfo, language: language)
+                        )
+                    }
                     ToolbarItem(placement: .confirmationAction) {
                         Button(L10n.string(.done, language: language)) {
                             text = scratch
