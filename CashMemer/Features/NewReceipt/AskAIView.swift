@@ -4,7 +4,8 @@ import SwiftUI
 struct AskAIView: View {
     @Environment(\.appLanguage) private var language
     @Environment(\.managedObjectContext) private var context
-    @StateObject private var ai = AskAIService()
+    @ObservedObject var ai: AskAIService
+    var showsHistoryButton: Bool = true
     @StateObject private var speech = SpeechInput()
     @State private var draft = ""
     @State private var showingHistory = false
@@ -57,14 +58,16 @@ struct AskAIView: View {
                 }
                 .accessibilityLabel(L10n.string(.aiNewChat, language: language))
             }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showingHistory = true
-                } label: {
-                    Image(systemName: "clock.arrow.circlepath")
-                        .foregroundStyle(Theme.brand)
+            if showsHistoryButton {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingHistory = true
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .foregroundStyle(Theme.brand)
+                    }
+                    .accessibilityLabel(L10n.string(.aiHistory, language: language))
                 }
-                .accessibilityLabel(L10n.string(.aiHistory, language: language))
             }
         }
         .sheet(isPresented: $showingHistory) {
@@ -268,6 +271,7 @@ private struct AskAIHistorySheet: View {
 
 /// The small circle AI button in the bottom-right corner. Opens the chat as a sheet.
 struct AskAIButton: View {
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var showing = false
 
     var body: some View {
@@ -281,21 +285,100 @@ struct AskAIButton: View {
                 .background(Theme.brand, in: Circle())
                 .shadow(radius: 3)
         }
-        .sheet(isPresented: $showing) {
+        .sheet(isPresented: Binding(get: { showing && sizeClass != .regular }, set: { showing = $0 })) {
+            AskAIHost(onClose: { showing = false })
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
+        .fullScreenCover(isPresented: Binding(get: { showing && sizeClass == .regular }, set: { showing = $0 })) {
+            AskAIHost(onClose: { showing = false })
+        }
+    }
+}
+
+/// Chooses the layout. On iPad: full screen, with the chat history on the left and the chat on the right.
+/// On iPhone: the chat screen, shown as a sheet.
+struct AskAIHost: View {
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.appLanguage) private var language
+    @StateObject private var ai = AskAIService()
+    let onClose: () -> Void
+
+    var body: some View {
+        if sizeClass == .regular {
+            NavigationSplitView {
+                AskAIHistorySidebar(ai: ai, onClose: onClose)
+            } detail: {
+                NavigationStack {
+                    AskAIView(ai: ai, showsHistoryButton: false)
+                }
+            }
+            .navigationSplitViewStyle(.balanced)
+        } else {
             NavigationStack {
-                AskAIView()
+                AskAIView(ai: ai)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button(role: .cancel) {
-                                showing = false
+                                onClose()
                             } label: {
                                 Image(systemName: "xmark")
                             }
                         }
                     }
             }
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
+        }
+    }
+}
+
+/// The chat history on the left side of the iPad screen. Tap a chat to open it; swipe to delete.
+private struct AskAIHistorySidebar: View {
+    @ObservedObject var ai: AskAIService
+    let onClose: () -> Void
+    @Environment(\.appLanguage) private var language
+
+    var body: some View {
+        List {
+            if ai.chats.isEmpty {
+                Text(L10n.string(.aiHistoryEmpty, language: language))
+                    .foregroundStyle(Theme.textSecondary)
+            }
+            ForEach(ai.chats) { chat in
+                Button {
+                    ai.open(chat)
+                } label: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(chat.title)
+                            .font(.body.weight(.medium))
+                            .lineLimit(1)
+                        Text(chat.updatedAt, style: .relative)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .onDelete { offsets in
+                offsets.map { ai.chats[$0].id }.forEach { ai.delete($0) }
+            }
+        }
+        .navigationTitle(L10n.string(.aiHistory, language: language))
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    onClose()
+                } label: {
+                    Image(systemName: "xmark")
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    ai.newChat()
+                } label: {
+                    Image(systemName: "square.and.pencil")
+                }
+                .accessibilityLabel(L10n.string(.aiNewChat, language: language))
+            }
         }
     }
 }
