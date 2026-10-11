@@ -9,6 +9,7 @@ struct AskAIView: View {
     @StateObject private var speech = SpeechInput()
     @State private var draft = ""
     @State private var showingHistory = false
+    @State private var showingPencil = false
 
     private var canSend: Bool {
         !ai.busy && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -17,6 +18,9 @@ struct AskAIView: View {
     var body: some View {
         screen
             .foregroundStyle(Theme.brand)
+            .sheet(isPresented: $showingPencil) {
+                PencilWritingPad(text: $draft)
+            }
     }
 
     private var screen: some View {
@@ -192,6 +196,15 @@ struct AskAIView: View {
 
     private var inputBar: some View {
         HStack(alignment: .bottom, spacing: 10) {
+            Button {
+                showingPencil = true
+            } label: {
+                Image(systemName: "pencil.tip")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Theme.brand)
+                    .frame(width: 44, height: 44)
+            }
+
             ZStack(alignment: .topLeading) {
                 PencilTextField(text: $draft)
                 if draft.isEmpty {
@@ -387,5 +400,42 @@ private struct AskAIHistorySidebar: View {
                 .accessibilityLabel(L10n.string(.aiNewChat, language: language))
             }
         }
+    }
+}
+
+/// The large writing pop-up opened by the pencil button. Write with the Apple Pencil; Done sends the text to the message box.
+private struct PencilWritingPad: View {
+    @Binding var text: String
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.appLanguage) private var language
+    @State private var scratch = ""
+
+    var body: some View {
+        NavigationStack {
+            PencilTextField(text: $scratch)
+                .padding(8)
+                .background(Theme.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .padding(16)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .background(Theme.background)
+                .navigationTitle(L10n.string(.aiPlaceholder, language: language))
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(L10n.string(.cancel, language: language)) {
+                            dismiss()
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(L10n.string(.done, language: language)) {
+                            text = scratch
+                            dismiss()
+                        }
+                        .disabled(scratch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                }
+                .onAppear { scratch = text }
+        }
+        .presentationDetents([.large])
     }
 }
