@@ -86,17 +86,19 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
     case english = "en"
     case urdu = "ur"
     case chinese = "zh"
+    case arabic = "ar"
 
     var id: String { rawValue }
 
     /// Urdu is written right-to-left; the whole UI mirrors when it is selected.
-    var isRightToLeft: Bool { self == .urdu }
+    var isRightToLeft: Bool { self == .urdu || self == .arabic }
 
     var displayName: String {
         switch self {
         case .english: return "English (ENG)"
         case .urdu: return "Urdu (اردو)"
         case .chinese: return "Chinese (中文)"
+        case .arabic: return "Arabic (العربية)"
         }
     }
 
