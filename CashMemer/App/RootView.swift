@@ -107,11 +107,6 @@ struct RootView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
-        // Easter egg: only in sidebar mode on iPad, never with the top bar.
-        .overlay(alignment: .bottomTrailing) {
-            LaughingGhostView()
-                .padding(24)
-        }
     }
 
     private var tabLayout: some View {
