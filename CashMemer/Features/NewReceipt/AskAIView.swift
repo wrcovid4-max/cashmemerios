@@ -192,12 +192,19 @@ struct AskAIView: View {
 
     private var inputBar: some View {
         HStack(alignment: .bottom, spacing: 10) {
-            TextField(L10n.string(.aiPlaceholder, language: language), text: $draft, axis: .vertical)
-                .lineLimit(1...4)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Theme.card, in: Capsule())
-                .overlay(Capsule().stroke(Theme.separator.opacity(0.5), lineWidth: 1))
+            ZStack(alignment: .topLeading) {
+                PencilTextField(text: $draft)
+                if draft.isEmpty {
+                    Text(L10n.string(.aiPlaceholder, language: language))
+                        .foregroundStyle(Theme.textSecondary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .allowsHitTesting(false)
+                }
+            }
+            .frame(minHeight: 44, maxHeight: 120)
+            .background(Theme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Theme.separator.opacity(0.5), lineWidth: 1))
 
             Button {
                 speech.toggle()
