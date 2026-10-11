@@ -92,12 +92,13 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
     case spanish = "es"
     case persian = "fa"
     case punjabi = "pa"
+    case punjabiShahmukhi = "pa-PK"
     case arabic = "ar"
 
     var id: String { rawValue }
 
     /// Urdu is written right-to-left; the whole UI mirrors when it is selected.
-    var isRightToLeft: Bool { self == .urdu || self == .arabic || self == .persian }
+    var isRightToLeft: Bool { self == .urdu || self == .arabic || self == .persian || self == .punjabiShahmukhi }
 
     var displayName: String {
         switch self {
@@ -110,6 +111,7 @@ enum AppLanguage: String, CaseIterable, Codable, Identifiable {
         case .spanish: return "Spanish (Español)"
         case .persian: return "Persian (فارسی)"
         case .punjabi: return "Punjabi (ਪੰਜਾਬੀ)"
+        case .punjabiShahmukhi: return "Punjabi Pakistan (پنجابی)"
         case .arabic: return "Arabic (العربية)"
         }
     }
