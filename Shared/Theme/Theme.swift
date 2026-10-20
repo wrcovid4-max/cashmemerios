@@ -138,7 +138,7 @@ extension View {
 /// false = the normal app theme (the look from before Halloween).
 /// Change only this line, then rebuild.
 enum Holiday {
-    static let halloween = true
+    static let halloween = false
 }
 
 /// Where cards report their bounds, so leaves can land on them.
