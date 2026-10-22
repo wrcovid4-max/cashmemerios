@@ -1,3 +1,4 @@
+import LanguageKit
 import Foundation
 
 /// Preferences, mirrored onto the Firestore user document.

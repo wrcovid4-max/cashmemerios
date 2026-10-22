@@ -1,3 +1,4 @@
+import LanguageKit
 import Foundation
 
 // Swift 5.7 (Xcode 14.2) has no `switch` expressions, so every mapping below
@@ -80,43 +81,6 @@ enum DiscountType: String, CaseIterable, Codable, Identifiable {
         case .fixed: return .discountFixed
         }
     }
-}
-
-enum AppLanguage: String, CaseIterable, Codable, Identifiable {
-    case english = "en"
-    case englishUS = "en-US"
-    case englishNZ = "en-NZ"
-    case urdu = "ur"
-    case chinese = "zh"
-    case chineseTraditional = "zh-TW"
-    case spanish = "es"
-    case persian = "fa"
-    case punjabi = "pa"
-    case punjabiShahmukhi = "pa-PK"
-    case arabic = "ar"
-
-    var id: String { rawValue }
-
-    /// Urdu is written right-to-left; the whole UI mirrors when it is selected.
-    var isRightToLeft: Bool { self == .urdu || self == .arabic || self == .persian || self == .punjabiShahmukhi }
-
-    var displayName: String {
-        switch self {
-        case .english: return "English (ENG)"
-        case .englishUS: return "English US (ENG)"
-        case .englishNZ: return "English NZ (ENG)"
-        case .urdu: return "Urdu (اردو)"
-        case .chinese: return "Chinese (中文)"
-        case .chineseTraditional: return "Chinese Traditional (繁體中文)"
-        case .spanish: return "Spanish (Español)"
-        case .persian: return "Persian (فارسی)"
-        case .punjabi: return "Punjabi (ਪੰਜਾਬੀ)"
-        case .punjabiShahmukhi: return "Punjabi Pakistan (پنجابی)"
-        case .arabic: return "Arabic (العربية)"
-        }
-    }
-
-    var locale: Locale { Locale(identifier: rawValue) }
 }
 
 enum AppTheme: String, CaseIterable, Codable, Identifiable {

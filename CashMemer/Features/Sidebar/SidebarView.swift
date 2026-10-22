@@ -1,3 +1,4 @@
+import LanguageKit
 import SwiftUI
 
 /// The iPad sidebar: brand, destinations, the Quick Overview panel and a contact footer.

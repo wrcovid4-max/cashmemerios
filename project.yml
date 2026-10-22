@@ -44,6 +44,9 @@ packages:
     url: https://github.com/firebase/firebase-ios-sdk
     exactVersion: 10.9.0
 
+  LanguageKit:
+    path: libs/filewall-kit/ios/LanguageKit
+
 fileGroups:
   - README.md
   - project.yml
@@ -92,6 +95,10 @@ targets:
         product: FirebaseAuth
       - package: Firebase
         product: FirebaseFirestore
+      - package: LanguageKit
+        product: LanguageKit
+      - package: LanguageKit
+        product: LanguageKitUI
       - target: CashMemerWidgets
       - target: CashMemerWatch
 
@@ -122,6 +129,8 @@ targets:
         CODE_SIGN_ENTITLEMENTS: CashMemerWidgets/CashMemerWidgets.entitlements
         SKIP_INSTALL: YES
     dependencies:
+      - package: LanguageKit
+        product: LanguageKit
       - sdk: WidgetKit.framework
       - sdk: SwiftUI.framework
       - sdk: CoreData.framework
@@ -156,6 +165,10 @@ targets:
         TARGETED_DEVICE_FAMILY: "4"
         WATCHOS_DEPLOYMENT_TARGET: "9.0"
     dependencies:
+      - package: LanguageKit
+        product: LanguageKit
+      - package: LanguageKit
+        product: LanguageKit
       - sdk: WatchConnectivity.framework
       - sdk: SwiftUI.framework
 

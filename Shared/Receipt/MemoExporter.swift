@@ -1,3 +1,4 @@
+import LanguageKit
 import SwiftUI
 #if canImport(UIKit)
 import UIKit
