@@ -200,6 +200,7 @@ extension L10n {
         .switchLanguageBody: "Toda la app cambiará de inmediato. Tus recibos y ajustes se conservarán.",
         .switchLanguageConfirm: "Cambiar",
         .switchLanguageCancel: "Cancelar",
+        .watchLanguageInfo: "Cambia solo este reloj. Tu teléfono mantiene su propio idioma.",
         .infoUrduLanguage: "Muestra la app en urdu (de derecha a izquierda). Desactívalo para volver al inglés.",
         .infoLockFooter: "Los recibos nuevos usan siempre este pie de página y no se puede editar en el recibo.",
         .lockSignature: "Bloquear el panel de firma",

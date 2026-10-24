@@ -200,6 +200,7 @@ extension L10n {
         .switchLanguageBody: "整个应用将立即切换。您的收据和设置会保留。",
         .switchLanguageConfirm: "切换",
         .switchLanguageCancel: "取消",
+        .watchLanguageInfo: "仅更改此手表。手机保留自己的语言。",
         .infoUrduLanguage: "以乌尔都语显示应用（从右到左）。关闭即可恢复英文。",
         .infoLockFooter: "新收据始终使用此页脚，且在收据上不可编辑。",
         .lockSignature: "锁定签名板",

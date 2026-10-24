@@ -81,7 +81,7 @@ enum L10n {
         case issuerAccount, notePageTwoLabel, each, noteTwoPrivateHint
         case prefilledFooters, footerOneDefault, footerTwoDefault, lockFooterOne, lockFooterTwo, footerLockedHint
         case gotIt, infoDiscountBody, infoTaxBody, infoCashBody, infoScannerBody, infoDetailsBody
-        case switchLanguageTitle, switchLanguageBody, switchLanguageConfirm, switchLanguageCancel, infoUrduLanguage, infoLockFooter
+        case switchLanguageTitle, switchLanguageBody, switchLanguageConfirm, switchLanguageCancel, infoUrduLanguage, infoLockFooter, watchLanguageInfo
         case lockSignature, infoLockSignature
         case extraFees, infoExtraFees, scanning, showTaxBreakdown, infoShowTaxBreakdown, includeScanFees, infoIncludeScanFees
         case bulkTitle, bulkHint, bulkPick, bulkClear, bulkSave, bulkEdit, bulkWaiting, bulkScanning, bulkDone, bulkFailed, bulkAllDone, bulkEtaCalculating, bulkEtaMinutes, bulkEtaSeconds, bulkProgress, bulkReceiptNumber, bulkScanTile

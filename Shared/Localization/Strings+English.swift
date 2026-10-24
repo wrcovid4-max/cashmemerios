@@ -213,6 +213,7 @@ extension L10n {
         .switchLanguageBody: "The whole app switches straight away. Your receipts and settings are kept.",
         .switchLanguageConfirm: "Switch",
         .switchLanguageCancel: "Cancel",
+        .watchLanguageInfo: "Changes only this watch. Your phone keeps its own language.",
         .infoUrduLanguage: "Shows the app in Urdu, right to left. Turn it off to go back to English.",
         .infoLockFooter: "New receipts always use this footer, and it cannot be edited on the receipt.",
         .lockSignature: "Lock signature pad",

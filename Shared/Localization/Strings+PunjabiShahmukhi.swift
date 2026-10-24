@@ -200,6 +200,7 @@ extension L10n {
         .switchLanguageBody: "پوری ایپ ہݨے بدل جائے گی۔ تہاڈیاں رسیداں محفوظ رہن گیاں۔",
         .switchLanguageConfirm: "بدلو",
         .switchLanguageCancel: "کینسل",
+        .watchLanguageInfo: "صرف ایہ گھڑی بدلدی اے۔ تہاڈا فون اپنی زبان رکھدا اے۔",
         .infoUrduLanguage: "ایپ نوں اردو وچ سڄے توں کھٻے وکھاندا اے۔",
         .infoLockFooter: "نویاں رسیداں ہمیشہ ایہو فوٹر ورتن گیاں تے ایڈٹ نہیں ہو سکن گیاں۔",
         .lockSignature: "دستخط پیڈ لاک کرو",
