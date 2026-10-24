@@ -11,6 +11,12 @@ struct WatchDashboardView: View {
             ScrollView {
                 VStack(spacing: 8) {
                     todayCard
+                    NavigationLink {
+                        WatchLanguageView()
+                    } label: {
+                        Label(L10n.string(.platformLanguages, language: language), systemImage: "globe")
+                            .font(.caption)
+                    }
                     HStack(spacing: 8) {
                         metric(
                             value: "\(session.payload.todaysTotals().count)",
